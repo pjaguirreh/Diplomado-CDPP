@@ -1,0 +1,46 @@
+---
+#########
+##TidyR##
+#########
+---
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+## Ejemplo gather()
+
+```{r}
+table4a
+gather(table4a, `1999`, `2000`, key = "año", value = "población") 
+```
+
+## Ejemplo spread()
+
+```{r}
+table2
+spread(table2, key = type, value = count)
+```
+
+## Ejemplo separate()
+
+```{r}
+table3
+separate(table3, rate, into = c("cases", "population"), sep = "/", convert = TRUE) 
+```
+
+##Ejemplo unite()
+
+```{r}
+table5
+unite(table5, new, century, year, sep = "") 
+```
+
+
+
+      
+
+
+
+

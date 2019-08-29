@@ -1,0 +1,451 @@
+---
+title: 'Introducción a R'
+subtitle: "[Diplomado en Big Data para Políticas Públicas](https://gobierno.uai.cl/diplomado/diplomado-big-data-politicas-publicas/)"
+author: "Pablo Aguirre Hormann"
+date: "14 de julio, 2018"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+Este es un [R Markdown](http://rmarkdown.rstudio.com) *Notebook*. Cuando se ejecute código dentro del *notebook* los resultados aparecerán justo abajo.
+
+Pueden ejecutar el código presionando el botón *Run* (flech verde) de cada *chunk* poniendo el cursor dentro del *chunk* y presionando *Ctrl+Shift+Enter* (para todo el *chunk*) o *Ctrl+Enter* (para una linea en particular). 
+
+Pueden agregar nuevos *chunks* presionando *Ctrl+Alt+I*.
+
+Cuando guarden un *notebook*, un arcvhio HTML con el código y resultados será guardado también (se puede presionar *Preview* o *Ctrl+Shift+K*) para tener un "preview" del documento.
+
+## R como calculadora 
+Primero que todo, R puede ser usado como una -excesivamente llamativa- calculadora
+```{r}
+1 + 2 + 3
+1 + 2 * 3
+(1 + 2) * 3
+4.4 / 2.2
+3 ^ 2
+```
+
+## Comentarios y espacios
+
+### Comentarios
+
+El signo `#` se puede utilizar para hacer comentarios en tu código (similar a `//` o `*` en los Do File de Stata)
+```{r}
+2 + 3 + 4 #La respuesta es 9
+```
+
+Pero cuidado...
+```{r}
+2 + 3 #+ 4 #La respuesta es 9?
+```
+
+### Espacios
+
+En general en R no son importante los espacios
+```{r}
+2 + 3 + 4
+2+3+4
+2+                         3             +4
+#incluso
+
+2+
+  3+
+  4
+```
+
+## Tipos de datos
+
+Pero no solo se puede trabajar con números en `R` sino que también con otras formas de datos. Algunos ejemplos de datos (y los más típicos) con que `R` trabaja son los siguientes:
+
+- *numeric*: números reales (1, 2.5, pi, etc)
+- *character*: texto ("hola")
+- *logical*: `TRUE`, `FALSE`
+
+### Datos numéricos
+
+```{r}
+class(1.45431312)
+class(-432)
+class(13)
+```
+
+### Datos tipo texto
+
+```{r}
+"Hola Mundo" 
+'Hola mundo'
+class("Hola Mundo")
+```
+
+### Datos tipo lógicos
+
+```{r}
+TRUE
+FALSE
+NA
+class(NA)
+```
+
+#### Operadores lógicos
+
+Los operadores lógicos son una pieza clave de cualquier lenguaje de programación o software de manejo de datos o estadística y como su nombre sugiere darán como resultado un valor lógico. Por suerte, en `R` no son muy distintos a los que ya conocen por otros lenguajes/software (o al menos son bastante intuitivos).
+
+1. `<`   menor
+2. `<=`  menor o igual 
+3. `>`   mayor
+4. `>=`  mayor o igual
+5. `==`  igual 
+6. `!=`  diferente
+7. `&`   y
+8. `|`   o
+
+Como funcionan:
+
+```{r collapse=TRUE}
+1 == 2
+1 != 2
+1 <= 2 & 1 <= 3
+1 == 1 | 1 == 2
+1 > 1 | 1 > 2 & 3 == 3
+1 > 1 & 1 > 2 & 1 > 3
+```
+
+## Asignar valores a una variable
+
+Se puede realizar utilizando `<-` o `=`.
+
+```{r}
+respuesta <- 2 + 3 + 4 # o respuesta = 2 + 3 + 4
+class(respuesta)
+respuesta
+```
+
+Los objetos que creemos (en este caso `respuesta`) se comportan de igual manera que el tipo de dato que contienen.
+
+```{r}
+respuesta*5
+respuesta2 <- respuesta*5
+```
+
+Para tener una lista de objetos que se encuentran en el *Environment* se puede utilizar `ls()`
+```{r}
+ls()
+```
+
+Para borrar objetos creados se puede utlizar la función `rm()`
+
+```{r}
+rm(respuesta, respuesta2)
+ls()
+```
+
+O para eliminar todo
+
+```{r}
+rm(list = ls())
+```
+
+## Funciones
+
+R tiene muchas funciones pre instaladas y forman parte de lo que se denomina *R base*. Las funciones utilizan argumentos dentro de paréntesis: `función(argumento1, argumento2, ...)`
+
+```{r collapse=TRUE}
+log(x = 3, base=exp(1))
+log(3)
+log(3, base=2)
+log(3, 2)
+log(2, 3)
+log(base=2, x=3)
+```
+
+En general no es necesario decirle a `R` que argumento es cual (en este caso "decirle" que utilize `base`).
+
+### Función "Help"
+
+```{r eval=FALSE}
+help(log) # o ?log
+```
+
+En la parte inferior derecha verán que se abre una página con las siguientes secciones:
+
+- Description: propósito de la función
+- Usage: como se utiliza/implementa
+- Arguments: los argumentos que se utilizan (o pueden utilizar) y que hacen
+- Details: información más detallada sobre lo que hace la función
+- Value: qué es lo que la función produce
+- See Also: funciones relacionadas
+- References: citas (bibliografía) 
+- Examples: ejemplos de código
+
+## Librerías
+
+Eventualmente las funcionalidades base de `R` presentarán limitaciones o simplemente no podrá ejecutar ciertos analisis (al menos no de forma simple).
+
+### Instalar y cargar librerías
+
+Por ejemplo, para estimar modelos *probit* o *logit* se puede utilizar el paquete `MASS` que ya incluye desarrollada la "habilidad" de hacer esto.
+
+```{r, eval=FALSE}
+install.packages("MASS")
+```
+
+Instalarlo no basta, hay que pedirle a `R` que cargue la librería y esto habr? que hacerlo cada vez que se abra `R` de nuevo.
+
+```{r,  eval=FALSE}
+library("MASS")
+```
+
+Si quieren saber que funciones se incluyen dentro del paquete `MASS`
+
+```{r,  eval=FALSE}
+library(help = "MASS") #o MASS:: lo cual abrirá una lista despegable con las distintas funciones
+```
+
+## Objetos en `R`
+
+`R` es un lenguaje basado en objetos. En otras palabras, toda acción que realicemos se basará en la manipulación de alguno de sus diferentes tipos de objetos. Entre los [objetos más utilizados](http://venus.ifca.unican.es/Rintro/_images/dataStructuresNew.png) (o más básicos) en `R` están:
+
+- Vectores: objetos uni-dimensionales del mismo tipo. Por ejemplo, un vector con 10 elementos correspondientes a los números del 1 al 10, o a las primeras 10 letras del abecedario.
+- Matrices y *Arrays*: objetos de dos (matrices) o más (*arrays*) dimensiones. Los elementos en estos objetos son del mismo tipo.
+- *Data frames*: Es lo más cercano a una "planilla Excel". Los datos dentro de una columna deben tener el mismo tipo pero distintas columnas pueden ser de distintos tipos de datos.
+- Listas: La lista es un tipo de objeto especial que es capaz de almacenar otros objetos. Por ejemplo, el primer elemento de una lista puede ser un vector de 10 números, el segundo puede ser una matriz de letras, y el tercero puede ser un *array*.
+
+### Vectores
+
+Podemos crear vectores simples con la función `c()`
+
+```{r}
+c(1,1,2,3,5,8)
+1:50
+c("Hola Mundo", "¿Qué tal?")
+c(TRUE, FALSE, NA)
+c(1, 2, "tres")
+```
+
+También se pueden realizar operaciones matemáticas con vectores.
+
+```{r}
+c(1,2,3) + c(1,2,3)
+c(1,2,3,4) + c(1,2,3)
+c(1,2,3) * c(1,2,3)
+c(1,2,3) / c(1,2,3)
+c(1,2,3,4) / c(1,2,3)
+```
+
+Así como asignar vectores a variables y realizar operaciones matemáticas.
+
+```{r}
+vector1 <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+vector1 + vector1
+vector1/vector1 
+log(vector1)
+```
+
+Y extraer distinta información a través del uso de funciones.
+
+```{r, collapse=TRUE}
+sum(vector1)
+prod(vector1)
+median(vector1)
+sd(vector1)
+sort(vector1, decreasing = TRUE )
+length(vector1)
+summary(vector1)
+```
+
+Incluso graficar.
+
+```{r}
+plot(vector1)
+```
+
+También se pueden trabajar con vectores no numéricos.
+
+```{r, collapse=TRUE}
+vector_car1 <- "Hola"
+vector_car2 <- "Amigo"
+
+nchar("Hola")
+nchar(c(vector_car1, vector_car2))
+paste(vector_car1, vector_car2)
+paste(vector_car1, vector_car2, sep = "")
+tolower(c(vector_car1, vector_car2))
+toupper(c(vector_car1, vector_car2))
+```
+
+#### Manipulando vectores
+
+Podemos hacer referencia a valores (o rango de valores) particulares dentro de los vectores con el uso de `[]`.
+
+```{r collapse=TRUE}
+vector2 <- c("Hola", ",", "¿", "qué", "tal", "?")
+vector2[3] # referencia al tercer elemento del vector
+vector2[2:4] #referencia a un rango dentro del vector 
+vector2[c(1,3,4)] # referencia de ciertos elementos dentro del vector
+vector2[-2] # todos los elementos menos el segundo
+vector2[1] <- "Hello" # podemos reemplazar
+vector2
+```
+
+También se pueden utilizar los operadores lógicos para ayudar a la manipulación del vector.
+
+```{r collapse=TRUE}
+vector3 <- c(1, 1, 2, 3, 4, 4.5 , 6, 6, 10)
+vector3
+vector3[vector3 == 1]
+vector3[vector3 >= 4]
+vector3[vector3 != 4 & vector3 > 2]
+```
+
+### Matrices
+
+La matriz es una combinación de dos o más vectores con el mismo tipo de datos. Para crear matrices usamos la función `matrix()`. Esta función utiliza los siguientes argumentos:
+
+* *data*: un objeto (por ejemplo un vector, o un n?mero)
+* *nrow*: n?mero de filas para la matriz
+* *ncol*: n?mero de columnas
+* *byrow*: define si la matriz ser? completada por columnas o filas
+
+```{r collapse=TRUE}
+matrix1 <- matrix(data = 1, nrow = 3, ncol = 3) #o solo matrix(1,3,3)
+matrix1
+```
+
+También se pueden crear matrices utilizando vectores unidos por las funciones `cbind()` o `rbind()`
+
+```{r collapse=TRUE}
+vector4 <- 1:9
+(matrix2 <- rbind(vector3, vector4)) #¿ qué hace el paréntesis cuando se crea una variable?
+(matrix3 <- cbind(vector3, vector4))
+```
+
+#### Manipulando matrices
+
+La forma de extraer valores o rangos desde las matrices es similar al caso de los vectores. En el caso de los vectores se utilizaba `[indice]` y para matrices es `[fila, columna]`
+
+```{r collapse=TRUE}
+matriz4 = matrix(1:9, 3)
+matriz4
+
+matriz4[1,1] # extraemos el elemento de la primera fila y columna
+matriz4[2,3] # extraemos el elemento de la segunda fila y septima columna
+```
+
+También se pueden seleccionar columnas o filas completas
+
+```{r collapse=TRUE}
+matriz4[,2] # extrae un vector correspondiente a la segunda columna
+matriz4[3,] # extrae un vector correspondiente a la tercera fila
+matriz4[1:2,] # extrae la primera y segunda fila
+matriz4[matriz4[,2]>4,] # extrae todas las filas que contengan valores superiores a 4 en la segunda columna
+```
+
+### Data Frames
+
+Los *data frames* son probablemente los objetos que más utilizarán en `R`. Estos consisten en un conjunto de vectores del mismo tamaño que, a diferencia de las matrices, pueden ser de igual o diferente tipo.
+
+```{r}
+a <- c(10,20,30,40)
+b <- c("libro", "lapiz", "carpeta", "goma")
+c <- c(TRUE,FALSE,TRUE,FALSE)
+d <- c(2.5, 8, 10, 7)
+(df <- data.frame("ID" = a, 
+                  "Producto" = b,
+                  "Disponibilidad" = c,
+                  "Precio" = d))
+```
+
+De forma similar a las matrices, podemos acceder a columnas, filas o subconjuntos de nuestro *data frame* utilizando `[fila, columna]`.
+
+```{r collapse=TRUE}
+df[2,3] # valor correspondiente a la fila 2 de la columna 3
+df[,4] # toda la columna 4 (variable precio)
+df[2,] # toda la fila 2
+df[1:2, 2:4] # subconjunto correspondiente a producto, disponibilidad y precio para las dos primeras filas
+df[, c("ID", "Precio")] # También se pueden usar los nombres
+df[, c(1,4)]
+```
+
+Por otro lado, se puede acceder a las columnas (o variables) directamente utilizando `$`.
+
+```{r}
+df$Producto
+df$Disponibilidad[2:4] # Elementos 2, 3 y 4 de la columna o variable "Disponibilidad"
+```
+
+Utilizar `$` presenta varias ventajas a la hora de trabajar con *data frames*. Por ejemplo, podemos crear nuevas variables (o columnas)
+
+```{r}
+df$cantidad<- c(3,2,5,7)
+df
+df$gasto <- df$Precio*df$cantidad
+```
+
+O filtrar los datos respecto a otras variables en el *data frame*
+
+```{r}
+df[df$Disponibilidad == TRUE,] # Crea un nuevo data frame con aquellas observaciones con disponibilidad = TRUE
+df[df$Precio >2.5 | df$cantidad >= 3,]
+```
+
+`R` viene con una serie de *data frames* cargados por defecto que podemos utilizar para practicar lo que hemos aprendido.
+
+```{r}
+data(USArrests)
+dim(USArrests) 
+names(USArrests)
+summary(USArrests)
+```
+
+### Listas
+
+Las listas son objetos que pueden almacenar distintos objetos. Por ejemplo, una lista puede tener matrices, vectores, y data frames dentro de su estructura.
+
+```{r}
+vector5 <- 1:5
+matriz5 <- matrix(1:9, ncol = 3)
+vector6 <- c("a", "b", "c")
+(milista <- list(vector5, matriz5, vector6 , df))
+```
+
+Como pueden ver ahora los cuatro objetos previamente creados se pueden ver dentro de `milista`. Para acceder a estos objetos dentro de la lista se debe utilizar `[[indice]]`. Por ejemplo, para acceder a la matriz dentro de la lista lo hacemos de la siguiente forma:
+
+```{r}
+milista[[2]]
+```
+
+O también podemos asignarle nombres a cada objeto dentro de la lista y acceder a estos de forma similar que con los *data frames* utilizando `$`
+
+```{r}
+(milista = list(v = vector5, m = matriz5, v2 = vector6, d = df))
+```
+
+Como verán ya no contamos con `[[1]]`, `[[2]]`, `[[3]]` y `[[4]]` (aunque todavía se pueden usar) si no que con `$v`, `$m`, `$v2` y `$d` que fueron los nombres que el asignamos a cada uno de los objetos dentro de la lista.
+
+```{r}
+milista$v2
+milista[[3]]
+```
+
+# Ejercicios
+
+1. Creen un nuevo *script*
+2. Generen un vector **x** que contenga una secuencia de números enteros del 1 al 10
+3. Generen un vector **y** que contenga una secuencia de números pares del 2 al 20
+4. Generen una matriz **M** que contenga ambos vectores recien creados como sus columnas
+5. Extraigan los valores de la quinta fila de **M**
+6. Extraigan los valores de la segunda columna de **M**
+
+```{r}
+data(USArrests)
+```
+
+Utilizando la información disponible en `USArrests` respondan la siguientes preguntas:
+
+1. Asigne la información correspondiente a `USArrests` a un nuevo objeto `datos`
+2. ¿Cuántas filas y columnas tiene este *data frame*? (en otras palabras: ¿qué **dim**ensiones tiene?)
+3. ¿Qué variables incluye? ¿De qué tipo son?
+5. ¿Cuál es el valor de la fila 3 de la variable `Murder`?
+6. Cree una nueva variable correspondiente al logaritmo de la variable `UrbanPop`
+7. Genere un nuevo objeto `datos2` correspondiente a aquellas observaciones (o filas) del *data frame* `datos` cuyos valores de `Assault` y `Murder` sean mayor al promedio de cada una de estas variables.
