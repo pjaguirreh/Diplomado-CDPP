@@ -1,0 +1,160 @@
+---
+title: "Tarea 1 - Modulo 2"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+library(tidyverse)
+```
+
+La siguiente tarea consiste en **12 preguntas cortas** que consideran el material cubierto en las tres últimas clases. 
+
+Recuerde que si no tiene instalada alguna de las librerías que se requieran para esta tarea deberá hacerlo utilizando `install.packages("NombreDeLaLibrería"). De forma similar, y teniendo ya las ibrerías instaladas, cuando quiera utilizar alguna de estas deberá cargarlas cada vez que inicie una sesión de `R` utilizando `library(NombreDeLaLibrería)`.
+
+Recuerde que si quiere saber más sobre una función en particular puede utilizar `?NombreFuncion` o `help(NombreFuncio)`.
+
+Finalmente, la tarea debeá ser entregada en **UN SOLO ARHIVICO RMARKDOWN** cuyo nombre deberá ser **Apellido_Nombre.Rmd**
+
+**1.** ¿Qué saldrá en la consola al ejecutar el siguiente código? O en otras palabras, ¿qué se imprime cuando se ejecuta la variable resultado?
+
+```{r, echo = TRUE}
+x <- 2
+y <- -1
+b <- c(x, y)
+resultado <- b[1]
+resultado
+```
+
+**2.** Se tiene un objeto de la siguiente forma:
+
+```{r, echo = TRUE}
+objeto <- c(1,2,3,4,5,'a')
+```
+
+¿Cuál de las siguientes opciones es correcta para que solo se imprima (se vea) un objeto con valores de 1, 2, 3, 4, 5? (sin la letra a).
+
+I) objeto[-a]
+II) objeto[1:5]
+III) objeto[-6]
+
+a) Solo I
+b) Solo II
+c) Solo III
+d) Solo II y III
+e) Todas
+
+**3.** Cargue el archivo `datos_tarea.xlsx` y asignelo a la variabla `datos`. *Utilice la función `read_xlsx` de la librería `readxl`*.
+
+```{r}
+library(readxl)
+datos <- read_xlsx("datos_tarea.xlsx")
+```
+
+**4.** A través del uso de funciones, describa el objeto `datos`. ¿A qué tipo de objeto corresponde `datos`? ¿Cuántas observaciones y variables tiene? ¿De qué tipo son sus variables? ¿Cuál es el valor máximo y mínimo de la variable `obesity_rate`?
+
+```{r}
+#Hay más de una respuesta correcta
+class(datos)
+str(datos)
+summary(datos$obesity_rate)
+```
+
+**5.** Replique el resultado de la siguiente linea de código utilizando la función `filter()` de la librería `dplyr`.
+
+```{r, echo=TRUE}
+datos[datos$year == 2010,]
+```
+
+```{r}
+library(dplyr)
+filter(datos, year == 2010)
+datos %>% filter(year == 2010)
+```
+
+**6.** Replique el resultado de la siguiente linea de código utilizando la función `select()` de la librería `dplyr`.
+
+```{r, echo=TRUE}
+datos[, "Country"]
+#o
+datos[, 1]
+```
+
+```{r}
+select(datos, Country)
+datos %>% select(Country)
+```
+
+**7.** Replique el resultado de la siguiente linea de código utilizando las funciones `filter()` y `select()` de la librería `dplyr`. Asigne el resultado a `datos2`.
+
+```{r, echo = TRUE}
+datos[datos$year == 2005 | datos$year == 2015, c("Country", "year", "obesity_rate")]
+#o
+datos[datos$year == 2005 | datos$year == 2015, c(1, 4, 5)]
+```
+
+```{r}
+datos2 <- datos %>% filter(year %in% c(2005, 2015)) %>% select(Country, year, obesity_rate)
+datos2 <- select(filter(datos, year %in% c(2005, 2015)), Country, year, obesity_rate)
+```
+
+**8.** Utilizando la funcion `spread()` de la librería `tidyr` convierta los valores de la variable `year` dentro `datos2` en columnas. Los valores (filas) de estas nuevas (2) columnas deben ser los correspondientes a `obesity_rate`. Asigne el resultados a `datos3`.
+
+```{r}
+library(tidyr)
+datos3 <- datos2 %>% spread(key = year, value = obesity_rate)
+datos3 <- spread(datos2, key = year, value = obesity_rate)
+```
+
+**9.** Convierta `datos3` nuevamente a la forma de `datos2` (columnas de años como valores dentro de una columna `year`) utilizando la función `gather()` de la librería `tidyr`. 
+
+```{r}
+datos3 %>% gather(`2005`,`2015`, key = "year", value = "obesity_rate")
+```
+
+**10.** Replique el resultado de las siguientes lineas de código utilizando la función `rename()` de la librería `dplyr`. Asigne el resultado a `datos4`.
+
+```{r, echo = TRUE, eval=FALSE}
+colnames(datos2) <- c("País", "Año", "tasa_obesidad")
+```
+
+```{r}
+datos4 <- rename(datos2, 
+       "País" = Country,
+       "Año" = year,
+       "tasa_obesidad" = obesity_rate)
+```
+
+**11.** Vuelva a escribir el código descrito a continuación utilizando `%>%`.
+
+```{r, echo = TRUE}
+summarize(
+  group_by(
+    filter(datos, year == 1995), 
+    Region), 
+  promedio_region = mean(obesity_rate, na.rm = TRUE))
+```
+
+```{r}
+datos %>% filter(year == 1995) %>% group_by(Region) %>% summarize(promedio_region = mean(obesity_rate, na.rm = TRUE))
+```
+
+**12.** Tomando como base el siguiente código:
+
+```{r, echo=TRUE}
+x <- rnorm(100)
+y <- 2*(x^2) + 10 + rnorm(100)
+d <- as.data.frame(cbind(x,y))
+```
+
+Genere un gráfico con la variable `x` en el eje horizontal e `y` en el eje vertical. Luego agregue dos `geom` uno con puntos de color azul y lueog una linea de tendencia (`smooth`) de color rojo. Considere como base `ggplot(d, aes( , ))`. *Utilice la librería `ggplot2`*.
+
+```{r}
+library(ggplot2)
+ggplot(d, aes(x = x, y = y)) + 
+  geom_point(col = "blue") + 
+  geom_smooth(col = "red")
+```
+
