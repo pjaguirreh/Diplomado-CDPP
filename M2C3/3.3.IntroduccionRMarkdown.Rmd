@@ -1,0 +1,56 @@
+---
+title: "Introducción a R Markdown"
+author: "Pablo Aguirre Hormann"
+date: "7/24/2020"
+output:
+  html_document: default
+---
+
+Este es un documento ``R Markdown`. Markdown nos permite combinar texto, código, y resultados en un solo producto. Noten que los archivos `R Markdown` son `.Rmd` y no `.R`.
+
+`R Markdown` nos permite generar texto **en negritas** o *cursiva* así como generar listas:
+
+- Primero objeto
+- Segundo Objeto
+- Tercerc objeto
+
+> O hacer notas
+
+Podemos también escribir código como en un *script* a través de *code chunks* (`ALT`+`CTRL`+`I`).
+
+```{r}
+head(iris)
+```
+
+También podemos escribir código dentro una linea de texto. Por ejemplo, en `iris` el valor correspondiente a la cuarta fila de la variable `Sepal.Width` es: **`r iris$Sepal.Width[4]`**.
+
+Otra característica es que podemos definir título de "distintos niveles/jerarquías".
+
+# Título 1
+## Título 2
+### Título 3
+#### Título 4
+##### etc...
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+```{r, warning=FALSE, message=FALSE}
+library(kableExtra)
+head(iris) %>% 
+  kable(format = "markdown")
+```
+
+```{r, warning=FALSE, message=FALSE}
+library(gt)
+head(iris) %>% 
+  gt()
+```
+
+```{r, warning=FALSE, message=FALSE}
+library(DT)
+head(iris) %>% 
+  datatable()
+```
+
