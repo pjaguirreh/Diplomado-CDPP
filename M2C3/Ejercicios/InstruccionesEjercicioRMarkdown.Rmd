@@ -1,0 +1,103 @@
+---
+title: "Ejercicio R Markdown"
+author: "Ciencia de Datos para Políticas Públicas"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. Abra un archivo R Markdown nuevo (`.Rmd`).
+    * Ponga como título *Primer reporte*.
+    * Ponga su nombre como autor.
+    * Escoja HTML como el formato de salida.
+
+2. Guarde el archivo R Markdown (`.Rmd`) con el nombre __*PrimeraPruebaMarkdown.Rmd*__.
+
+3. Borre desde donde dice `## R Markdown` (línea 10) hacia abajo. En otras palabras, solo deje la sección con el título y el autor además del primer *chunk* (que define las opciones globales del documento).
+
+4. Inserte un segundo *chunk* (bajo el único que hay en este momento) y cargue los siguientes paquetes:
+    * `readr`
+    * `dplyr`
+    * `ggplot2`
+    * `lubridate`
+  
+5. Inserte un tercer *chunk* donde cargará el archivo __*DatosCovidRegion.csv*__ usando la función `read_csv` y asignando los datos al objeto `datos_covid`.
+
+6. Inserte un cuarto *chunk* donde replicarán el último gráfico realizado en la primera clase.
+    * Ver el script __*CodigoCovidViz.R*__ (Clase de visualización de datos).
+  
+7. Presione el boton **Knit** en el archivo __*PrimeraPruebaMarkdown.Rmd*__ para generar el archivo.
+    * ¿Qué observa?
+  
+8. Vuelva al archivo R Markdown y cambie las opciones globales (primer *chunk*) a `echo = FALSE` y agregue también `warning = FALSE` y `message = FALSE` (las tres opciones deben ir separadas por comas).
+
+9. Presione el botón **Knit** para generar el archivo.
+    * ¿Qué observa?
+    
+10. Agregue un título/encabezado (usando `#`) sobre el *chunk* que carga los datos. El título debe decir *Análisis COVID*.
+
+11. Sobre el *chunk* que genera el gráfico escriba una breve introducción (1 o 2 líneas) a lo que el gráfico busca mostrar y bajo el mismo *chunk* escriba en una o dos líneas alguna conclusión/hallazgo.
+
+12. Presione el botón **Knit** para generar el archivo.
+    * ¿Qué observa?
+    
+13. En el *chunk* que genera el gráfico agregue la opción `out.width='80%'` (deberá poner una coma después de la `r`).
+
+14. Presione el botón **Knit** para generar el archivo.
+    * ¿Qué observa?
+    
+15. Agregue en el *chunk* que genera el gráfico la opción `fig.align='center'`.
+
+16. Presione el botón **Knit** para generar el archivo.
+    * ¿Qué observa?
+    
+17. Agregue un nuevo *chunk* bajo el que genera el gráfico pero sobre la conclusión/hallazgo escrita (paso 11). Copie el siguiente código dentro del *chunk*:
+
+```{r, eval = FALSE}
+dos_semanas_atras <- Sys.Date()-15
+
+max_casos <- datos_covid %>% 
+  filter(region != "Total",
+         fecha >= dos_semanas_atras) %>% 
+  slice_max(casos_nuevos)
+```
+
+¿Qué hace este código?
+
+18. Copie el siguiente texto/código bajo la linea de conclusión/hallazgo escrita por usted (paso 11):
+
+```{r, eval = FALSE}
+La región que ha presentado el mayor número de casos nuevos en las últimas dos semanas es 
+la región `r max_casos$region` con **`r max_casos$casos_nuevos`** casos el 
+`r day(max_casos$fecha)` de `r month(max_casos$fecha)` del `r year(max_casos$fecha)`
+```
+
+19. Presione el botón **Knit** para generar el archivo.
+    * ¿Qué observa?
+    
+20. Agregue en el último *chunk* (creado en el paso 17) bajo el código ya existente lo siguiente:
+
+```{r, eval = FALSE}
+num <- c(1:12)
+mes <- c("enero", "febrero", "marzo", "abril", 
+         "mayo", "junio", "julio", "agosto", 
+         "septiembre", "octubre", "noviembre", "diciembre")
+
+diccionario_mes <- bind_cols(Mes = num, Nombre_mes = mes)
+
+mes_max_casos <- diccionario_mes %>% 
+  filter(Mes == month(max_casos$fecha)) %>% 
+  pull(Nombre_mes)
+```
+
+¿Qué hace este código?
+
+21. Reemplace donde dice __*r month(max_casos$fecha)*__ (último párrafo) por __*r mes_max_casos*__.
+
+22. Presione el botón **Knit** para generar el archivo.
+    * ¿Qué observa?
+    
+23. Presione la flecha la derecha del botón **Knit** y seleccione __*Knit to Word*__.
+    * ¿Qué observa?

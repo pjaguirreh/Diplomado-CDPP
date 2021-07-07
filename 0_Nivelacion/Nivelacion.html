@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Ciencia de Datos para Políticas Públicas</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pablo Aguirre Hormann" />
+    <meta name="date" content="2021-03-06" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":1,"eraser_size":10}) })</script>
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":false,"autoSearch":true}) })</script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Ciencia de Datos para Políticas Públicas
+## Nivelación
+### Pablo Aguirre Hormann
+### 03/06/2021
+
+---
+
+
+
+
+# Nivelación
+
+### Objetivos
+
+- Repasar conceptos que probablemente han visto antes, pero de forma aplicada y con ejemplos en `R`
+
+- Generar un lenguaje común
+
+--
+
+En el mundo de la Estadística/Econometría/Machine Learning se habla generalmente de **modelos**.
+
+--
+
+Queremos ver conceptos que nos ayuden a entender mejor ese "mundo" (y su nomenclatura) al revisarlos en la 2da parte del módulo 2. 
+
+---
+
+# ¿Para qué?
+
+.pull-left[
+
+### En particular
+
+&lt;img src="../Imagenes/RegOutput.jpeg" width="100%" style="display: block; margin: auto;" /&gt;
+
+`$$Y=\beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\epsilon$$`
+
+]
+--
+
+.pull-right[
+
+### En general
+
+&lt;img src="../Imagenes/ProcesoDS.png" width="140%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# ¿Qué veremos?
+
+- Conceptos estadísticos
+ * Conjuntos
+ * Probabilidad
+ * Variables discretas y continuas
+ * Medidas de tendencia central y dispersión
+ * Teorema del límite central
+ * Distribuciones conjuntas
+ * Distribuciones: Normal, `\(\chi^2\)`, `\(t\)`, `\(F\)`
+- `R`
+
+---
+class: inverse, center, middle
+name: reg
+
+# Conjuntos
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Proceso aleatorio
+
+En un proceso aleatorio hay más de una posibilidad de resultado y la predicción de algún resultado particular es difícil:
+
+Clásicos ejemplos:
+  * tirar una moneda
+  * tirar un dado
+
+---
+
+# Proceso aleatorio
+
+### Espacio muestral
+
+Es el conjunto de todos los posibles resultados de un proceso aleatorio.
+--
+
+ - Dados: `\(S=\{1,2,3,4,5,6\}\)`
+ - Moneda: `\(S=\{C,S\}\)`
+
+--
+
+### Evento
+
+Es un subconjunto del espacio muestral.
+
+--
+
+Para el caso del dado, digamos que: 
+
+- `\(A\)` representa el evento de que al tirar un dado el resultado es un número par: `\(A=\{2,4,6\}\)`
+--
+
+- `\(B\)` representa el evento de que al tirar un dado el resultado es un número impar: `\(B=\{1,3,5\}\)`
+--
+
+- `\(C\)` representa el evento de que al tirar un dado el resultado es un número primo: `\(C=\{2,3,5\}\)`
+
+---
+
+# Diagrama de Venn
+
+&lt;img src="../Imagenes/venn.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Complemento de un evento
+
+.pull-left[
+**Definición**: el complemento de un evento son todos los resultados en el espacio muestral que no son el evento mismo.
+
+**Ejemplo**: el complemento del evento `\(C\)` es el conjunto de resultados de tirar un dado que no corresponden a números primos.
+
+**Notación**: `\(\Large  C^c\)`
+
+`\(\Large C^c:\{1,4,6\}\)`
+]
+
+.pull-right[
+&lt;img src="../Imagenes/venn.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Complemento de un evento
+
+Definir tres *vectores* `\(A\)`, `\(B\)`, `\(C\)`
+
+
+```r
+A &lt;- c(2,4,6)
+B &lt;- c(1,3,5)
+C &lt;- c(2,3,5)
+```
+
+--
+
+Definir un vector que contiene los elementos de `\(A\)` y `\(B\)`
+
+
+```r
+AyB &lt;- union(A, B)
+```
+
+--
+
+Ver que elementos que están en `\(A\)` o `\(B\)`, no están en `\(C\)`
+
+
+```r
+setdiff(AyB, C)
+```
+
+```
+## [1] 4 6 1
+```
+
+--
+
+Para ver que hace una función (por ejemplo `setdiff()`) usar `?setdiff`
+
+---
+
+# Eventos mutuamente excluyentes
+
+.pull-left[
+**Definición**: los eventos mutuamente excluyentes son eventos que no pueden ocurrir al mismo tiempo.
+
+**Ejemplo**: el evento `\(A\)` y el evento `\(B\)` son mutuamente excluyentes porque el resultado de tirar un dado no puede ser par e impar al mismo tiempo.
+
+Los eventos `\(A\)` y `\(C\)` no son mutuamente excluyentes solamente porque 2 es tanto par como primo.
+]
+
+.pull-right[
+&lt;img src="../Imagenes/venn.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Eventos mutuamente excluyentes
+
+¿Existe al menos un elemento de `\(A\)` igual a un elemento en `\(C\)`?
+
+--
+
+
+```r
+intersect(A, C)
+```
+
+```
+## [1] 2
+```
+
+`\(A\)` y `\(C\)` **no** son mutuamente excluyentes
+
+--
+
+¿Existe al menos un elemento de `\(B\)` igual a un elemento en `\(C\)`?
+
+--
+
+
+```r
+intersect(B, C)
+```
+
+```
+## [1] 3 5
+```
+
+`\(B\)` y `\(C\)` **no** son mutuamente excluyentes
+
+--
+
+¿Existe al menos un elemento de `\(A\)` igual a un elemento en `\(B\)`?
+
+
+```r
+intersect(A, B)
+```
+
+```
+## numeric(0)
+```
+
+`\(A\)` y `\(B\)` son mutuamente excluyentes
+
+---
+
+# Notación de conjuntos
+
+.pull-left[
+
+|Descripción |Notación    |Lectura  |Elementos|
+| -------    |:-------    |:------- |:------- |
+|Unión       | `\(A \cup C\)` |A o C    | `\(\{2,3,4,5,6\}\)` |
+|Intersección| `\(A \cap C\)` |A y C    | `\(\{2\}\)` |
+
+]
+
+.pull-right[
+&lt;img src="../Imagenes/venn.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Notación de conjuntos
+
+.pull-left[
+
+|Descripción |Notación    |Lectura  |Elementos|
+| -------    |:-------    |:------- |:------- |
+|Unión       | `\(A \cup C\)` |A o C    | `\(\{2,3,4,5,6\}\)` |
+|Intersección| `\(A \cap C\)` |A y C    | `\(\{2\}\)` |
+
+
+```r
+union(A, C)
+```
+
+```
+## [1] 2 4 6 3 5
+```
+
+```r
+intersect(A, C)
+```
+
+```
+## [1] 2
+```
+
+]
+
+.pull-right[
+&lt;img src="../Imagenes/venn.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Probabilidades
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Definamos probabilidad
+
+## Definición "frecuentista"
+
+La probabilidad de un resultado está definida por la **proporción de veces** que ese resultado es observado a través de un **alto número de repeticiones de procesos aleatorios**.
+
+--
+
+Asuman que repetimos el proceso aleatorio de tirar una moneda y que registramos `\(X\)`, el número de veces que sale *cara* en `\(n\)` tiradas de moneda. Entonces:
+
+`$$\Large P(Cara)=\lim_{n\to\infty}\frac{X}{n}$$`
+
+--
+
+`$$\Large P(Cara)=\frac{1}{2}$$`
+---
+
+# En la práctica
+
+
+
+Definamos un vector *moneda* con los posibles eventos y simulemos una sola tirada de esa moneda.
+
+```r
+moneda &lt;- c("cara", "sello")
+sample(moneda, 1)
+```
+
+```
+## [1] "cara"
+```
+
+--
+
+Repitamos 5 veces este proceso
+
+```r
+tirar_moneda &lt;- sample(moneda, 5, replace = TRUE)
+table(tirar_moneda)
+```
+
+```
+## tirar_moneda
+##  cara sello 
+##     3     2
+```
+Dados estos resultados, vemos que `\(P(Cara)=\frac{3}{5}=60\%\)`
+
+---
+
+# En la práctica
+
+
+
+Definamos un vector *moneda* con los posibles eventos y simulemos una sola tirada de esa moneda.
+
+```r
+moneda &lt;- c("cara", "sello")
+sample(moneda, 1)
+```
+
+```
+## [1] "cara"
+```
+
+Repitamos 5.000 veces este proceso
+
+```r
+tirar_moneda &lt;- sample(moneda, 5000, replace = TRUE)
+table(tirar_moneda)
+```
+
+```
+## tirar_moneda
+##  cara sello 
+##  2449  2551
+```
+
+En este caso vemos que `\(P(Cara)=\frac{2448}{5000}=48,96\%\)`
+
+---
+
+# En la práctica
+
+&lt;img src="Nivelacion_files/figure-html/simularmoneda-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Definamos probabilidad
+
+## Definición "bayesiana"
+
+Al definir una probabilidad, además de considerar el número de veces que un resultado ocurre, la aproximación *bayesiana* considera información previa (*prior*) que se tenga sobre ese resultado.
+
+**No profundizaremos en este tema pero lo dejo como antecedente.**
+
+---
+
+# Cosas a saber sobre las probabilidades
+
++ `\(0 \leq P(A) \leq 1\)`: La probabilidad de cualquier evento se encuentra entre cero y uno
++ `\(P(S)=1\)`: El conjunto de eventos es igual a 1
+
+--
+
+### Probabilidad de eventos complementarios
+
+`\(P(A)+P(A^c)=1\)`. Por ejemplo, si sabemos que la **probabilidad de que llueva es 0.1**, entonces sabemos también que la **probabilidad de que no llueva es 0.9**.
+
+--
+
+### Regla de Independencia y Multiplicación
+
+Dos procesos son independientes si el saber el resultado de uno no afecta el resultado de otro. Por ejemplo, tirar dos monedas al aire.
+
+--
+
+Si el evento `\(A\)` y `\(B\)` son independientes, entonces: `\(P(A \cap B)=P(A) \times P(B)\)`
+
+--
+
+La probabilidad de sacar dos *caras* en dos tiradas de una misma moneda es: `\(\frac{1}{2} \times \frac{1}{2}=\frac{1}{4}\)`
+
+---
+class: inverse, center, middle
+name: reg
+
+# Probabilidad Conjunta/Marginal/Condicional
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# GSS 2018
+
+La *General Social Survey* (GSS) es una encuesta sociológica que se hace en Estados Unidos desde 1972. Es una encuesta muy completa que entrega información sobre distintos aspectos sobre los residentes del país.
+
+&lt;img src="../Imagenes/TablaGSS.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Eventos
+
+Digamos que `\(B\)` representa el evento de aleatoriamente seleccionar una persona de esta muestra que **cree en la vida después de la muerte**.
+
+--
+
+Digamos que `\(C\)` representa el evento de aleatoriamente seleccionar una persona de esta muestra que **ha tomado un curso universitario de ciencias**.
+
+---
+
+# Probabilidad marginal
+
+&lt;img src="../Imagenes/TablaGSS.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+`\(P(B)\)` representa una *probabilidad marginal*. Así también `\(P(C)\)`, `\(P(B^C)\)`, y `\(P(C^C)\)`.
+
+Para calcular estas probabilidad solo debemos usar los valores en los márgenes de la tabla (por eso el nombre).
+
+--
+
+`\(\large P(B)=\frac{860}{1050}\)`
+
+`\(\large P(C)=\frac{450}{1050}\)`
+
+---
+
+# Probabilidad conjunta
+
+&lt;img src="../Imagenes/TablaGSS.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+Noten que los eventos `\(B\)` y `\(C\)` **no son mutualmente excluyentes**. Una persona seleccionada aleatoriamente puede creer en la vida después de la muerte y podría haber tomado un curso universitario de ciencias. `\(B \cap C \neq \emptyset\)`
+
+--
+
+`\(\large P(B \cap C)=\frac{375}{1050}\)`
+
+--
+
+Noten también que `\(P(B \cap C)=P(C \cap B)\)`. El orden no importa.
+
+---
+
+# Regla de adición
+
+&lt;img src="../Imagenes/TablaGSS.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+`\(\large P(B \cup C)=P(B)+P(C)-P(B \cap C)\)`
+
+`\(\large P(B \cup C)=\frac{860}{1050}+\frac{450}{1050}-\frac{375}{1050}=\frac{935}{1050}\)`
+
+--
+
+&lt;br&gt;
+
+`\(\large P(B \cup C)=P(B^c)+P(C^c)+P(B \cap C)\)`
+
+`\(\large P(B \cup C)=\frac{485}{1050}+\frac{75}{1050}+\frac{375}{1050}=\frac{935}{1050}\)`
+
+---
+
+# Probabilidad condicional
+
+&lt;img src="../Imagenes/TablaGSS.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+`\(P(B|C)\)` representa una *probabilidad condicional* ("Probabilidad de B dado C"). Así también `\(P(B^C|C)\)`, `\(P(C|B)\)`, y `\(P(C|B^C)\)`.
+
+--
+
+Para calcular estas probabilidades nos enfocamos en las filas o columnas de la *información dada* o la condición. En otras palabras, reducimos el espacio muestral a esta información dada o condición.
+
+--
+
+La probabilidad de que una persona seleccionada aleatoriamente **crea en la vida después de la muerta DADO que ha tomado un curso universitario de ciencias**:
+
+`\(\large P(B|C)=\frac{375}{450}\)`
+
+--
+
+El orden acá si importa: `\(P(B|C) \neq P(C|B)\)`
+
+---
+
+# Probabilidad condicional
+
+### Teorema de Bayes
+
+`$$\Large P(A|B)=\frac{P(B|A)\times P(A)}{P(B)}$$`
+
+--
+
+Nuevamente, no profundizaremos en este tema. Pero bueno tenerlo en el radar.
+
+--
+
+En el módulo tres hablarán un poco más sobre este tema (*Naive Bayes*)
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Caso hipotético
+
+&lt;img src="../Imagenes/TablaNarniaWakanda.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+`EjercicioProbabilidadesDisc.R`
+---
+
+# Tengan en cuenta
+
+&lt;img src="../Imagenes/TipoDatos.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Respuestas
+
+&lt;img src="../Imagenes/TablaNarniaWakanda.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+.pull-left[
+
+`\(P(COVID\ No)\)`
+
+
+```r
+tabla[2,3]/tabla[3,3]
+```
+
+```
+## [1] 0.7466667
+```
+
+`\(P(Narnia \cap COVID\ No)\)`
+
+
+```r
+tabla[2,1]/tabla[3,3]
+```
+
+```
+## [1] 0.28
+```
+
+]
+
+.pull-right[
+
+`\(P(COVID\ Si|Narnia)\)`
+
+
+```r
+tabla[1,1]/tabla[3,1]
+```
+
+```
+## [1] 0.16
+```
+
+`\(P(Wakanda|COVID\ No)\)`
+
+
+```r
+tabla[2,2]/tabla[2,3]
+```
+
+```
+## [1] 0.625
+```
+
+]
+
+
+---
+class: inverse, center, middle
+name: reg
+
+# Variables aleatorias discretas
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Variables aleatorias discretas
+
+Una función que asigna un resultado numérico a un proceso aleatorio se conoce como **variable aleatoria**.
+
+--
+
+Para una **variable aleatoria discreta**, estos resultados numéricos toman valores aislados (entre dos números no existe ninguno intermedio) y los posibles valores son finitos.
+
+--
+
+Usaremos letras mayúsculas, como `\(X\)`, `\(Y\)`, y `\(Z\)`, para representar variables aleatorias y minúsculas ( `\(x\)`, `\(y\)`, y `\(z\)`) para indicador resultados observados.
+
+---
+
+# Variable aleatorias discretas
+
+Proceso aleatorio: Tirar 3 veces una misma moneda.
+
+--
+
+Espacio muestral: `\(\{CCC,CCS,CSC,SCC,CSS,SCS,SSC,SSS\}\)`
+
+--
+
+Digamos que `\(X\)` es una variable aleatoria discreta que representa el número total de *caras* en 3 tiros de moneda. ¿Cuál es `\(P(X=2)\)`?
+
+--
+
+`\(P(X=2)=\frac{3}{8}=0.375\)`
+
+--
+
+| x             | 0     | 1     | 2     | 3     |
+|---            |---    |---    |---    |---    |
+| `\(\small P(X=x)=f(x)\)` | `\(f(0)\)`=0,125 | `\(f(1)\)`=0,375 | `\(f(2)\)`=0,375 | `\(f(3)\)`=0,125 |
+
+--
+
+
+```r
+resultados &lt;- replicate(expr = sum(sample(moneda, 3, replace = TRUE) == "cara"), n = 10000)
+table(resultados)/10000
+```
+
+```
+## resultados
+##      0      1      2      3 
+## 0.1242 0.3705 0.3765 0.1288
+```
+
+---
+
+# Función de Masa de Probabilidad
+
+Para una variable aleatoria discreta, `\(X\)`, la distribución de todos los valores posibles de `\(x\)` puede ser graficada con una Función de Masa de Probabilidad (Probability Mass Function - **pmf**)
+
+&lt;img src="Nivelacion_files/figure-html/pmf-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Función de Distribución Acumulada
+
+|     | x             | 0     | 1     | 2     | 3     |
+|--   |---            |---    |---    |---    |---    |
+| pmf | `\(\small P(X=x)=f(x)\)` | `\(f(0)\)`=0,125 | `\(f(1)\)`=0,375 | `\(f(2)\)`=0,375 | `\(f(3)\)`=0,125 |
+| cdf | `\(\small P(X&lt;=x)=F(x)\)`| `\(F(0)\)`=0,125 | `\(F(1)\)`=0,5   | `\(F(2)\)`=0,875 | `\(F(3)\)`=1     |
+
+&lt;img src="Nivelacion_files/figure-html/pdfdisc-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Medidas de tendencia central
+
+`$$\{1,2,3,3,4,5,6,7,8,9,10,11,12\}$$`
+
+--
+
+.pull-left[
+**Esperanza** o Valor Esperado
+
+Valor promedio/medio (ponderado).
+
+
+```r
+mean(c(1,2,3,3,4,5,6,7,8,9,10,11,12))
+```
+
+```
+## [1] 6.230769
+```
+
+**Mediana**
+
+Valor ( `\(x\)`) que divide las observaciones en dos grupos de igual tamaño.
+
+
+```r
+median(c(1,2,3,3,4,5,6,7,8,9,10,11,12))
+```
+
+```
+## [1] 6
+```
+
+]
+
+.pull-right[
+
+**Moda**
+
+Valor con la mayor probabilidad de ocurrencia (o mayor valor de la función de densidad)
+
+
+```r
+table(c(1,2,3,3,4,5,6,7,8,9,10,11,12))
+```
+
+```
+## 
+##  1  2  3  4  5  6  7  8  9 10 11 12 
+##  1  1  2  1  1  1  1  1  1  1  1  1
+```
+
+]
+
+---
+
+# Esperanza/Valor Esperado
+
+Si repetimos muchas veces este proceso aleatorio de tirar una moneda tres veces, ¿cuantas *caras* esperamos ver en promedio?
+
+--
+
+| x             | 0     | 1     | 2     | 3     |
+|---            |---    |---    |---    |---    |
+| `\(\small P(X=x)=f(x)\)` | 0,125 | 0,375 | 0,375 | 0,125 |
+
+--
+
+`\(E(X)=\sum{[x*f(x)]}\)`
+
+--
+
+`\(E(X)=(0 \times 0.125)+(1 \times 0.375)+(2 \times 0.375)+(3 \times 0.125)\)`
+
+`\(E(X) = \mu = 1.5\)`
+
+--
+
+
+```r
+mean(resultados)
+```
+
+```
+## [1] 1.5099
+```
+
+--
+
+**¿Cómo interpretamos que al tirar tres monedas el valor esperado sean 1.5 caras?**
+
+---
+
+# Interpretación en la práctica
+
+Podemos decir que `\(\mu = 1.5\)` al tirar tres monedas es lo mismo que esperar obtener 15 caras al repetir este proceso 10 veces. De hecho:
+
+--
+
+.pull-left[
+
+```r
+resultado_final &lt;- vector()
+for (i in 1:10000){
+  resultado_por_proceso &lt;- vector()
+  for (j in 1:10){
+    resultado_por_proceso[j] &lt;- sum(sample(moneda, 3, replace = TRUE) == "cara")
+  }
+  resultado_final[i] &lt;- sum(resultado_por_proceso)
+}
+```
+]
+
+.pull-right[
+&lt;img src="Nivelacion_files/figure-html/graftresmonedasdiez-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+Si simulamos 10.000 escenarios donde tiramos 10 veces 3 monedas y contamos el número de *caras*, obtenemos que el valor más probable (esperado) es 15.
+
+---
+
+# Medidas de dispersión
+
+- Varianza
+
+- Desviación estándar
+
+- Coeficiente de variación
+
+- Rango intercuartil
+
+--
+
+&lt;img src="../Imagenes/BoxPlot.PNG" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Varianza
+
+Probablemente han visto algo como esto:
+
+`$$Var(X)=\frac{1}{n}\sum_i^n(x_i-\mu)^2$$`
+
+--
+
+Otra forma de verlo (una generalización):
+
+`$$\Large Var(X)=E[(X-\mu)^2]$$`
+--
+
+`$$\Large Var(X)=E[(X-E(X))^2]$$`
+
+--
+
+`$$\Large Var(X)=\sigma^2=E(X^2)-[E(X)]^2$$`
+---
+
+# Varianza
+
+| x             | 0     | 1     | 2     | 3     |
+|---            |---    |---    |---    |---    |
+| `\(\small P(X=x)=f(x)\)` | 0,125 | 0,375 | 0,375 | 0,125 |
+
+`\(\large Var(X)=E(X^2)-E[(X)]^2=E(X^2)-1.5^2\)`
+
+--
+
+`\(\large E(X^2)=\sum{[x^2*f(x)]}\)`
+
+--
+
+`\(\large E(X^2)=(0^2 \times 0.125)+(1^2 \times 0.375)+(2^2 \times 0.375)+(3^2 \times 0.125)\)`
+
+`\(\large E(X^2)=3\)`
+
+--
+
+`\(\large Var(X)=3-1.5^2=3-2.25=0.75=\sigma^2\)`
+
+--
+
+
+```r
+var(resultados)
+```
+
+```
+## [1] 0.7559776
+```
+
+--
+
+Desviación estándar: `\(\sigma=\sqrt{0.75}=0.8660254\)`
+
+---
+
+# Algo interesante...
+
+La variable aleatoria, `\(X\)`, correspondiente al resultado de tirar tres monedas **sigue una distribución binomial** que depende de, `\(n\)`, número de intentos de un proceso aleatorio y, `\(p\)`, la probabilidad de éxito. 
+
+--
+
+`\(n\)` y `\(p\)` los denominamos como **parámetros de la distribución**.
+
+--
+
+`$$X \sim  Binomial(n, p)$$`
+.pull-left[
+
+`\(S=\{0,1,...,n\}\)`
+
+&lt;br&gt;
+
+`\(P(X=x)=f(x)=\binom{n}{k}p^x(1-p)^{n-x}\)`
+
+&lt;br&gt;
+
+`\(E(X)=np\)`
+
+`\(Var(X)=np(1-p)\)`
+
+]
+
+--
+
+.pull-right[
+
+
+```r
+dbinom(x = 3, size = 3, prob = 0.5) #pmf
+```
+
+```
+## [1] 0.125
+```
+
+```r
+pbinom(q = 3, size = 3, prob = 0.5) #cdf
+```
+
+```
+## [1] 1
+```
+
+`\(E(X)=3 \times 0.5=1.5\)`
+
+`\(Var(X)=3 \times 0.5 \times (1-0.5)=0.75\)`
+
+]
+
+---
+
+# Algo interesante...
+
+La variable aleatoria, `\(X\)`, correspondiente al resultado de tirar tres monedas **sigue una distribución binomial** que depende de, `\(n\)`, número de intentos de un proceso aleatorio y, `\(p\)`, la probabilidad de éxito. 
+
+`\(n\)` y `\(p\)` los denominamos como **parámetros de la distribución**.
+
+&lt;img src="Nivelacion_files/figure-html/dist_binom-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Suma de tirar dos dados
+
+&lt;img src="../Imagenes/dados.PNG" width="400px" style="display: block; margin: auto;" /&gt;
+
+`EjercicioDatos.R`
+
+---
+
+# Suma de tirar dos dados
+
+&lt;img src="../Imagenes/dados.PNG" width="400px" style="display: block; margin: auto;" /&gt;
+
+`\(S=\{2,3,4,5,6,7,8,9,10,11,12\}\)`
+
+--
+
+¿Cuál es la *pmf* y *cdf*?
+
+|     |                      | 2| 3| 4| 5| 6| 7| 8| 9|10|11|12|
+|--   |---                   |--|--|--|--|--|--|--|--|--|--|--|
+| pmf | `\(\small P(X=x)=f(x)\)` |  |  |  |  |  |  |  |  |  |  |  |
+| cdf | `\(\small P(X&lt;=x)=F(x)\)`|  |  |  |  |  |  |  |  |  |  |  |
+
+Calcule `\(E(X)\)`, `\(Var(X)\)`, y `\(\sigma\)`
+
+---
+
+# Respuestas
+
+¿Cuál es la *pmf* y *cdf*?
+
+|     |                      | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   |10   |11   |12   |
+|--   |---                   |--   |--   |--   |--   |--   |--   |--   |--   |--   |--   |--   |
+| pmf | `\(\small P(X=x)=f(x)\)` |0.028|0.056|0.083|0.111|0.139|0.167|0.139|0.111|0.083|0.056|0.028|
+| cdf | `\(\small P(X&lt;=x)=F(x)\)`|0.028|0.083|0.167|0.278|0.417|0.583|0.722|0.833|0.917|0.972|1    |
+
+
+
+--
+
+
+```r
+pmf &lt;- table(combinaciones$suma_dados)/nrow(combinaciones)
+pmf
+```
+
+```
+## 
+##          2          3          4          5          6          7          8 
+## 0.02777778 0.05555556 0.08333333 0.11111111 0.13888889 0.16666667 0.13888889 
+##          9         10         11         12 
+## 0.11111111 0.08333333 0.05555556 0.02777778
+```
+
+---
+
+# Respuestas
+
+¿Cuál es la *pmf* y *cdf*?
+
+|     |                      | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   |10   |11   |12   |
+|--   |---                   |--   |--   |--   |--   |--   |--   |--   |--   |--   |--   |--   |
+| pmf | `\(\small P(X=x)=f(x)\)` |0.028|0.056|0.083|0.111|0.139|0.167|0.139|0.111|0.083|0.056|0.028|
+| cdf | `\(\small P(X&lt;=x)=F(x)\)`|0.028|0.083|0.167|0.278|0.417|0.583|0.722|0.833|0.917|0.972|1    |
+
+
+
+
+
+```r
+cdf &lt;- cumsum(pmf)
+cdf
+```
+
+```
+##          2          3          4          5          6          7          8 
+## 0.02777778 0.08333333 0.16666667 0.27777778 0.41666667 0.58333333 0.72222222 
+##          9         10         11         12 
+## 0.83333333 0.91666667 0.97222222 1.00000000
+```
+
+---
+
+# Respuestas
+
+Calcule `\(E(X)\)`, `\(Var(X)\)`, y `\(\sigma\)`
+
+.pull-left[
+
+### Desde las formulas
+
+
+```r
+espacio_muestral &lt;- unique(combinaciones$suma_dados)
+```
+
+
+```r
+(e_x &lt;- sum(espacio_muestral*pmf))
+## [1] 7
+(varianza_dados &lt;- (sum(espacio_muestral^2*pmf))-(sum(e_x^2)))
+## [1] 5.833333
+sqrt(varianza_dados)
+## [1] 2.415229
+```
+
+]
+
+--
+
+.pull-right[
+
+### Simular
+
+
+```r
+guardar_suma &lt;- replicate(
+  expr = sum(sample(1:6, 2,replace = TRUE)),
+  n = 10000)
+
+mean(guardar_suma)
+## [1] 6.9982
+var(guardar_suma)
+## [1] 5.902587
+sd(guardar_suma)
+## [1] 2.429524
+```
+]
+
+---
+
+# Otras distribuciones discretas
+
+.pull-left[
+
+Distribución Geométrica: `\(X\)` es el número de *fracasos* antes de observar el primer *éxito* en  procesos independientes.
+ - `\(X \sim Geom(p)\)`
+
+&lt;br&gt;
+
+ - `\(f(x)=(1-p)^xp\)`
+ - `\(E(X)=\frac{1-p}{p}\)`
+ - `\(Var(X)=\frac{1-p}{p^2}\)`
+ 
+&lt;br&gt;
+
+ - `dgeom(x, prob)` (pmf) y `pgeom(q, prob)` (cdf)
+  
+]
+
+.pull-right[
+
+Distribución Poisson: `\(X\)` es el número de ocurrencias de un evento dentro de un espacio o tiempo **finito**.
+ - `\(X \sim Poisson(\lambda)\)`
+ 
+&lt;br&gt;
+
+ - `\(f(x)=\frac{\lambda^x}{x!}e^{-\lambda}\)`
+ - `\(E(X)=Var(X)=\lambda\)`
+ 
+&lt;br&gt;
+
+ - `dpois(x, lambda)` (pmf) y `ppois(lambda)` (cdf)
+
+]
+
+---
+
+# Otras distribuciones discretas
+
+.pull-left[
+
+Distribución Geométrica: `\(X\)` es el número de *fracasos* antes de observar el primer *éxito* en  procesos independientes.
+ - `\(X \sim Geom(p)\)`
+
+&lt;img src="Nivelacion_files/figure-html/dist_geom-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+  
+]
+
+.pull-right[
+
+Distribución Poisson: `\(X\)` es el número de ocurrencias de un evento dentro de un espacio o tiempo **finito**.
+ - `\(X \sim Poisson(\lambda)\)`
+ 
+&lt;img src="Nivelacion_files/figure-html/dist_poisson-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Variables aleatorias continuas
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Variables aleatorias continuas
+
+A diferencia de las variables discretas (que pueden tomar un número finito de valores), las variables continuas pueden tomar un **"número infinito de valores posibles"**.
+
+--
+
+El concepto de número infinito de valores posibles es una **abstracción matemática** ya que en la práctica todas las mediciones que hagamos consisten en un número finito (ingreso de una persona, longitud de un objeto, tiempo transcurrido).
+
+La utilidad de considerar variables como continuas es que hace el **"manejo matemático" más fácil**.
+
+--
+
+En este caso no hablamos de distribución de función de masa de probabilidad (*pmf*) sino que de **función de densidad de probabilidad** (*pdf* en inglés).
+
+--
+
+La función de distribución acumulada (*cdf*) para una variable continua se define de forma similar al caso discreto ( `\(P(X&lt;=x)\)`).
+
+---
+
+# Función de densidad de probabilidad
+
+La función de densidad de probabilidad muestra la posibilidad relativa de la variable aleatoria continua en el espacio muestral. Esta debe cumplir que:
+
+--
+
+Para todo valor posible, la probabilidad tiene que ser mayor o igual a cero.
+`$$\Large  f(x) \geq 0\ \forall\ x \in S_X$$`
+
+--
+
+La suma de todos los casos posibles (área bajo la curva) debe ser igual a uno.
+`$$\Large  \int_{x \in S_X}f(x)dx=1$$`
+
+--
+
+Todo evento corresponde a una porción del área bajo la curva.
+`$$\Large  P(X \in B)=\int_{X \in B}f(x)$$`
+
+---
+
+# Ejemplo pdf
+
+
+
+`$$f(x)=12x^2(1-x)\ si \ 0 \leq x \leq 1$$`
+&lt;img src="Nivelacion_files/figure-html/vacont1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿ `\(\large f(x)\)` mayor o igual a 0?
+
+.pull-left[
+
+`\(f(x)=12x^2(1-x)\)`
+
+&lt;br&gt;
+
+`\(x^2 \geq 0\)`
+
+`\((1-x) \geq 0\)`
+
+&lt;br&gt;
+
+`\(f(x) \geq 0\ \forall\ x \in S_X\)`  **OK**
+
+]
+
+.pull-right[
+
+&lt;img src="Nivelacion_files/figure-html/vacont2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$f(x)=12x^2(1-x)\ si \ 0 \leq x \leq 1$$`
+
+]
+
+---
+
+# Área bajo la curva = 1
+
+.pull-left[
+
+`\(\int_{0}^{1}12 (x^2)(1-x)dx\)`
+
+&lt;br&gt;
+
+`\(12\int_{0}^{1} (x^2-x^3)dx\)`
+
+&lt;br&gt;
+
+`\(12\Big[\frac{x^3}{3}-\frac{x^4}{4}\bigg|_{0}^{1}\Big]\)`
+
+`\(12(\frac{1^3}{3}-\frac{1^4}{4})-12(\frac{0^3}{3}-\frac{0^4}{4})=\frac{12}{3}-\frac{12}{4}=4-3=1\)`
+
+
+```r
+f_ejemplo &lt;- function(x){12*(x^2)*(1-x)}
+integrate(f_ejemplo, 0, 1)
+```
+
+```
+## 1 with absolute error &lt; 1.1e-14
+```
+
+`\(\int_{x \in S_X}f(x)dx=1\)`  **OK**
+
+]
+
+.pull-right[
+
+&lt;img src="Nivelacion_files/figure-html/vacont4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$f(x)=12x^2(1-x)\ si \ 0 \leq x \leq 1$$`
+
+]
+
+---
+
+# Probabilidad = porción del área
+
+.pull-left[
+
+`\(P(0.25 &lt; X &lt; 0.5)=\int_{0.25}^{0.5}12(x^2)(1-x)dx\)`
+
+&lt;br&gt;
+
+`\(12\int_{0.25}^{0.5}(x^2-x^3)dx\)`
+
+&lt;br&gt;
+
+`\(12\Big[\frac{x^3}{3}-\frac{x^4}{4}\bigg|_{0.25}^{0.5}\Big]=0.2617188\)`
+
+
+```r
+integrate(f_ejemplo, 0.25, 0.5)
+```
+
+```
+## 0.2617188 with absolute error &lt; 2.9e-15
+```
+
+&lt;br&gt;
+
+`\(P(X \in B)=\int_{X \in B}f(x)\)`  **OK**
+]
+
+.pull-right[
+
+&lt;img src="Nivelacion_files/figure-html/unnamed-chunk-5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$f(x)=12x^2(1-x)\ si \ 0 \leq x \leq 1$$`
+
+]
+
+---
+
+# Probabilidad de un `\(x\)` = 0
+
+.pull-left[
+
+`\(P(X = x_i)=0\)`
+
+&lt;br&gt;
+
+`\(P(X=0.4)=\int_{0.4}^{0.4}12(x^2)(1-x)dx\)`
+
+&lt;br&gt;
+
+`\(12\int_{0.4}^{0.4}(x^2-x^3)dx\)`
+
+&lt;br&gt;
+
+`\(12\Big[\frac{x^3}{3}-\frac{x^4}{4}\bigg|_{0.4}^{0.4}\Big]=0\)`
+
+
+```r
+integrate(f_ejemplo, 0.4, 0.4)
+```
+
+```
+## 0 with absolute error &lt; 0
+```
+
+]
+
+.pull-right[
+
+&lt;img src="Nivelacion_files/figure-html/vacont7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$f(x)=12x^2(1-x)\ si \ 0 \leq x \leq 1$$`
+
+]
+
+---
+
+# CDF
+
+
+
+.pull-left[
+
+`\(P(X \leq x)=F(x)=\int_{l}^{x}f(x)dx\)`
+
+
+&lt;br&gt;
+
+`\(F(0.75)=\int_{0}^{0.75}12(x^2)(1-x)dx\)`
+
+&lt;br&gt;
+
+`\(12\int_{0}^{0.75}(x^2-x^3)dx\)`
+
+`\(12\Big[\frac{x^3}{3}-\frac{x^4}{4}\bigg|_{0}^{0.75}\Big]=0.7382812\)`
+
+&lt;br&gt;
+
+`\(F'(x)=f(x)\)`
+
+]
+
+.pull-right[
+
+&lt;img src="Nivelacion_files/figure-html/vacont8-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$f(x)=12x^2(1-x)\ si \ 0 \leq x \leq 1$$`
+
+
+&lt;img src="Nivelacion_files/figure-html/vacont9-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+`$$F(x)=4x^3-3x^4\ si \ 0 \leq x \leq 1$$`
+
+]
+
+---
+
+# Valor esperado
+
+.pull-left[
+`\(E(X)=\int_{x \in S_X}(x*f(x))dx\)`
+
+&lt;br&gt;
+
+`\(\int_{0}^{1}(x)(12)(x^2)(1-x)dx\)`
+
+&lt;br&gt;
+
+`\(12\int_{0}^{1}(x^4-x^5)dx\)`
+
+&lt;br&gt;
+
+`\(12\Big[\frac{x^4}{4}-\frac{x^5}{5}\bigg|_{0}^{1}\Big]=0.6\)`
+
+]
+
+.pull-right[
+
+```r
+f_ejemplo_e &lt;- function(x){x*(12*(x^2)*(1-x))}
+integrate(f_ejemplo_e, 0, 1)
+```
+
+```
+## 0.6 with absolute error &lt; 6.7e-15
+```
+]
+
+---
+
+# Varianza
+
+.pull-left[
+`\(Var(X)=E(X^2)-E(X)^2\)`
+
+&lt;br&gt;
+
+`\(E(X^2)=\int_{0}^{1}x^2(12)(x^2)(1-x)dx\)`
+
+&lt;br&gt;
+
+`\(E(X^2)=12\int_{0}^{1}(x^4-x^5)dx\)`
+
+&lt;br&gt;
+
+`\(12\Big[\frac{x^5}{5}-\frac{x^6}{6}\bigg|_{0}^{1}\Big]=0.4\)`
+
+&lt;br&gt;
+
+`\(Var(X)=0.4-0.6^2=0.04\)`
+]
+
+.pull-right[
+
+```r
+f_ejemplo_var &lt;- function(x){x^2*(12*(x^2)*(1-x))}
+integrate(f_ejemplo_var, 0, 1)[[1]] - (integrate(f_ejemplo_e, 0, 1))[[1]]^2
+```
+
+```
+## [1] 0.04
+```
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio
+
+`EjercicioProbabilidadesCont.R`
+
+---
+
+# Respuestas
+
+&lt;img src="Nivelacion_files/figure-html/resp_distnormal-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: inverse, center, middle
+name: reg
+
+# Distribución normal (o gaussiana)
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Distribución normal
+
+Esta es una distribución continua con características muy particulares (y de mucha utilidad).
+
+.pull-left[
+
+`$$X \sim \mathcal{N}(\mu, \sigma^2)$$`
+
+&lt;br&gt;
+
+`$$f(x)=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$$`
+
+&lt;br&gt;
+
+`$$E(X)=\mu$$`
+
+`$$Var(X)=\sigma^2$$`
+
+]
+
+.pull-right[
+
+.center[Promedio = Mediana = Moda]
+
+`$$P(X &lt; \mu)=0.5$$`
+
+&lt;img src="Nivelacion_files/figure-html/normal-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Parámetros de la distribución
+
+`$$X \sim \mathcal{N}(\mu, \sigma^2)$$`
+
+- `\(\mu\)`: centro de la distribución
+- `\(\sigma^2\)`: dispersión de la distribución
+
+&lt;img src="Nivelacion_files/figure-html/normal2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Ejemplo práctico
+
+Digamos que las notas de una prueba con un máximo de 100 puntos se distribuye de forma normal con media 80 y desviación estándar de 5.
+
+--
+
+`$$X \sim \mathcal{N}(80, 5^2)$$`
+
+&lt;img src="Nivelacion_files/figure-html/ejnorm-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Calcular probabilidades
+
+**¿Cuál es la probabilidad de que un estudiante tenga menos de 75 puntos?**
+
+--
+
+.pull-left[
+
+```r
+pnorm(75, mean = 80, sd = 5)
+```
+
+```
+## [1] 0.1586553
+```
+
+]
+
+.pull-right[
+&lt;img src="Nivelacion_files/figure-html/ejnorm2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+Si un estudiante saca 75 puntos, el percentil al que pertenece es el 15.86%
+
+---
+
+# Calcular probabilidades
+
+**¿Cuál es la probabilidad de que un estudiante tenga más de 85 puntos?**
+
+.pull-left[
+
+
+]
+
+.pull-right[
+&lt;img src="Nivelacion_files/figure-html/ejnorm3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Calcular probabilidades
+
+¿Cuál es la probabilidad de que un estudiante tenga más de 85 puntos?
+
+.pull-left[
+
+
+```r
+1 - pnorm(85, mean = 80, sd = 5)
+```
+
+```
+## [1] 0.1586553
+```
+
+
+```r
+pnorm(85, mean = 80, sd = 5, lower.tail = FALSE)
+```
+
+```
+## [1] 0.1586553
+```
+
+]
+
+.pull-right[
+&lt;img src="Nivelacion_files/figure-html/ejnorm6-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# N° de `\(\sigma\)` de la media
+
+**Un/a estudiantetuvo 85 puntos en la prueba. ¿A cuántas desviaciones estándar está desde la media?**
+
+
+```r
+(85-80)/5
+```
+
+```
+## [1] 1
+```
+
+--
+
+**Un/a estudiante tuvo 77.5 puntos en la prueba. ¿A cuántas desviaciones está desde la media?**
+
+
+```r
+(77.5-80)/5
+```
+
+```
+## [1] -0.5
+```
+
+---
+
+# Z-score
+
+`$$Z=\frac{X-\mu}{\sigma}$$`
+
+--
+
+Podemos calcular *Z-scores* sin importar la distribución de los datos (no tienen que distribuir normalmente). Este solo muestra a cuantas desviaciones estándar se encuentra un valor de la media.
+
+--
+
+Una propiedad interesante de las distribuciones normales es que cualquier combinación lineal de variables aleatorias normales será también normal. Sabiendo esto, resulta que el *Z-Score* nos permite convertir cualquier distribución normal en una **distribución normal estándar** y así aprovechar las propiedades de esta.
+
+---
+
+# Distribución normal estándar
+
+`$$X \sim \mathcal{N}(0, 1)$$`
+
+.pull-left[
+
+`$$f(x)=\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}=\phi(x)$$`
+
+
+&lt;img src="Nivelacion_files/figure-html/normal3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+dnorm(0, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.3989423
+```
+]
+
+.pull-right[
+
+`$$F(x)=P(X&lt;x)=\int_{-\infty}^X\phi(x)dx=\Phi(x)$$`
+
+&lt;img src="Nivelacion_files/figure-html/normal4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+pnorm(0, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.5
+```
+
+]
+
+---
+
+# Quizás recuerdan esto
+
+.pull-left[
+
+&lt;img src="../Imagenes/Z-table.PNG" width="120%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+&lt;img src="Nivelacion_files/figure-html/norm0_1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+pnorm(q = 2, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.9772499
+```
+
+]
+
+---
+
+# Distribución normal estándar
+
+Un **68.27%** de las observaciones están a **una** desviación estándar de la media.
+
+
+```r
+pnorm(1, mean = 0, sd = 1) - pnorm(-1, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.6826895
+```
+&lt;img src="Nivelacion_files/figure-html/normest-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Distribución normal estándar
+
+Un **95.45%** de las observaciones están a **dos** desviaciones estándar de la media.
+
+
+```r
+pnorm(2, mean = 0, sd = 1) - pnorm(-2, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.9544997
+```
+
+&lt;img src="Nivelacion_files/figure-html/normest2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Distribución normal estándar
+
+Un **99.73%** de las observaciones están a **tres** desviaciones estándar de la media.
+
+
+```r
+pnorm(3, mean = 0, sd = 1) - pnorm(-3, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.9973002
+```
+
+&lt;img src="Nivelacion_files/figure-html/normest3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio 
+
+`EjercicioDistNormal.R`
+
+---
+
+# Respuestas
+
+
+```r
+# ¿Cuál es la probabilidad de que alguien mida menos de 1.6 metros?
+pnorm(160, mean = 177, sd = 10)
+## [1] 0.04456546
+
+# ¿Cuál es la probabilidad de que alguien mida más de 1.8 metros?
+1 - pnorm(180, 177, 10)
+## [1] 0.3820886
+pnorm(180, 177, 10, lower.tail = FALSE)
+## [1] 0.3820886
+
+# ¿Cuál es la probabilidad de que alguien mida entre 1.6 y 1.8 metros?
+pnorm(180, 177, 10) - pnorm(160, 177, 10)
+## [1] 0.573346
+```
+
+
+---
+
+# Otras distribuciones continuas
+
+.pull-left[
+
+Distribución Uniforme Continua
+ - `\(X \sim U(a,b)\)`
+
+&lt;br&gt;
+
+ - `\(f(x)=\frac{1}{b-a}\ si\ a \leq x \leq b\)`
+ 
+&lt;br&gt;
+
+ - `\(E(X)=\frac{b+a}{2}\)`
+ 
+ - `\(Var(X)=\frac{(b-a)^2}{12}\)`
+ 
+&lt;br&gt;
+
+ - `dunif(x, min, max)` (pmf) y `punif(q, min, max)` (cdf)
+  
+]
+
+.pull-right[
+
+Distribución Exponencial
+ - `\(X \sim Exp(\lambda)\)`
+ 
+&lt;br&gt;
+
+ - `\(f(x)=\lambda e^{-\lambda x}\ si\ x \in [0, \inf]\ y\ \lambda &gt; 0\)`
+ 
+&lt;br&gt;
+
+ - `\(E(X)=\frac{1}{\lambda}\)`
+ - `\(Var(X)=\frac{1}{\lambda^2}\)`
+ 
+&lt;br&gt;
+
+ - `dexp(x, rate)` (pmf) y `pexp(x, rate)` (cdf)
+
+]
+
+---
+
+# Otras distribuciones continuas
+
+.pull-left[
+
+Distribución Uniforme Continua
+ - `\(X \sim U(a,b)\)`
+
+&lt;img src="Nivelacion_files/figure-html/dist_unif-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+  
+]
+
+.pull-right[
+
+Distribución Exponencial
+ - `\(X \sim Exp(\lambda)\)`
+ 
+&lt;img src="Nivelacion_files/figure-html/dist_exp-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Teorema del Límite Central
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Teorema del límite central
+
+*Si ciertas condiciones se cumplen, la distribución muestral se distribuirá de forma normal con media igual al parámetro poblacional. La desviación estándar será inversamente proporcional a la raiz cuadrada del tamaño muestral*
+
+--
+
+### Población vs Muestra
+
+- **Población**: grupo bien definido de sujetos (por ejemplo, población de un país)
+- **Muestra**: Subconjunto de individuos provenientes de una población que se obtienen a través de algún procedimiento de muestreo (ej. muestreo aleatorio simple)
+
+--
+
+Buscamos aprender algo de la **población** a través de una **muestra** (o varias). A esto lo denominamos **inferencia** (hablaremos más de esto en el módulo 2)
+
+---
+
+# Censo
+
+Asumamos que estos datos ( `\(N=10.000\)`) corresponden al total del país.
+
+
+```r
+censo &lt;- read.csv("../datos/muestra_censo_2017.csv")
+str(censo)
+```
+
+```
+## 'data.frame':	10000 obs. of  4 variables:
+##  $ ï..x        : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ edad        : int  35 37 59 29 76 65 25 16 49 35 ...
+##  $ sexo        : chr  "M" "H" "H" "M" ...
+##  $ p_originario: chr  "no" "no" "no" "no" ...
+```
+
+Analicemos la variable `edad`.
+
+---
+
+# Distribución de edad
+
+&lt;img src="Nivelacion_files/figure-html/histedad-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+.center[**Claramente no sigue una distribución normal**]
+
+---
+
+# Sabemos `\(\mu\)` y `\(\sigma\)`
+
+Debido a que tenemos la información de todas las personas sabemos cual es el promedio y la desviación estándar de la población.
+
+
+```r
+mean(censo$edad)
+```
+
+```
+## [1] 36.0179
+```
+
+```r
+sd(censo$edad)
+```
+
+```
+## [1] 22.14836
+```
+
+--
+
+Pero practicamente nunca sabremos estos parámetros poblacionales, y lo que tenemos que hacer es sacar conclusiones desde **muestras** (hacer estimaciones).
+
+--
+
+Si sacamos una muestra desde una población y calculamos un parámetro, por ejemplo la media, llamamos a esto una **estimación puntual**.
+
+---
+
+# Muestras
+
+Una muestra de 100 observaciones
+
+
+```r
+mean(sample(censo$edad, 100))
+```
+
+```
+## [1] 40
+```
+
+--
+
+Una segunda muestra de 100 observaciones
+
+
+```r
+mean(sample(censo$edad, 100))
+```
+
+```
+## [1] 37.89
+```
+
+--
+
+Una tercera muestra de 100 observaciones
+
+
+```r
+mean(sample(censo$edad, 100))
+```
+
+```
+## [1] 40.05
+```
+
+--
+
+.center[ **¿Qué pasa si repetimos esto muchas veces?** ]
+
+---
+
+# 10.000 muestras con `\(n\)`=100
+
+Sacamos 10.000 muestras de tamaño 100 y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="Nivelacion_files/figure-html/distpromediocenso-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+**¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional!**
+
+---
+
+# 10.000 muestras con `\(n\)`=500
+
+Sacamos 10.000 muestras de tamaño 500 y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="Nivelacion_files/figure-html/distpromediocenso2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# Aplica también a proporciones
+
+Proporción de personas que se identifican como parte de algún pueblo originario:
+
+
+```r
+round(table(censo$p_originario)/10000, 3)*100
+```
+
+```
+## 
+##   no   si 
+## 87.5 12.5
+```
+
+&lt;img src="Nivelacion_files/figure-html/unnamed-chunk-6-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Teorema del límite central
+
+*Si ciertas condiciones se cumplen, la distribución muestral se distribuirá de forma normal con media igual al parámetro poblacional. La desviación estándar será inversamente proporcional a la raiz cuadrada del tamaño muestral*
+
+--
+
+&lt;br&gt;
+
+`$$\bar{x} \sim aproximadamente\ N(\mu, \frac{\sigma^2}{n})$$`
+
+`$$p \sim aproximadamente\ N(\pi, \frac{\pi (1-\pi)}{n})$$`
+
+--
+
+&lt;br&gt;
+
+**Muy relevante a la hora de hacer inferencia a partir de muestras**
+
+---
+class: inverse, center, middle
+name: reg
+
+# Distribuciones conjuntas
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Distribuciones conjuntas
+
+Si `\(X\)` e `\(Y\)` son dos variables aleatorias, la **distribución conjunta** de `\(X\)` e `\(Y\)` permite calcular las probabilidades de eventos que involucren a ambas variables.
+
+--
+
+Por ejemplo, la probabilidad de que alguien mida entre 1.7 y 1.8 metros y que pese entre 60 y 80 kilogramos.
+
+--
+
+Desde una distribución conjunta podemos obtener **distribuciones marginales** (distribución de cada variable) y **distribuciones condicionales**.
+
+--
+
+### Esperanzas condicionales
+
+Si `\(X\)` e `\(Y\)` no son independientes, entonces saber algo de `\(X\)` me puede ayudar a predecir/explicar `\(Y\)`.
+
+--
+
+`\(E(Y|X)\)` es una **función** que me dice para cada valor de `\(X\)`, la esperanza de `\(Y\)` de aquellos individuos con ese valor de `\(X\)`.
+
+---
+
+# Relaciones entre variables
+
+### Covarianza
+
+`\(Cov(X,Y) = \frac{\sum_{1}^{n}(X-\bar{X})(Y-\bar{Y})}{n}\)`
+
+`\(Cov(X,Y) = E(XY)-E(X)E(Y)\)`
+
+### Correlación
+
+Mismo signo que `\(Cov(X,Y)\)` pero adimensional (entre -1 y 1)
+
+`\(\rho_{X,Y}=\frac{\sigma_{X,Y}}{\sigma_X \sigma_Y}=\frac{Cov(X,Y)}{\sqrt{Var(X)Var(Y)}}=\frac{Cov(X,Y)}{\sigma_X \sigma_Y}\)`
+
+---
+
+# Relaciones entre variables
+
+.pull-left[
+
+&lt;img src="Nivelacion_files/figure-html/unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+
+```r
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+
+]
+
+---
+
+# Relaciones entre variables
+
+.pull-left[
+
+**Covarianza caballos de fuerza (`hp`)/millas por galón (`mpg`)**
+
+
+```r
+cov(mtcars$hp, mtcars$mpg)
+```
+
+```
+## [1] -320.7321
+```
+
+**Correlación caballos de fuerza (`hp`)/millas por galón (`mpg`)**
+
+
+```r
+cor(mtcars$hp, mtcars$mpg)
+```
+
+```
+## [1] -0.7761684
+```
+
+]
+
+.pull-right[
+
+
+```r
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Distribuciones derivadas de la Normal
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Distribución `\(\chi^2\)`
+
+La distribución `\(\chi^2\)` corresponde a la suma de `\(M\)` distribuciones normales estándar al cuadrado.
+
+`$$Z^2_1+...+Z^2_M \sim \chi^2_M\ con\ Z_m \sim \mathcal{N}(0,1)$$`
+
+--
+
+&lt;br&gt;
+
+Para una variable `\(X\)` que siga una distribución `\(\chi^2_M\)`:
+
+- `\(E(X)=M\)`
+- `\(Moda=M\)`
+- `\(Var(X)=2\times M\)`
+
+--
+
+&lt;br&gt;
+
+`dchisq(x, df)` (pmf) y `pchisq(q, df)` (cdf)
+
+---
+
+# Distribución `\(\chi^2\)`
+
+&lt;img src="Nivelacion_files/figure-html/chi_2-1.png" width="90%" height="120%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Distribución `\(t\)`
+
+Corresponde al ratio entre una normal y la raíz cuadrada de una chi-cuadrado.
+
+Si `\(Z\)` es una distribución normal estándar, `\(W\)` es una variable aleatoria chi-cuadrado, `\(\chi^2_M\)`, y ambas son independientes. Entonces:
+
+`$$\frac{Z}{\sqrt{Q/M}}=X \sim t_M$$`
+
+--
+
+`\(X\)` es una variable aleatoria que sigue una distribución *t-student* (o solo t). 
+
+`\(t_M\)` es simétrica y con forma de campana similar a una distribución normal. De hecho, tiende a `\(N(0,1)\)` cuando el número de observaciones es grande (se suele decir que mayor a 30).
+
+Para una variable `\(X\)` que siga una distribución `\(t_M\)`:
+
+- `\(E(X)=0\)`
+- `\(Var(X)=\frac{M}{M-2}\)`
+
+`dt(x, df)` (pmf) y `pt(q, df)` (cdf)
+
+---
+
+# Distribución `\(t\)`
+
+&lt;img src="Nivelacion_files/figure-html/dist_t-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Distribución `\(F\)`
+
+Ratio de dos distribuciones chi-cuadrado.
+
+Si `\(W\)` es una variable distribuida `\(\chi^2_M\)` y `\(V\)` es una variable distribuida `\(\chi^2_N\)` (con ambas variables independientes entre sí), entonces:
+
+`$$\frac{W/M}{V/N}=X \sim F_{M,N}$$`
+`\(X\)` es una variable aleatoria que sigue una distribución `\(F_{M,N}\)`
+
+`df(x, df1, df2)` (pmf) y `pf(q, df1, df2)` (cdf)
+
+---
+class: inverse, center, middle
+name: reg
+
+# Lo que se viene
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Módulo 2
+
+- 3 clases intensivo de `R`:
+  * Visualización
+  * Manipulación
+  * Transformación
+  
+- 3 clases de inferencia estadística (y `R`):
+  * Pruebas de hipótesis
+  * Regresiones lineales
+  * Modelo logit/probit
+  * Inferencia vs Predicción
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

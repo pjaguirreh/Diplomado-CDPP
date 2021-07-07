@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Ciencia de Datos para Políticas Públicas</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pablo Aguirre Hörmann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":false,"autoSearch":true}) })</script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Ciencia de Datos para Políticas Públicas
+## Módulo 2 - Clase 3: Transformación de datos/R Markdown
+### Pablo Aguirre Hörmann
+### 29/06/2021
+
+---
+
+
+&lt;style type="text/css"&gt;
+#.remark-slide-content {
+#  font-size: 28px;
+#  padding: 20px 80px 20px 80px;
+#}
+#.remark-code, .remark-inline-code {
+#  background: #f0f0f0;
+#}
+.small .remark-code {
+  font-size: 14px;
+}
+
+.smaller .remark-code {
+  font-size: 12px;
+}
+
+.tiny .remark-code {
+  font-size: 11px;
+}
+
+.pull-left2 {
+  float: left;
+  width: 40%;
+}
+
+.pull-right2 {
+  float: right;
+  width: 54%;
+}
+&lt;/style&gt;
+
+
+
+
+# ¿Qué veremos hoy?
+
+- Visualización de datos
+- Manejo de datos
+- **&lt;span style="color:red"&gt;Transformación de datos/`R Markdown`&lt;/span&gt;**
+- Inferencia Estadística/Econometría
+
+---
+
+# Pero antes...
+
+- `EjercicioManejoDatosAlcaldes.R`
+
+---
+
+# El contexto... nuevamente
+
+&lt;img src="Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Tidy data - Datos ordenados
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Tidy data - Datos ordenados
+
+- Cada columna es una variable
+- Cada fila es una observación
+- Cada celda corresponde a un valor
+
+&lt;img src="Imagenes/TidyData.png" width="750px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Tidyr - Cambio en funciones
+
+- **&lt;span style="color:red"&gt;Antes&lt;/span&gt;**: `spread`
+- **&lt;span style="color:green"&gt;Ahora&lt;/span&gt;**: `pivot_wider`
+
+&lt;img src="Imagenes/pivot_wider.PNG" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# pivot_wider()
+
+.pull-left[
+
+```r
+table2
+```
+
+.small[
+
+```
+## # A tibble: 12 x 4
+##    country      year type            count
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;           &lt;int&gt;
+*##  1 Afghanistan  1999 cases             745
+*##  2 Afghanistan  1999 population   19987071
+##  3 Afghanistan  2000 cases            2666
+##  4 Afghanistan  2000 population   20595360
+##  5 Brazil       1999 cases           37737
+##  6 Brazil       1999 population  172006362
+##  7 Brazil       2000 cases           80488
+##  8 Brazil       2000 population  174504898
+##  9 China        1999 cases          212258
+## 10 China        1999 population 1272915272
+## 11 China        2000 cases          213766
+## 12 China        2000 population 1280428583
+```
+]
+]
+
+--
+
+.pull-right[
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count)
+```
+
+.small[
+
+```
+## # A tibble: 6 x 4
+##   country      year  cases population
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+*## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583
+```
+]
+]
+
+---
+
+# Tidyr - Cambio en funciones
+
+- **&lt;span style="color:red"&gt;Antes&lt;/span&gt;**: `gather`
+- **&lt;span style="color:green"&gt;Ahora&lt;/span&gt;**: `pivot_longer`
+
+&lt;img src="Imagenes/pivot_longer.PNG" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# pivot_longer()
+
+.pull-left[
+
+```r
+table4a
+```
+
+```
+## # A tibble: 3 x 3
+##   country     `1999` `2000`
+## * &lt;chr&gt;        &lt;int&gt;  &lt;int&gt;
+*## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766
+```
+]
+
+--
+
+.pull-right[
+
+```r
+table4a %&gt;% 
+  pivot_longer(2:3, 
+               names_to = "year", 
+               values_to = "value")
+```
+
+```
+## # A tibble: 6 x 3
+##   country     year   value
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;int&gt;
+*## 1 Afghanistan 1999     745
+*## 2 Afghanistan 2000    2666
+## 3 Brazil      1999   37737
+## 4 Brazil      2000   80488
+## 5 China       1999  212258
+## 6 China       2000  213766
+```
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Demo - Tuberculosis
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# script
+
+- `Clase03.R`
+
+---
+
+# Datos Tuberculosis
+
+
+```r
+glimpse(who)
+```
+
+```
+## Rows: 7,240
+## Columns: 60
+*## $ country      &lt;chr&gt; "Afghanistan", "Afghanistan", "Afghanistan", "Afghanis...
+## $ iso2         &lt;chr&gt; "AF", "AF", "AF", "AF", "AF", "AF", "AF", "AF", "AF", ...
+## $ iso3         &lt;chr&gt; "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG"...
+*## $ year         &lt;int&gt; 1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, ...
+## $ new_sp_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sp_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+```
+
+---
+
+# Datos Tuberculosis
+
+
+```r
+glimpse(who)
+```
+
+```
+## Rows: 7,240
+## Columns: 60
+## $ country      &lt;chr&gt; "Afghanistan", "Afghanistan", "Afghanistan", "Afghanis...
+## $ iso2         &lt;chr&gt; "AF", "AF", "AF", "AF", "AF", "AF", "AF", "AF", "AF", ...
+## $ iso3         &lt;chr&gt; "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG"...
+## $ year         &lt;int&gt; 1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, ...
+*## $ new_sp_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sp_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sn_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+*## $ new_sn_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_sn_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ new_ep_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_m65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f014  &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f1524 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f2534 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f3544 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f4554 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f5564 &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+## $ newrel_f65   &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+```
+
+---
+
+# Donde comenzamos
+
+
+
+
+```r
+(enfermedades &lt;- who %&gt;% 
+  select(-iso2, -iso3))
+```
+
+```
+## # A tibble: 7,240 x 58
+##    country  year new_sp_m014 new_sp_m1524 new_sp_m2534 new_sp_m3544 new_sp_m4554
+##    &lt;chr&gt;   &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+##  1 Afghan~  1980          NA           NA           NA           NA           NA
+##  2 Afghan~  1981          NA           NA           NA           NA           NA
+##  3 Afghan~  1982          NA           NA           NA           NA           NA
+##  4 Afghan~  1983          NA           NA           NA           NA           NA
+##  5 Afghan~  1984          NA           NA           NA           NA           NA
+##  6 Afghan~  1985          NA           NA           NA           NA           NA
+##  7 Afghan~  1986          NA           NA           NA           NA           NA
+##  8 Afghan~  1987          NA           NA           NA           NA           NA
+##  9 Afghan~  1988          NA           NA           NA           NA           NA
+## 10 Afghan~  1989          NA           NA           NA           NA           NA
+## # ... with 7,230 more rows, and 51 more variables: new_sp_m5564 &lt;int&gt;,
+## #   new_sp_m65 &lt;int&gt;, new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;,
+## #   new_sp_f2534 &lt;int&gt;, new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;,
+## #   new_sp_f5564 &lt;int&gt;, new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;,
+## #   new_sn_m1524 &lt;int&gt;, new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;,
+## #   new_sn_m4554 &lt;int&gt;, new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;,
+## #   new_sn_f014 &lt;int&gt;, new_sn_f1524 &lt;int&gt;, new_sn_f2534 &lt;int&gt;,
+## #   new_sn_f3544 &lt;int&gt;, new_sn_f4554 &lt;int&gt;, new_sn_f5564 &lt;int&gt;,
+## #   new_sn_f65 &lt;int&gt;, new_ep_m014 &lt;int&gt;, new_ep_m1524 &lt;int&gt;,
+## #   new_ep_m2534 &lt;int&gt;, new_ep_m3544 &lt;int&gt;, new_ep_m4554 &lt;int&gt;,
+## #   new_ep_m5564 &lt;int&gt;, new_ep_m65 &lt;int&gt;, new_ep_f014 &lt;int&gt;,
+## #   new_ep_f1524 &lt;int&gt;, new_ep_f2534 &lt;int&gt;, new_ep_f3544 &lt;int&gt;,
+## #   new_ep_f4554 &lt;int&gt;, new_ep_f5564 &lt;int&gt;, new_ep_f65 &lt;int&gt;,
+## #   newrel_m014 &lt;int&gt;, newrel_m1524 &lt;int&gt;, newrel_m2534 &lt;int&gt;,
+## #   newrel_m3544 &lt;int&gt;, newrel_m4554 &lt;int&gt;, newrel_m5564 &lt;int&gt;,
+## #   newrel_m65 &lt;int&gt;, newrel_f014 &lt;int&gt;, newrel_f1524 &lt;int&gt;,
+## #   newrel_f2534 &lt;int&gt;, newrel_f3544 &lt;int&gt;, newrel_f4554 &lt;int&gt;,
+## #   newrel_f5564 &lt;int&gt;, newrel_f65 &lt;int&gt;
+```
+
+---
+
+# Donde queremos llegar
+
+
+```r
+tabla_final
+```
+
+```
+## # A tibble: 2 x 8
+## # Groups:   sexo [2]
+##   sexo    `0-14` `15-24` `25-34` `35-44` `45-54` `55-64`  `65+`
+##   &lt;chr&gt;    &lt;int&gt;   &lt;int&gt;   &lt;int&gt;   &lt;int&gt;   &lt;int&gt;   &lt;int&gt;  &lt;int&gt;
+## 1 hombres  97051  406084  495242  478700  417188  325188 288063
+## 2 mujeres  99738  320620  347398  260839  184791  136441 129468
+```
+
+- **¿Edad?**
+- **¿Sexo?**
+
+---
+
+# ¿Qué información tenemos disponible?
+
+
+```r
+names(enfermedades)
+```
+
+```
+##  [1] "country"      "year"         "new_sp_m014"  "new_sp_m1524" "new_sp_m2534"
+##  [6] "new_sp_m3544" "new_sp_m4554" "new_sp_m5564" "new_sp_m65"   "new_sp_f014" 
+## [11] "new_sp_f1524" "new_sp_f2534" "new_sp_f3544" "new_sp_f4554" "new_sp_f5564"
+## [16] "new_sp_f65"   "new_sn_m014"  "new_sn_m1524" "new_sn_m2534" "new_sn_m3544"
+## [21] "new_sn_m4554" "new_sn_m5564" "new_sn_m65"   "new_sn_f014"  "new_sn_f1524"
+## [26] "new_sn_f2534" "new_sn_f3544" "new_sn_f4554" "new_sn_f5564" "new_sn_f65"  
+## [31] "new_ep_m014"  "new_ep_m1524" "new_ep_m2534" "new_ep_m3544" "new_ep_m4554"
+## [36] "new_ep_m5564" "new_ep_m65"   "new_ep_f014"  "new_ep_f1524" "new_ep_f2534"
+## [41] "new_ep_f3544" "new_ep_f4554" "new_ep_f5564" "new_ep_f65"   "newrel_m014" 
+## [46] "newrel_m1524" "newrel_m2534" "newrel_m3544" "newrel_m4554" "newrel_m5564"
+## [51] "newrel_m65"   "newrel_f014"  "newrel_f1524" "newrel_f2534" "newrel_f3544"
+## [56] "newrel_f4554" "newrel_f5564" "newrel_f65"
+```
+
+- __[*new o new_*]+[*método diagnóstico*]+[_]+[*sexo*]+[*Rango de Edad*]__
+
+---
+
+# ¿pivot_ ... longer o wider?
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 7,240 x 58
+##    country  year new_sp_m014 new_sp_m1524 new_sp_m2534 new_sp_m3544 new_sp_m4554
+##    &lt;chr&gt;   &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+##  1 Afghan~  1980          NA           NA           NA           NA           NA
+##  2 Afghan~  1981          NA           NA           NA           NA           NA
+##  3 Afghan~  1982          NA           NA           NA           NA           NA
+##  4 Afghan~  1983          NA           NA           NA           NA           NA
+##  5 Afghan~  1984          NA           NA           NA           NA           NA
+##  6 Afghan~  1985          NA           NA           NA           NA           NA
+##  7 Afghan~  1986          NA           NA           NA           NA           NA
+##  8 Afghan~  1987          NA           NA           NA           NA           NA
+##  9 Afghan~  1988          NA           NA           NA           NA           NA
+## 10 Afghan~  1989          NA           NA           NA           NA           NA
+## # ... with 7,230 more rows, and 51 more variables: new_sp_m5564 &lt;int&gt;,
+## #   new_sp_m65 &lt;int&gt;, new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;,
+## #   new_sp_f2534 &lt;int&gt;, new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;,
+## #   new_sp_f5564 &lt;int&gt;, new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;,
+## #   new_sn_m1524 &lt;int&gt;, new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;,
+## #   new_sn_m4554 &lt;int&gt;, new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;,
+## #   new_sn_f014 &lt;int&gt;, new_sn_f1524 &lt;int&gt;, new_sn_f2534 &lt;int&gt;,
+## #   new_sn_f3544 &lt;int&gt;, new_sn_f4554 &lt;int&gt;, new_sn_f5564 &lt;int&gt;,
+## #   new_sn_f65 &lt;int&gt;, new_ep_m014 &lt;int&gt;, new_ep_m1524 &lt;int&gt;,
+## #   new_ep_m2534 &lt;int&gt;, new_ep_m3544 &lt;int&gt;, new_ep_m4554 &lt;int&gt;,
+## #   new_ep_m5564 &lt;int&gt;, new_ep_m65 &lt;int&gt;, new_ep_f014 &lt;int&gt;,
+## #   new_ep_f1524 &lt;int&gt;, new_ep_f2534 &lt;int&gt;, new_ep_f3544 &lt;int&gt;,
+## #   new_ep_f4554 &lt;int&gt;, new_ep_f5564 &lt;int&gt;, new_ep_f65 &lt;int&gt;,
+## #   newrel_m014 &lt;int&gt;, newrel_m1524 &lt;int&gt;, newrel_m2534 &lt;int&gt;,
+## #   newrel_m3544 &lt;int&gt;, newrel_m4554 &lt;int&gt;, newrel_m5564 &lt;int&gt;,
+## #   newrel_m65 &lt;int&gt;, newrel_f014 &lt;int&gt;, newrel_f1524 &lt;int&gt;,
+## #   newrel_f2534 &lt;int&gt;, newrel_f3544 &lt;int&gt;, newrel_f4554 &lt;int&gt;,
+## #   newrel_f5564 &lt;int&gt;, newrel_f65 &lt;int&gt;
+```
+]
+]
+
+---
+
+# Transformar la forma
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+* pivot_longer(-c(country:year),
+*              names_to = "variables",
+*              values_to = "valores")
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 4
+##    country      year variables    valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;          &lt;int&gt;
+##  1 Afghanistan  1980 new_sp_m014       NA
+##  2 Afghanistan  1980 new_sp_m1524      NA
+##  3 Afghanistan  1980 new_sp_m2534      NA
+##  4 Afghanistan  1980 new_sp_m3544      NA
+##  5 Afghanistan  1980 new_sp_m4554      NA
+##  6 Afghanistan  1980 new_sp_m5564      NA
+##  7 Afghanistan  1980 new_sp_m65        NA
+##  8 Afghanistan  1980 new_sp_f014       NA
+##  9 Afghanistan  1980 new_sp_f1524      NA
+## 10 Afghanistan  1980 new_sp_f2534      NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# stringr
+
+&lt;img src="Imagenes/Stringr.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+.center[**https://stringr.tidyverse.org/reference/index.html**]
+
+---
+
+# Donde estabamos
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores")
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 4
+##    country      year variables    valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;          &lt;int&gt;
+##  1 Afghanistan  1980 new_sp_m014       NA
+##  2 Afghanistan  1980 new_sp_m1524      NA
+##  3 Afghanistan  1980 new_sp_m2534      NA
+##  4 Afghanistan  1980 new_sp_m3544      NA
+##  5 Afghanistan  1980 new_sp_m4554      NA
+##  6 Afghanistan  1980 new_sp_m5564      NA
+##  7 Afghanistan  1980 new_sp_m65        NA
+##  8 Afghanistan  1980 new_sp_f014       NA
+##  9 Afghanistan  1980 new_sp_f1524      NA
+## 10 Afghanistan  1980 new_sp_f2534      NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Eliminaremos parte de "variables"
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+* mutate(variables = str_remove(variables,
+*                               "new_"),
+*        variables = str_remove(variables,
+*                               "new"))
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 4
+##    country      year variables valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
+##  1 Afghanistan  1980 sp_m014        NA
+##  2 Afghanistan  1980 sp_m1524       NA
+##  3 Afghanistan  1980 sp_m2534       NA
+##  4 Afghanistan  1980 sp_m3544       NA
+##  5 Afghanistan  1980 sp_m4554       NA
+##  6 Afghanistan  1980 sp_m5564       NA
+##  7 Afghanistan  1980 sp_m65         NA
+##  8 Afghanistan  1980 sp_f014        NA
+##  9 Afghanistan  1980 sp_f1524       NA
+## 10 Afghanistan  1980 sp_f2534       NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+
+---
+
+# Separamos la columna "variables"
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+* separate(variables,
+*          into = c("enfermedad", "otro"),
+*          sep = "_")
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 5
+##    country      year enfermedad otro  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         m014       NA
+##  2 Afghanistan  1980 sp         m1524      NA
+##  3 Afghanistan  1980 sp         m2534      NA
+##  4 Afghanistan  1980 sp         m3544      NA
+##  5 Afghanistan  1980 sp         m4554      NA
+##  6 Afghanistan  1980 sp         m5564      NA
+##  7 Afghanistan  1980 sp         m65        NA
+##  8 Afghanistan  1980 sp         f014       NA
+##  9 Afghanistan  1980 sp         f1524      NA
+## 10 Afghanistan  1980 sp         f2534      NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Separamos la columna "otro"
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  separate(variables, 
+           into = c("enfermedad", "otro"), 
+           sep = "_") %&gt;% 
+* separate(otro,
+*          into = c("sexo", "edad"),
+*          sep =  1)
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 6
+##    country      year enfermedad sexo  edad  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         m     014        NA
+##  2 Afghanistan  1980 sp         m     1524       NA
+##  3 Afghanistan  1980 sp         m     2534       NA
+##  4 Afghanistan  1980 sp         m     3544       NA
+##  5 Afghanistan  1980 sp         m     4554       NA
+##  6 Afghanistan  1980 sp         m     5564       NA
+##  7 Afghanistan  1980 sp         m     65         NA
+##  8 Afghanistan  1980 sp         f     014        NA
+##  9 Afghanistan  1980 sp         f     1524       NA
+## 10 Afghanistan  1980 sp         f     2534       NA
+## # ... with 405,430 more rows
+```
+]
+]
+ 
+---
+
+# Lo mismo usando paquete **stringr**
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+* transmute(country, year,
+*   enfermedad = case_when(
+*     str_detect(variables, "rel") ~ str_sub(variables, 1, 3),
+*     TRUE ~ str_sub(variables, 1,2)),
+*   sexo = case_when(
+*     str_detect(variables, "m") ~ "m",
+*     TRUE ~ "f"),
+*   edad = str_extract(variables, "\\d+"),
+*   valores)
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 6
+##    country      year enfermedad sexo  edad  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         m     014        NA
+##  2 Afghanistan  1980 sp         m     1524       NA
+##  3 Afghanistan  1980 sp         m     2534       NA
+##  4 Afghanistan  1980 sp         m     3544       NA
+##  5 Afghanistan  1980 sp         m     4554       NA
+##  6 Afghanistan  1980 sp         m     5564       NA
+##  7 Afghanistan  1980 sp         m     65         NA
+##  8 Afghanistan  1980 sp         f     014        NA
+##  9 Afghanistan  1980 sp         f     1524       NA
+## 10 Afghanistan  1980 sp         f     2534       NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# ¿transmute?
+
+### Casos (`case`) cada 10.000 personas
+
+.pull-left[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(casos_pop = (cases/population)*10000)
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population casos_pop
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071     0.373
+## 2 Afghanistan  2000   2666   20595360     1.29 
+## 3 Brazil       1999  37737  172006362     2.19 
+## 4 Brazil       2000  80488  174504898     4.61 
+## 5 China        1999 212258 1272915272     1.67 
+## 6 China        2000 213766 1280428583     1.67
+```
+
+]
+]
+
+.pull-right[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  transmute(casos_pop = (cases/population)*10000)
+```
+
+```
+## # A tibble: 6 x 1
+##   casos_pop
+##       &lt;dbl&gt;
+## 1     0.373
+## 2     1.29 
+## 3     2.19 
+## 4     4.61 
+## 5     1.67 
+## 6     1.67
+```
+
+]
+]
+
+---
+
+# ¿case_when?
+
+.pull-left[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(indicador = ifelse(year == 1999, 
+                            1, 
+                            0))
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population indicador
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071         1
+## 2 Afghanistan  2000   2666   20595360         0
+## 3 Brazil       1999  37737  172006362         1
+## 4 Brazil       2000  80488  174504898         0
+## 5 China        1999 212258 1272915272         1
+## 6 China        2000 213766 1280428583         0
+```
+
+]
+]
+
+.pull-right[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(indicador = case_when(
+    year == 1999 ~ 1,
+    year != 1999 ~ 0
+  ))
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population indicador
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071         1
+## 2 Afghanistan  2000   2666   20595360         0
+## 3 Brazil       1999  37737  172006362         1
+## 4 Brazil       2000  80488  174504898         0
+## 5 China        1999 212258 1272915272         1
+## 6 China        2000 213766 1280428583         0
+```
+
+]
+]
+
+---
+
+# ¿case_when?
+
+.pull-left[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(indicador = ifelse(year == 1999, 
+                            1, 
+                            0))
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population indicador
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071         1
+## 2 Afghanistan  2000   2666   20595360         0
+## 3 Brazil       1999  37737  172006362         1
+## 4 Brazil       2000  80488  174504898         0
+## 5 China        1999 212258 1272915272         1
+## 6 China        2000 213766 1280428583         0
+```
+
+]
+]
+
+.pull-right[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(indicador = case_when(
+    year == 1999 ~ 1,
+    TRUE ~ 0
+  ))
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population indicador
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071         1
+## 2 Afghanistan  2000   2666   20595360         0
+## 3 Brazil       1999  37737  172006362         1
+## 4 Brazil       2000  80488  174504898         0
+## 5 China        1999 212258 1272915272         1
+## 6 China        2000 213766 1280428583         0
+```
+
+]
+]
+
+---
+
+# ¿case_when?
+
+.pull-left[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(indicador = ifelse(year == 1999, 
+                            1,
+                            ifelse(country == "Brazil", 
+                                   2, 
+                                   0)))
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population indicador
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071         1
+## 2 Afghanistan  2000   2666   20595360         0
+## 3 Brazil       1999  37737  172006362         1
+## 4 Brazil       2000  80488  174504898         2
+## 5 China        1999 212258 1272915272         1
+## 6 China        2000 213766 1280428583         0
+```
+
+]
+]
+
+.pull-right[
+.smaller[
+
+
+```r
+table2 %&gt;% 
+  pivot_wider(names_from = type, 
+              values_from = count) %&gt;% 
+  mutate(indicador = case_when(
+    year == 1999 ~ 1,
+    country == "Brazil" ~ 2,
+    TRUE ~ 0
+  ))
+```
+
+```
+## # A tibble: 6 x 5
+##   country      year  cases population indicador
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071         1
+## 2 Afghanistan  2000   2666   20595360         0
+## 3 Brazil       1999  37737  172006362         1
+## 4 Brazil       2000  80488  174504898         2
+## 5 China        1999 212258 1272915272         1
+## 6 China        2000 213766 1280428583         0
+```
+
+]
+]
+
+---
+
+# .
+
+--- 
+
+# Expresiones regulares
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  transmute(country, year, 
+    enfermedad = case_when( 
+      str_detect(variables, "rel") ~ str_sub(variables, 1, 3), 
+      TRUE ~ str_sub(variables, 1,2)), 
+    sexo = case_when( 
+      str_detect(variables, "m") ~ "m", 
+      TRUE ~ "f"), 
+*   edad = str_extract(variables, "\\d+"),
+    valores) 
+```
+]
+]
+
+.pull-right2[
+
+- Las expresiones regulares son herramientas/instrucciones para describir patrones en texto
+
+- Recursos:
+  + https://stringr.tidyverse.org/articles/regular-expressions.html
+  + http://griverorz.net/big-data/06-text-analysis/01-intro-regex.nb.html
+  + https://rpubs.com/ydmarinb/429756
+  + https://lost-stats.github.io/Data_Manipulation/Regular_Expressions.html
+
+]
+
+---
+
+# Lo mismo usando paquete **stringr**
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+* transmute(country, year,
+*   enfermedad = case_when(
+*     str_detect(variables, "rel") ~ str_sub(variables, 1, 3),
+*     TRUE ~ str_sub(variables, 1,2)),
+*   sexo = case_when(
+*     str_detect(variables, "m") ~ "m",
+*     TRUE ~ "f"),
+*   edad = str_extract(variables, "\\d+"),
+*   valores)
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 6
+##    country      year enfermedad sexo  edad  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         m     014        NA
+##  2 Afghanistan  1980 sp         m     1524       NA
+##  3 Afghanistan  1980 sp         m     2534       NA
+##  4 Afghanistan  1980 sp         m     3544       NA
+##  5 Afghanistan  1980 sp         m     4554       NA
+##  6 Afghanistan  1980 sp         m     5564       NA
+##  7 Afghanistan  1980 sp         m     65         NA
+##  8 Afghanistan  1980 sp         f     014        NA
+##  9 Afghanistan  1980 sp         f     1524       NA
+## 10 Afghanistan  1980 sp         f     2534       NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Paso a paso
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  transmute(country, year, 
+*   enfermedad = case_when(
+*     str_detect(variables, "rel") ~ str_sub(variables, 1, 3),
+*     TRUE ~ str_sub(variables, 1,2)),
+    valores)
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 4
+##    country      year enfermedad valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
+##  1 Afghanistan  1980 sp              NA
+##  2 Afghanistan  1980 sp              NA
+##  3 Afghanistan  1980 sp              NA
+##  4 Afghanistan  1980 sp              NA
+##  5 Afghanistan  1980 sp              NA
+##  6 Afghanistan  1980 sp              NA
+##  7 Afghanistan  1980 sp              NA
+##  8 Afghanistan  1980 sp              NA
+##  9 Afghanistan  1980 sp              NA
+## 10 Afghanistan  1980 sp              NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Paso a paso
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  transmute(country, year, 
+    enfermedad = case_when( 
+      str_detect(variables, "rel") ~ str_sub(variables, 1, 3), 
+      TRUE ~ str_sub(variables, 1,2)), 
+*   sexo = case_when(
+*     str_detect(variables, "m") ~ "m",
+*     TRUE ~ "f"),
+    valores) 
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 5
+##    country      year enfermedad sexo  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         m          NA
+##  2 Afghanistan  1980 sp         m          NA
+##  3 Afghanistan  1980 sp         m          NA
+##  4 Afghanistan  1980 sp         m          NA
+##  5 Afghanistan  1980 sp         m          NA
+##  6 Afghanistan  1980 sp         m          NA
+##  7 Afghanistan  1980 sp         m          NA
+##  8 Afghanistan  1980 sp         f          NA
+##  9 Afghanistan  1980 sp         f          NA
+## 10 Afghanistan  1980 sp         f          NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Paso a paso
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  transmute(country, year, 
+    enfermedad = case_when( 
+      str_detect(variables, "rel") ~ str_sub(variables, 1, 3), 
+      TRUE ~ str_sub(variables, 1,2)), 
+    sexo = case_when( 
+      str_detect(variables, "m") ~ "m",
+      TRUE ~ "f"), 
+*   edad = str_extract(variables, "\\d+"),
+    valores) 
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 6
+##    country      year enfermedad sexo  edad  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         m     014        NA
+##  2 Afghanistan  1980 sp         m     1524       NA
+##  3 Afghanistan  1980 sp         m     2534       NA
+##  4 Afghanistan  1980 sp         m     3544       NA
+##  5 Afghanistan  1980 sp         m     4554       NA
+##  6 Afghanistan  1980 sp         m     5564       NA
+##  7 Afghanistan  1980 sp         m     65         NA
+##  8 Afghanistan  1980 sp         f     014        NA
+##  9 Afghanistan  1980 sp         f     1524       NA
+## 10 Afghanistan  1980 sp         f     2534       NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Mismo resultado
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"), 
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+* separate(variables,
+*          into = c("enfermedad", "otro"),
+*          sep = "_") %&gt;%
+* separate(otro,
+*          into = c("sexo", "edad"),
+*          sep =  1)
+```
+]
+]
+
+.pull-right2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"),
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+* transmute(country, year,
+*   enfermedad = case_when(
+*     str_detect(variables, "rel") ~ str_sub(variables, 1, 3),
+*     TRUE ~ str_sub(variables, 1,2)),
+*   sexo = case_when(
+*     str_detect(variables, "m") ~ "m",
+*     TRUE ~ "f"),
+*   edad = str_extract(variables, "\\d+"),
+*   valores)
+```
+]
+]
+
+---
+
+# Cambios para más entendimiento
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"), 
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  separate(variables, 
+           into = c("enfermedad", "otro"), 
+           sep = "_") %&gt;% 
+  separate(otro,
+           into = c("sexo", "edad"),
+           sep =  1) %&gt;% 
+* mutate(
+*   edad = case_when(
+*     edad == "014" ~ "0-14",
+*     edad == "1524" ~ "15-24",
+*     edad == "2534" ~ "25-34",
+*     edad == "3544" ~ "35-44",
+*     edad == "4554" ~ "45-54",
+*     edad == "5564" ~ "55-64",
+*     edad == "65" ~ "65+"),
+*   sexo = case_when(
+*     sexo == "m" ~ "hombres",
+*     sexo == "f" ~ "mujeres"))
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 405,440 x 6
+##    country      year enfermedad sexo    edad  valores
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;
+##  1 Afghanistan  1980 sp         hombres 0-14       NA
+##  2 Afghanistan  1980 sp         hombres 15-24      NA
+##  3 Afghanistan  1980 sp         hombres 25-34      NA
+##  4 Afghanistan  1980 sp         hombres 35-44      NA
+##  5 Afghanistan  1980 sp         hombres 45-54      NA
+##  6 Afghanistan  1980 sp         hombres 55-64      NA
+##  7 Afghanistan  1980 sp         hombres 65+        NA
+##  8 Afghanistan  1980 sp         mujeres 0-14       NA
+##  9 Afghanistan  1980 sp         mujeres 15-24      NA
+## 10 Afghanistan  1980 sp         mujeres 25-34      NA
+## # ... with 405,430 more rows
+```
+]
+]
+
+---
+
+# Total por sexo/edad para 2010
+
+.pull-left2[
+.smaller[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"), 
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  separate(variables, 
+           into = c("enfermedad", "otro"), 
+           sep = "_") %&gt;% 
+  separate(otro,
+           into = c("sexo", "edad"),
+           sep =  1) %&gt;% 
+  mutate(
+    edad = case_when(
+      edad == "014" ~ "0-14",
+      edad == "1524" ~ "15-24",
+      edad == "2534" ~ "25-34",
+      edad == "3544" ~ "35-44",
+      edad == "4554" ~ "45-54",
+      edad == "5564" ~ "55-64",
+      edad == "65" ~ "65+"), 
+    sexo = case_when( 
+      sexo == "m" ~ "hombres", 
+      sexo == "f" ~ "mujeres")) %&gt;% 
+* filter(year == 2010) %&gt;%
+* group_by(sexo, edad) %&gt;%
+* summarise(total = sum(valores, na.rm = TRUE))
+```
+]
+]
+
+.pull-right2[
+.small[
+
+```
+## # A tibble: 14 x 3
+## # Groups:   sexo [2]
+##    sexo    edad   total
+##    &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt;
+##  1 hombres 0-14   97051
+##  2 hombres 15-24 406084
+##  3 hombres 25-34 495242
+##  4 hombres 35-44 478700
+##  5 hombres 45-54 417188
+##  6 hombres 55-64 325188
+##  7 hombres 65+   288063
+##  8 mujeres 0-14   99738
+##  9 mujeres 15-24 320620
+## 10 mujeres 25-34 347398
+## 11 mujeres 35-44 260839
+## 12 mujeres 45-54 184791
+## 13 mujeres 55-64 136441
+## 14 mujeres 65+   129468
+```
+]
+]
+
+---
+
+# Tabla final
+
+.pull-left2[
+.tiny[
+
+```r
+enfermedades %&gt;% 
+  pivot_longer(-c(country:year), 
+               names_to = "variables", 
+               values_to = "valores") %&gt;% 
+  mutate(variables = str_remove(variables, 
+                                "new_"), 
+         variables = str_remove(variables, 
+                                "new")) %&gt;% 
+  separate(variables, 
+           into = c("enfermedad", "otro"), 
+           sep = "_") %&gt;% 
+  separate(otro,
+           into = c("sexo", "edad"),
+           sep =  1) %&gt;% 
+  mutate(
+    edad = case_when(
+      edad == "014" ~ "0-14",
+      edad == "1524" ~ "15-24",
+      edad == "2534" ~ "25-34",
+      edad == "3544" ~ "35-44",
+      edad == "4554" ~ "45-54",
+      edad == "5564" ~ "55-64",
+      edad == "65" ~ "65+"), 
+    sexo = case_when( 
+      sexo == "m" ~ "hombres", 
+      sexo == "f" ~ "mujeres")) %&gt;% 
+  filter(year == 2010) %&gt;% 
+  group_by(sexo, edad) %&gt;% 
+  summarise(total = sum(valores, na.rm = TRUE)) %&gt;% 
+* pivot_wider(names_from = edad,
+*             values_from = total)
+```
+]
+]
+
+.pull-right2[
+.smaller[
+
+```
+## # A tibble: 2 x 8
+## # Groups:   sexo [2]
+##   sexo    `0-14` `15-24` `25-34` `35-44` `45-54` `55-64`  `65+`
+##   &lt;chr&gt;    &lt;int&gt;   &lt;int&gt;   &lt;int&gt;   &lt;int&gt;   &lt;int&gt;   &lt;int&gt;  &lt;int&gt;
+## 1 hombres  97051  406084  495242  478700  417188  325188 288063
+## 2 mujeres  99738  320620  347398  260839  184791  136441 129468
+```
+]
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio
+
+- `EjercicioManejoTransformacionDatos`
+
+---
+
+class: inverse, center, middle
+name: reg
+
+# Reportería - R Markdown
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# ¿Qué es R Markdown?
+
+Entorno para la creación de reportes/documentos reproducibles
+
+  - **HTML**
+  - MS Word
+  - PDF
+  - MS Power Point
+  - Y más...
+  
+&lt;img src="Imagenes/RMarkdown.PNG" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# R Markdown
+
+&lt;img src="Imagenes/RMarkdown0.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+.center[**A diferencia de un script (`.R`), estos archivos serán `.Rmd`**]
+
+---
+
+# R Markdown
+
+&lt;img src="Imagenes/RMarkdowni.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# R Markdown
+
+&lt;img src="Imagenes/RMarkdownii.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# R Markdown
+
+&lt;img src="Imagenes/RMarkdowniii.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Formato de texto
+
+&lt;img src="Imagenes/RMarkdownTexto.PNG" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Formato de texto
+
+&lt;img src="Imagenes/RMarkdownTextoii.PNG" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# R Markdown
+
+&lt;img src="Imagenes/RMarkdowniv.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# "Pedazos de código" (*chunks*)
+
+- Se pueden agregar de distintas formas:
+  * Ocupando las teclas **Ctrl**+**Alt**+**I** (Apple: **Cmd**+**Alt**+**I**).
+  * Utilizando el botón *Insert new code* en la barra de tareas del archivo RMarkdown.
+  * Escribiendo los delimitadores de los *chunks* manualmente: ````{r}` y.
+  
+- Opciones de los *chunks* (se agregan en los encabezados de los *chunks* - ````{r}`)
+  * `message = FALSE` previene que mensajes generados por el código aparezcan en el documento final.
+  * `include = FALSE` previene que el código y los resultados del *chunk* aparezcan en el documento final. El código se ejecutará y los resultados estarán disponibles para ser usados en otros *chunks*.
+  * `echo = FALSE` previene que el código aparezca en el resultado final pero el resultado si lo hará. Esto será muy útil cuando generemos tablas y/o gráficos
+  * `warning = FALSE` previene que mensajes de error generados por el código aparezcan en el documento final.
+  
+Pueden revisar más opciones en la siguiente [Hoja de Referencia](https://rstudio.com/wp-content/uploads/2015/03/rmarkdown-spanish.pdf).
+
+---
+class: inverse, center, middle
+name: reg
+
+# Demostración
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Demostración
+
+- `DemoRMarkdown.Rmd`
+
+---
+
+# Presentación 9 de Junio 2020
+
+&lt;img src="Imagenes/CharlaAutomatizacion.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+.center[**https://www.youtube.com/watch?v=QfeTzUF_8Nk**]
+
+---
+
+# Lo que se viene
+
+- Tarea 1 (11 de julio)
+- Ayudantía (jueves)
+- "Hora de consultas" (miércoles)
+
+---
+
+# Próxima clase
+
+- Inferencia estadísitca
+- Intervalos de confianza
+- Prueba de hipótesis
+- Paquete `infer`
+
+&lt;img src="Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

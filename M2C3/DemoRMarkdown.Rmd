@@ -1,0 +1,108 @@
+---
+title: "Resultados - Elecciones Alcaldes"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r cargar_datos}
+datos_alcaldes <- read_xlsx("../datos/alcaldes_2021.xlsx") 
+
+datos_alcaldes_limp <- datos_alcaldes %>% 
+  filter(!is.na(partido))
+```
+
+# Introducción
+
+El siguiente documento resume los resultados de las **elecciones de Alcaldes llevadas a cabo en Chile durante el año 2021**.
+
+# Datos
+
+Los datos fueron obtenidos desde la [web del SERVEL](https://pv.servelelecciones.cl/) a través de un *web scraping* de esta.
+
+# Análisis
+
+### Información general
+
+```{r datos_generales}
+# Calcular n° de candidatos
+n_candidatos <- datos_alcaldes_limp %>% 
+  distinct(candidato) %>% 
+  nrow()
+
+# Calcular n° de pactos
+n_pactos <- datos_alcaldes_limp %>% 
+  summarise(n = n_distinct(lista_pacto)) %>% 
+  pull(n)
+
+# Calcular n° de partidos
+n_partidos <- datos_alcaldes_limp %>% 
+  summarise(n = n_distinct(partido)) %>% 
+  pull(n)
+
+# Calcular total de votos, validos, nulos, y blancos
+votos_general <- datos_alcaldes %>% 
+  filter(is.na(partido)) %>% 
+  group_by(candidato) %>% 
+  summarise(votos = prettyNum(sum(votos, na.rm = TRUE), big.mark = "."))
+
+votos_blancos <- votos_general %>% 
+  select(votos) %>% 
+  slice(4)
+```
+
+El número total de votos en este proceso fue de **`r votos_general[1,2]`**, de los cuales:
+
+- *`r votos_general$votos[2]`* fueron válidamente emitidos, 
+- `r votos_general %>% select(votos) %>% slice(3)` blancos, 
+- y `r votos_blancos` nulos.
+
+O podemos presentarlo como tabla:
+
+```{r}
+votos_general
+```
+
+Mejor
+
+```{r}
+# Existan paquetes
+votos_general %>% 
+  knitr::kable()
+```
+
+## Votos por partido
+
+```{r graf_votos_partido}
+datos_alcaldes_limp %>% 
+  group_by(partido_nom) %>% 
+  summarise(votos = sum(votos, na.rm = TRUE)) %>% 
+  ggplot(aes(x = reorder(partido_nom, votos), 
+             y = votos,
+             label = prettyNum(votos, big.mark = ".", decimal.mark = ","))) +
+  geom_col() +
+  geom_text(size = 2.2, 
+            nudge_y = 90000,
+            nudge_x = 0.15) +
+  coord_flip() +
+  labs(title = "Elecciones de alcaldes 2021",
+       subtitle = "Votos por partido político",
+       x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 7),
+        axis.text.x = element_blank())
+```
+
+
+
+

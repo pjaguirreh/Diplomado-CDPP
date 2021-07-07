@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Ciencia de Datos para Políticas Públicas</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pablo Aguirre Hörmann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":1,"eraser_size":10}) })</script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Ciencia de Datos para Políticas Públicas
+## Módulo 2 - Clase 1: Visualización de datos
+### Pablo Aguirre Hörmann
+### 15/06/2021
+
+---
+
+
+
+
+# Información general
+
+- 6 clases: dos partes (3 c/u)
+- Office hours (*Zoom*): horario por definir
+- Ayudantías: 1 y 22 de julio
+- Web curso para preguntas fuera de horario de clases
+- Dedicación de tiempo
+- PPTs se subirán al terminar cada clase
+
+---
+
+# Qué, Por qué y Cómo de este curso
+
+### ¿Qué?
+
+- R
+- Visualización de datos
+- Manejo de datos
+- Reportar resultados
+- Inferencia Estadística/Econometría
+
+---
+
+# Qué, Por qué y Cómo de este curso
+
+### ¿Qué?
+
+&lt;img src="../Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Qué, Por qué y Cómo de este curso
+
+## ¿Por qué?
+
+- Análisis/Investigación reproducible
+- Control/Flexibilidad
+
+---
+
+# Reproducibilidad
+
+**Objetivo: realizar un reporte basado en datos de [Datos Públicos](http://datos.gob.cl/)**
+
+---
+
+# Reproducibilidad
+
+**Objetivo: realizar un reporte basado en datos de [Datos Públicos](http://datos.gob.cl/)**
+
+.pull-left[
+
+**&lt;span style="color:red"&gt;SIN PROGRAMACIÓN&lt;/span&gt;**
+
+1. Ingresar a la web y descargar datos
+2. Limpiar, ordenar, y analizar datos en *MS Excel*
+3. Escribir documento en *MS Word*
+4. Guardar en "algún lado" (ojalá no en "Mis Documentos" o "Descargas")
+
+]
+
+---
+
+# Reproducibilidad
+
+**Objetivo: realizar un reporte basado en datos de [Datos Públicos](http://datos.gob.cl/)**
+
+.pull-left[
+
+**&lt;span style="color:red"&gt;SIN PROGRAMACIÓN&lt;/span&gt;**
+
+1. Ingresar a la web y descargar datos
+2. Limpiar, ordenar, y analizar datos en *MS Excel*
+3. Escribir documento en *MS Word*
+4. Guardar en "algún lado" (ojalá no en "Mis Documentos" o "Descargas")
+
+]
+
+.pull-right[
+
+**&lt;span style="color:green"&gt;CON PROGRAMACIÓN&lt;/span&gt;**
+
+1. Crear una carpeta para el proyecto/tarea
+    * `datos`
+    * `gráficos`
+    * `resultados`
+2. Descargar datos desde `R`
+3. Limpiar, ordenar, y analizar datos en `R`
+4. Escribir documento en `R Markdown`
+
+]
+
+---
+
+# Reproducibilidad
+
+**Seis meses después quieres repetir la tarea (o un/a colega)**
+
+---
+
+# Reproducibilidad
+
+**Seis meses después quieres repetir la tarea (o un/a colega)**
+
+.pull-left[
+
+**&lt;span style="color:red"&gt;SIN PROGRAMACIÓN&lt;/span&gt;**
+
+1. Recordar que se hizo
+2. Ingresar a la web y descargar datos
+3. Limpiar, ordenar, y analizar datos en *MS Excel*
+4. Escribir documento en *MS Word*
+5. Guardar en "algún lado" (ojalá no en "Mis Documentos" o "Descargas")
+
+]
+
+---
+
+# Reproducibilidad
+
+**Seis meses después quieres repetir la tarea (o un/a colega)**
+
+.pull-left[
+
+**&lt;span style="color:red"&gt;SIN PROGRAMACIÓN&lt;/span&gt;**
+
+1. Recordar que se hizo
+2. Ingresar a la web y descargar datos
+3. Limpiar, ordenar, y analizar datos en *MS Excel*
+4. Escribir documento en *MS Word*
+5. Guardar en "algún lado" (ojalá no en "Mis Documentos" o "Descargas")
+
+]
+
+.pull-right[
+
+**&lt;span style="color:green"&gt;CON PROGRAMACIÓN&lt;/span&gt;**
+
+1. Ejecutar el código
+
+]
+
+---
+
+# ¿Cómo?
+
+- **RStudio Cloud**
+  * Pero vayan practicando en la versión de escritorio
+
+- **Aprender haciendo**
+  * Demostración - Ejercicio
+  * Todo código que se muestre estará disponible
+
+---
+
+# Dicho eso...
+
+- **Este curso no es suficiente**
+  + Requiere de dedicación y práctica para poder sacar el mayor provecho
+  + Prueba y error
+
+- **Contamos con horas finitas de clases**
+  + Hay detalles que no podremos cubrir y que es importante que puedan revisar/practicar por su parte
+  + Trataré de ir mencionando estos a medida que avancemos
+
+---
+
+# Fuentes valiosas de información 
+
+&lt;img src="../Imagenes/FuentesInformacion.PNG" width="450px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Fuentes valiosas de información 
+
+&lt;img src="../Imagenes/Libros.PNG" width="600px" style="display: block; margin: auto;" /&gt;
+
+- https://r4ds.had.co.nz/ | https://es.r4ds.hadley.nz/
+- http://faculty.marshall.usc.edu/gareth-james/ISL/
+
+---
+
+# Además de google...
+
+No se aburran de usar `?nombrefunción`. Ej: `?ggplot`
+
+&lt;img src="../Imagenes/Help.PNG" width="500px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Qué veremos hoy?
+
+- **&lt;span style="color:red"&gt;Visualización de datos&lt;/span&gt;**
+- Manejo de datos
+- Transformación de datos
+- Reportar resultados
+- Inferencia Estadística/Econometría
+
+---
+
+# Pero antes...
+
+### Recordemos
+
+- Instalar paquetes: `install.packages("nombrepaquete")`
+
+- Cargar paquetes: `library(nombrepaquete)`
+
+- Principales paquetes que usaremos:
+  * `readr`: cargar datos
+  * `tidyr`: lograr datos *tidy* (ordenados)
+  * `dplyr`: "verbos" (funciones) de manipulación de datos
+  * `ggplot2`: visualización
+
+---
+
+# Pero antes...
+
+### Recordemos
+
+- Funciones, `funcion(argumento1, argumento2, ...)`
+  * `log(x = 100, base = 10)`
+  * `log(100, 10)`
+  * `filter(censo, region == "RM")`
+  
+- `%&gt;%`: "Encadenar" código
+  * `censo %&gt;% filter(region == "RM)`
+
+- `+`: "Sumar" capas en `ggplot2`
+
+---
+
+# Imprime pero no guarda
+
+
+
+
+```r
+read_csv("../datos/datos_mundo.csv")
+```
+
+```
+## # A tibble: 1,704 x 6
+##    pais        continente  anio ExpVida      pob gdpPercap
+##    &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Afghanistan Asia        1952    28.8  8425333      779.
+##  2 Afghanistan Asia        1957    30.3  9240934      821.
+##  3 Afghanistan Asia        1962    32.0 10267083      853.
+##  4 Afghanistan Asia        1967    34.0 11537966      836.
+##  5 Afghanistan Asia        1972    36.1 13079460      740.
+##  6 Afghanistan Asia        1977    38.4 14880372      786.
+##  7 Afghanistan Asia        1982    39.9 12881816      978.
+##  8 Afghanistan Asia        1987    40.8 13867957      852.
+##  9 Afghanistan Asia        1992    41.7 16317921      649.
+## 10 Afghanistan Asia        1997    41.8 22227415      635.
+## # ... with 1,694 more rows
+```
+
+---
+
+# Guarda pero no imprime
+
+
+```r
+datos_mundo &lt;- read_csv("../datos/datos_mundo.csv")
+```
+
+---
+
+# Guarda e imprime
+
+
+```r
+datos_mundo &lt;- read_csv("../datos/datos_mundo.csv")
+datos_mundo
+```
+
+```
+## # A tibble: 1,704 x 6
+##    pais        continente  anio ExpVida      pob gdpPercap
+##    &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Afghanistan Asia        1952    28.8  8425333      779.
+##  2 Afghanistan Asia        1957    30.3  9240934      821.
+##  3 Afghanistan Asia        1962    32.0 10267083      853.
+##  4 Afghanistan Asia        1967    34.0 11537966      836.
+##  5 Afghanistan Asia        1972    36.1 13079460      740.
+##  6 Afghanistan Asia        1977    38.4 14880372      786.
+##  7 Afghanistan Asia        1982    39.9 12881816      978.
+##  8 Afghanistan Asia        1987    40.8 13867957      852.
+##  9 Afghanistan Asia        1992    41.7 16317921      649.
+## 10 Afghanistan Asia        1997    41.8 22227415      635.
+## # ... with 1,694 more rows
+```
+
+---
+
+# Guarda e imprime
+
+
+```r
+(datos_mundo &lt;- read_csv("../datos/datos_mundo.csv"))
+```
+
+```
+## # A tibble: 1,704 x 6
+##    pais        continente  anio ExpVida      pob gdpPercap
+##    &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Afghanistan Asia        1952    28.8  8425333      779.
+##  2 Afghanistan Asia        1957    30.3  9240934      821.
+##  3 Afghanistan Asia        1962    32.0 10267083      853.
+##  4 Afghanistan Asia        1967    34.0 11537966      836.
+##  5 Afghanistan Asia        1972    36.1 13079460      740.
+##  6 Afghanistan Asia        1977    38.4 14880372      786.
+##  7 Afghanistan Asia        1982    39.9 12881816      978.
+##  8 Afghanistan Asia        1987    40.8 13867957      852.
+##  9 Afghanistan Asia        1992    41.7 16317921      649.
+## 10 Afghanistan Asia        1997    41.8 22227415      635.
+## # ... with 1,694 more rows
+```
+
+---
+
+# Mala práctica
+
+
+```r
+library(readr)
+library(dplyr)
+library(ggplot2) 
+datos_mundo &lt;- read_csv("datos/datos_mundo.csv")
+ggplot(filter(datos_mundo, anio == 2007), aes(x = ExpVida, y = pob)) + geom_point()
+```
+
+---
+
+# Buena práctica
+
+
+```r
+# Cargar paquetes
+library(readr)
+library(dplyr)
+library(ggplot2) 
+
+# Cargar datos
+datos_mundo &lt;- read_csv("/datos/datos_mundo.csv")
+
+# Crear subset con datos del año 2007
+datos_mundo_select &lt;- datos_mundo %&gt;% 
+  filter(anio == 2007)
+
+# Gráfico de ExpVida vs pob
+ggplot(datos_mundo_select, aes(x = ExpVida, y = pob)) + 
+  geom_point()
+```
+
+---
+
+# ¿Qué veremos hoy?
+
+- **&lt;span style="color:red"&gt;Visualización de datos&lt;/span&gt;**
+- Manejo de datos
+- Transformación de datos
+- Reportar resultados
+- Inferencia Estadística/Econometría
+
+---
+
+# ¿Por qué visualizar?
+
+Dos razones principales:
+1. **Para uno**: entender los datos con el fin de guiar análisis posteriores (análisis exploratorio)
+
+&lt;img src="../Imagenes/Datasaurus.gif" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Por qué visualizar?
+
+Dos razones principales:
+1. **Para uno**: entender los datos con el fin de guiar análisis posteriores (análisis exploratorio)
+2. **Para otros**: contar una historia sobre los datos y resultados con el fin de comunicar algo
+
+&lt;img src="../Imagenes/napoleon_minard.png" width="75%" style="display: block; margin: auto;" /&gt;
+.center[*(Charles Joseph Minard, 1869)*]
+
+---
+
+# ¿Por qué visualizar?
+
+Dos razones principales:
+1. **Para uno**: entender los datos con el fin de guiar análisis posteriores (análisis exploratorio)
+2. **Para otros**: contar una historia sobre los datos y resultados con el fin de comunicar algo
+
+## Lo que deberíamos buscar
+
+- Mostrar los datos y no mentir con estos
+  + Contar una historia (¿una relación? ¿causalidad? ¿un patrón? ¿un quiebre?)
+  + Transmitir y convencer
+- Minimizar aspectos innecesarios
+- Visualizaciones deben complementar el texto y tener suficiente información para "sobrevivir por sí mismas"
+
+---
+
+# Una idea general
+
+- El cerebro solo puede procesar un cierto número de atributos de forma instantánea (*pre-attentive attributes*)
+  + Forma, posición, color, tamaño
+
+
+- Queremos buscar la variación justa en estos atributos para enfocarnos en lo que importa
+
+--
+
+### ¿Cuántos 3 hay?
+
+&lt;img src="../Imagenes/Ver3.png" width="600px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Una idea general
+
+- El cerebro solo puede procesar un cierto número de atributos de forma instantánea (*pre-attentive attributes*)
+  + Forma, posición, color, tamaño
+
+
+- Queremos buscar la variación justa en estos atributos para enfocarnos en lo que importa
+
+
+### ¿Y ahora?
+
+&lt;img src="../Imagenes/Ver3.2.png" width="600px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Principios de (Edward) Tufte 
+
+https://www.edwardtufte.com/tufte/
+
+- Muestra los datos
+- Maximiza el ratio entre datos y *tinta* (o texto)
+- Evita *tinta* que no corresponda a datos 
+- No ser redundante en la información
+- Evita la *basura visual*
+- Prefiere disposiciones horizontales
+
+---
+
+# ¿Qué opinan?
+
+&lt;img src="../Imagenes/MalGraf.png" width="600px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Apliquemos los principios
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-17-1.png" width="800px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Qué hay por detrás?
+
+### `R` - `ggplot2`
+
+
+```r
+ggplot(datos_graf, aes(x = reorder(educ, -inc), y = inc, label = inc)) +
+  geom_col(width = 0.5, fill = "dark blue") +
+  geom_text(nudge_y = 40, size = 3) +
+  coord_flip() +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(n.breaks = 9) +
+  theme_minimal() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.text.x = element_blank()) +
+  labs(title = "Discounted Expected Lifetime Earnings, VN(t')",
+       subtitle = "(Income in thousands)")
+```
+
+---
+class: inverse, center, middle
+name: reg
+
+# Visualización de datos con **ggplot2**
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Lógica de ggplot2
+
+"gg" por [Grammar of Graphics](https://www.springer.com/gp/book/9780387245447)
+
+&lt;img src="../Imagenes/CapasGgplot.png" width="600px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Forma general de ggplot2
+
+
+```r
+library(ggplot2)
+ggplot(datos, aes(x = var1, y = var2)) +
+  geom_XXX(...) +
+  otros(...)
+```
+
+- `geom_point()`
+- `geom_line()`
+- `geom_xxxx()`
+- `facet`
+- `theme`
+
+---
+class: inverse, center, middle
+name: reg
+
+# Demo - Visualizar Datos de indicadores de países
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Demo - Script
+
+- `CodigoViz.R`
+
+---
+
+# Datos 
+
+
+```r
+library(readr)
+library(ggplot2)
+(datos_mundo &lt;- read_csv("../datos/datos_mundo2007.csv"))
+```
+
+```
+## # A tibble: 142 x 6
+##    pais        continente  anio ExpVida       pob gdpPercap
+##    &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Afghanistan Asia        2007    43.8  31889923      975.
+##  2 Albania     Europe      2007    76.4   3600523     5937.
+##  3 Algeria     Africa      2007    72.3  33333216     6223.
+##  4 Angola      Africa      2007    42.7  12420476     4797.
+##  5 Argentina   Americas    2007    75.3  40301927    12779.
+##  6 Australia   Oceania     2007    81.2  20434176    34435.
+##  7 Austria     Europe      2007    79.8   8199783    36126.
+##  8 Bahrain     Asia        2007    75.6    708573    29796.
+##  9 Bangladesh  Asia        2007    64.1 150448339     1391.
+## 10 Belgium     Europe      2007    79.4  10392226    33693.
+## # ... with 132 more rows
+```
+
+---
+
+# Histograma 
+## Gráfico base (datos)
+
+
+```r
+ggplot(datos_mundo)
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-22-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Histograma 
+## Agregar capa (aes)
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-23-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Histograma
+## Agregar capa (geom)
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+* geom_histogram()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-24-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Histograma
+## Cambiar algunos argumentos
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+* geom_histogram(bins = 100, fill = "blue")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-25-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Histograma
+## Cambiar algunos argumentos
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+* geom_histogram(binwidth = 5000, col = "blue")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Histograma
+
+.pull-left[
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+  geom_histogram(binwidth = 1000, col = "white")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-27-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+  geom_histogram(binwidth = 10000, col = "white")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-28-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+  geom_histogram(binwidth = 5000, col = "white")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-29-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap)) +
+  geom_histogram(binwidth = 15000, col = "white")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-30-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Muchos argumentos
+
+**NO OLVIDAR**: Siempre consulten `?nombrefunción`. Ej: `?ggplot`
+
+&lt;img src="../Imagenes/Help.PNG" width="500px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Más de una variable
+
+
+```r
+ggplot(datos_mundo, aes(x = continente, y = gdpPercap))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-32-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Capa de puntos (geom_point)
+
+
+```r
+ggplot(datos_mundo, aes(x = continente, y = gdpPercap)) +
+* geom_point()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-33-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Boxplot
+
+
+```r
+ggplot(datos_mundo, aes(x = continente, y = gdpPercap)) +
+* geom_boxplot()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-34-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Qué nos muestra el boxplot?
+
+&lt;img src="../Imagenes/BoxPlot.PNG" width="800px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Juntar más de una capa (geom)
+
+
+```r
+ggplot(datos_mundo, aes(x = continente, y = gdpPercap)) +
+  geom_boxplot()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-36-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Juntar más de una capa (geom)
+
+
+```r
+ggplot(datos_mundo, aes(x = continente, y = gdpPercap)) +
+  geom_boxplot() +
+* geom_point()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-37-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Invertir los ejes
+
+
+```r
+ggplot(datos_mundo, aes(x = continente, y = gdpPercap)) +
+  geom_boxplot() +
+  geom_point() +
+* coord_flip()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-38-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Gráfico de dispersión 
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap, y = ExpVida)) +
+  geom_point()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-39-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Cambiar el color de los puntos
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap, y = ExpVida)) +
+* geom_point(col = "red")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-40-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Color para agregar más información
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap, y = ExpVida)) +
+* geom_point(aes(col = continente))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-41-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Linea de tendencia
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap, y = ExpVida)) +
+  geom_point() +
+* geom_smooth()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-42-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Linea de tendencia
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap, y = ExpVida)) +
+  geom_point() +
+* geom_smooth(se = FALSE, method = "lm")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-43-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Linea de tendencia
+
+
+```r
+ggplot(datos_mundo, aes(x = gdpPercap, y = ExpVida)) +
+  geom_point() +
+* geom_smooth(se = FALSE, method = "lm", formula = y ~ log(x))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-44-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio - Script
+
+- `EjercicioViz.R`
+
+---
+class: inverse, center, middle
+name: reg
+
+# Demo - Datos COVID Chile
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# COVID en Chile
+
+### ¿Segunda o primera ola?
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-45-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+&lt;font size="2"&gt; Datos obtenidos desde repositorio del Ministerio de Ciencia y Tecnología (https://github.com/MinCiencia/Datos-COVID19). Los datos han sido manipulados, no citar.&lt;/font&gt;
+
+---
+
+# Demo - Script
+
+- `CodigoCovidViz.R`
+
+---
+
+# Datos COVID-19 
+## Cargar datos
+
+
+```r
+library(readr)
+(datos_covid &lt;- read_csv("../datos/DatosCOVIDRegion.csv"))
+```
+
+```
+## # A tibble: 7,310 x 6
+##    region         fecha      casos_nuevos fallecidos fallecidos_d casos_nuevos_d
+##    &lt;chr&gt;          &lt;date&gt;            &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;          &lt;dbl&gt;
+##  1 Arica y Parin~ 2020-03-03           NA         NA           NA              0
+##  2 Arica y Parin~ 2020-03-04           NA         NA           NA              0
+##  3 Arica y Parin~ 2020-03-05            0         NA           NA              0
+##  4 Arica y Parin~ 2020-03-06            0         NA           NA              0
+##  5 Arica y Parin~ 2020-03-07            0         NA           NA              0
+##  6 Arica y Parin~ 2020-03-08            0         NA           NA              0
+##  7 Arica y Parin~ 2020-03-09            0         NA           NA              0
+##  8 Arica y Parin~ 2020-03-10            0         NA           NA              0
+##  9 Arica y Parin~ 2020-03-11            0         NA           NA              0
+## 10 Arica y Parin~ 2020-03-12            0         NA           NA              0
+## # ... with 7,300 more rows
+```
+
+
+
+---
+
+# Gráfico base
+
+
+```r
+library(ggplot2)
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Agregar `geom` de lineas 
+## Pero algo se ve mal
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos)) +
+* geom_line()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Una linea para cada región
+
+
+```r
+*ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, group = region)) +
+  geom_line()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf4b-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Una linea para cada región
+
+
+```r
+*ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Cada linea en su propio panel
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+* facet_wrap(vars(region))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf8-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Cada linea en su propio panel
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+* facet_wrap(vars(region), scales = "free_y")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf8b-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Cada linea en su propio panel
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+* facet_wrap(vars(region), scales = "free_y", ncol = 5)
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf8c-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Fondo blanco parece mejor
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") +
+* theme_bw()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf9-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Fondo blanco parece mejor
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") +
+* theme_minimal()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf9b-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# La leyenda no sirve mucho
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") +
+  theme_minimal() +
+* theme(legend.position = "none")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/graf10-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Modificar *theme*
+
+&lt;img src="../Imagenes/ggplot2Elements.jpg" width="700px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# "Themes" prefabricados
+
+https://ggplot2.tidyverse.org/reference/ggtheme.html
+
+&lt;iframe src="https://ggplot2.tidyverse.org/reference/ggtheme.html" width="90%" height="400px"&gt;&lt;/iframe&gt;
+
+---
+
+# La leyenda no sirve mucho
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-50-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Cambiemos el *theme*
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") +
+* theme_void() +
+  theme(legend.position = "none")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-51-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Títulos/Ejes
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() + theme(legend.position = "none") +
+* labs(title = "¿Segunda ola?",
+*      subtitle = "Casos diarios de COVID-19 en Chile por región",
+*      x = NULL, y = NULL)
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-52-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Último detalle
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+* geom_line(aes(y = casos_nuevos_d)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() + theme(legend.position = "none") +
+  labs(title = "¿Segunda ola?",
+       subtitle = "Casos diarios de COVID-19 en Chile por región",
+       x = NULL, y = NULL) 
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-53-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Último detalle
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+* geom_line(aes(y = casos_nuevos_d), alpha = 0.3) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() + theme(legend.position = "none") +
+  labs(title = "¿Segunda ola?", 
+       subtitle = "Casos diarios de COVID-19 en Chile por región",
+       x = NULL, y = NULL) 
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-54-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Gráfico final
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-55-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos))
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-56-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-57-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-58-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void()
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-59-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() +
+  theme(legend.position = "none")
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-60-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "¿Segunda ola?",
+       subtitle = "Casos diarios de COVID-19 en Chile por región", x = NULL, y = NULL)
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-61-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resumen
+
+
+```r
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line(aes(y = casos_nuevos_d, col = region), alpha = 0.3) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() + 
+  theme(legend.position = "none") +
+  labs(title = "¿Segunda ola?",
+       subtitle = "Casos diarios de COVID-19 en Chile por región", x = NULL, y = NULL)
+```
+
+&lt;img src="Introduccion_Visualizacion_files/figure-html/unnamed-chunk-62-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio - Script
+
+- `EjercicioVizII.R`
+
+---
+
+# Muchas más posibilidades 
+
+https://www.data-to-viz.com/
+
+&lt;iframe src="https://www.data-to-viz.com/" width="90%" height="400px"&gt;&lt;/iframe&gt;
+
+---
+
+# Muchas más posibilidades 
+
+&lt;img src="../Imagenes/GIFPasoaPaso.gif" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Para que revisen 
+
+- `EjemplosViz.html`
+
+&lt;img src="../Imagenes/EjemplosGGPlot.PNG" width="120%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Siguiente clase
+
+- Manejo de datos
+
+&lt;img src="../Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

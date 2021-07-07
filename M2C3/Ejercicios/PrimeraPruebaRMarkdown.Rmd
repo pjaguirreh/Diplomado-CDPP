@@ -1,0 +1,63 @@
+---
+title: "Primer reporte"
+author: "Pablo Aguirre"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+```
+
+# Análisis COVID
+
+```{r}
+datos_covid <- read_csv("../../datos/DatosCovidRegion.csv")
+```
+
+El siguiente gráfico representa la evolución de los casos nuevos de COVID en las distintas regiones de Chile.
+
+```{r, fig.align="center"}
+ggplot(datos_covid, aes(x = fecha, y = casos_nuevos, col = region)) +
+  geom_line(aes(y = casos_nuevos_d), alpha = 0.3) +
+  geom_line() +
+  facet_wrap(vars(region), scales = "free_y") + 
+  theme_void() + theme(legend.position = "none") +
+  labs(title = "¿Segunda ola?", 
+       subtitle = "Casos diarios de COVID-19 en Chile por región",
+       x = NULL, y = NULL) 
+```
+
+```{r}
+dos_semanas_atras <- Sys.Date()-15
+
+max_casos <- datos_covid %>% 
+  filter(region != "Total",
+         fecha >= dos_semanas_atras) %>% 
+  slice_max(casos_nuevos)
+
+num <- c(1:12)
+mes <- c("enero", "febrero", "marzo", "abril", 
+         "mayo", "junio", "julio", "agosto", 
+         "septiembre", "octubre", "noviembre", "diciembre")
+
+diccionario_mes <- bind_cols(Mes = num, Nombre_mes = mes)
+
+mes_max_casos <- diccionario_mes %>% 
+  filter(Mes == month(max_casos$fecha)) %>% 
+  pull(Nombre_mes)
+```
+
+Se ven distintas trayectorias en las regiones del país.
+
+La región que ha presentado el mayor número de casos nuevos en las últimas dos semanas es 
+la región `r max_casos$region` con **`r max_casos$casos_nuevos`** casos el 
+`r day(max_casos$fecha)` de `r mes_max_casos` del `r year(max_casos$fecha)`

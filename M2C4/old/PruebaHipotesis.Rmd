@@ -1,0 +1,1459 @@
+---
+title: "Ciencia de Datos para Políticas Públicas"
+subtitle: "Módulo 2 - Clase 4: Intervalo de confianza / Prueba de hipótesis"
+author: "Pablo Aguirre Hormann"
+date: "06/07/2021"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{css, echo = FALSE}
+#.remark-slide-content {
+#  font-size: 28px;
+#  padding: 20px 80px 20px 80px;
+#}
+#.remark-code, .remark-inline-code {
+#  background: #f0f0f0;
+#}
+.small .remark-code {
+  font-size: 14px;
+}
+
+.smaller .remark-code {
+  font-size: 12px;
+}
+
+.tiny .remark-code {
+  font-size: 11px;
+}
+
+.pull-left2 {
+  float: left;
+  width: 40%;
+}
+
+.pull-right2 {
+  float: right;
+  width: 54%;
+}
+```
+
+```{r setup, include = FALSE, purl = FALSE}
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  fig.align="center",  
+  fig.height=4, #fig.width=6,
+  dpi=300, #fig.path='Figs/',
+  cache=T,#, echo=F, warning=F, message=F,
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE,
+  out.width = "90%"
+  )
+library(tidyverse)
+library(hrbrthemes)
+library(fontawesome)
+library(patchwork)
+library(infer)
+xaringanExtra::use_scribble(pen_size = 1)
+xaringanExtra::use_search(show_icon = FALSE)
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+```
+
+# ¿Qué veremos hoy?
+
+- Visualización de datos
+- Manejo de datos
+- Transformación de datos
+- **<span style="color:red">Inferencia Estadística/Econometría</span>**
+
+```{r, out.width='80%',  echo = FALSE, out.width='750px'}
+knitr::include_graphics("../Imagenes/ProcesoDS.png")
+```
+
+---
+
+# Describir vs Inferir
+
+- 
+- 
+- 
+
+---
+class: inverse, center, middle
+name: reg
+
+# Teorema del Límite Central
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Teorema del límite central
+
+*Si ciertas condiciones se cumplen, las estimaciones muestrales se distribuirán de forma normal con media igual al parámetro poblacional. La dispersión será inversamente proporcional al tamaño muestral*
+
+--
+
+### Población vs Muestra
+
+- **Población**, $N$: grupo bien definido de sujetos (por ejemplo, población de un país).
+- **Muestra**, $n$: Subconjunto de individuos provenientes de una población que se obtienen a través de algún procedimiento de muestreo (ej. muestreo aleatorio simple).
+
+--
+
+Buscamos aprender algo de la **población** a través de una **muestra** (o varias). A esto lo denominamos **inferencia**.
+
+---
+
+# Censo
+
+Asumamos que estos datos corresponden al total del país ( $N=10.000$).
+
+```{r censo, highlight.output = c(3)}
+censo <- read.csv("../datos/muestra_censo_2017.csv")
+str(censo)
+```
+
+Analicemos la variable `edad`.
+
+---
+
+# Distribución de edad
+
+```{r histedad, echo = FALSE}
+censo %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white") +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia")
+```
+
+.center[**Claramente no sigue una distribución normal**]
+
+---
+
+# Sabemos $\mu$ y $\sigma$
+
+Debido a que tenemos la información de todas las personas sabemos cual es el promedio y la desviación estándar de la población.
+
+```{r mediasdpobcenso}
+(datos_poblacion <- censo %>% 
+  summarise(promedio = mean(edad, na.rm = TRUE),
+            sd = sd(edad, na.rm = TRUE)))
+```
+
+--
+
+Pero practicamente nunca sabremos estos parámetros poblacionales, y lo que tenemos que hacer es sacar conclusiones desde **muestras** (hacer estimaciones).
+
+Si sacamos una muestra desde una población y estimamos un parámetro, por ejemplo la media llamamos a esto una **estimación puntual**. A esta estimación la llamaremos $\hat{\mu}$.
+
+---
+
+# Muestras
+
+```{r, echo = FALSE}
+set.seed(1)
+```
+
+Una muestra aleatoria de 100 observaciones ( $n=100$)
+
+```{r samp1}
+censo %>% sample_n(100) %>% 
+  summarise(promedio = mean(edad))
+```
+
+$\hat{\mu}=39.08$
+
+--
+
+Una segunda muestra aleatoria de 100 observaciones ( $n=100$)
+
+```{r samp2}
+censo %>% sample_n(100) %>% 
+  summarise(promedio = mean(edad))
+```
+
+
+$\hat{\mu}=36.15$
+
+--
+
+.center[**¿Qué pasa si repetimos esto muchas veces?**]
+.center[**¿Cómo se distribuyen todas las estimaciones?**]
+
+---
+
+# 10.000 muestras con $n$=100
+
+Sacamos 10.000 muestras aleatorias de **100 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+```{r distpromediocenso, echo = FALSE, out.width="80%"}
+guardar_mediacenso <- replicate(expr = mean(sample(censo$edad, 100)), n = 10000)
+
+guardar_mediacenso %>% 
+  enframe(value = "edad") %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white", bins = 100) +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia") +
+  xlim(29, 43) +
+  ylim(0, 900) +
+  geom_vline(xintercept = mean(censo$edad), 
+             col = "red",
+             size = 1.5) +
+  geom_vline(xintercept = mean(guardar_mediacenso), 
+             col = "blue",
+             lty = 2)
+```
+
+**¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada**.
+
+---
+
+# 10.000 muestras con $n$=200
+
+Sacamos 10.000 muestras aleatorias de **200 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+```{r distpromediocenso11, echo = FALSE, out.width="80%"}
+guardar_mediacenso2 <- replicate(expr = mean(sample(censo$edad, 200)), n = 10000)
+
+guardar_mediacenso2 %>% 
+  enframe(value = "edad") %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white", bins = 100) +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia") +
+  xlim(29, 43) +
+  ylim(0, 900) +
+  geom_vline(xintercept = mean(censo$edad), 
+             col = "red",
+             size = 1.5) +
+  geom_vline(xintercept = mean(guardar_mediacenso2), 
+             col = "blue",
+             lty = 2)
+```
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con $n$=300
+
+Sacamos 10.000 muestras aleatorias de **300 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+```{r distpromediocenso13, echo = FALSE, out.width="80%"}
+guardar_mediacenso3 <- replicate(expr = mean(sample(censo$edad, 300)), n = 10000)
+
+guardar_mediacenso3 %>% 
+  enframe(value = "edad") %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white", bins = 100) +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia") +
+  xlim(29, 43) +
+  ylim(0, 900) +
+  geom_vline(xintercept = mean(censo$edad), 
+             col = "red",
+             size = 1.5) +
+  geom_vline(xintercept = mean(guardar_mediacenso3), 
+             col = "blue",
+             lty = 2)
+```
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con $n$=400
+
+Sacamos 10.000 muestras aleatorias de **400 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+```{r distpromediocenso14, echo = FALSE, out.width="80%"}
+guardar_mediacenso4 <- replicate(expr = mean(sample(censo$edad, 400)), n = 10000)
+
+guardar_mediacenso4 %>% 
+  enframe(value = "edad") %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white", bins = 100) +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia") +
+  xlim(29, 43) +
+  ylim(0, 900) +
+  geom_vline(xintercept = mean(censo$edad), 
+             col = "red",
+             size = 1.5) +
+  geom_vline(xintercept = mean(guardar_mediacenso4), 
+             col = "blue",
+             lty = 2)
+```
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con $n$=500
+
+Sacamos 10.000 muestras aleatorias de **500 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+```{r distpromediocenso15, echo = FALSE, out.width="80%"}
+guardar_mediacenso5 <- replicate(expr = mean(sample(censo$edad, 500)), n = 10000)
+
+guardar_mediacenso5 %>% 
+  enframe(value = "edad") %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white", bins = 100) +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia") +
+  xlim(29, 43) +
+  ylim(0, 900) +
+  geom_vline(xintercept = mean(censo$edad), 
+             col = "red",
+             size = 1.5) +
+  geom_vline(xintercept = mean(guardar_mediacenso5), 
+             col = "blue",
+             lty = 2)
+```
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con $n$=1000
+
+Sacamos 10.000 muestras aleatorias de **1000 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+```{r distpromediocenso2, echo = FALSE, out.width="80%"}
+guardar_mediacenso6 <- replicate(expr = mean(sample(censo$edad, 1000)), n = 10000)
+
+guardar_mediacenso6 %>% 
+  enframe(value = "edad") %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(col = "white", bins = 100) +
+  theme_minimal() +
+  labs(x = "Edad", y = "Frecuencia") +
+  xlim(29, 43) +
+  ylim(0, 900) +
+  geom_vline(xintercept = mean(censo$edad), 
+             col = "red",
+             size = 1.5) +
+  geom_vline(xintercept = mean(guardar_mediacenso6), 
+             col = "blue",
+             lty = 2)
+```
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# Comparar distribuciones muestrales
+
+.pull-left[
+
+$n = 100$
+
+```{r, collapse = TRUE}
+mean(guardar_mediacenso)
+sd(guardar_mediacenso)
+```
+
+$n = 300$
+
+```{r, collapse = TRUE}
+mean(guardar_mediacenso3)
+sd(guardar_mediacenso3)
+```
+
+$n = 500$
+
+```{r, collapse = TRUE}
+mean(guardar_mediacenso5)
+sd(guardar_mediacenso5)
+```
+
+]
+
+.pull-right[
+
+$n = 200$
+
+```{r, collapse = TRUE}
+mean(guardar_mediacenso2)
+sd(guardar_mediacenso2)
+```
+
+$n = 400$
+
+```{r, collapse = TRUE}
+mean(guardar_mediacenso4)
+sd(guardar_mediacenso4)
+```
+
+$n = 1000$
+
+```{r, collapse = TRUE}
+mean(guardar_mediacenso6)
+sd(guardar_mediacenso6)
+```
+
+]
+
+---
+
+# Teorema del límite central
+
+*Si ciertas condiciones se cumplen, las estimaciones muestrales se distribuirán de forma normal con media igual al parámetro poblacional. La dispersión será inversamente proporcional al tamaño muestral*
+
+<br>
+<br>
+
+$$\Large \hat{\mu} \sim aproximadamente\ N(\mu, \frac{\sigma^2}{n})$$
+
+---
+
+# A tener en cuenta
+
+En general, si sacamos una **muestra aleatoria** de tamaño $n$ desde una población $N$, entonces:
+- La muestra es **insesgada** y **representativa** de la población
+- Los resultados basados en la muestra podrían ser **generalizados a la población**.
+- La estimación puntual, $\hat{\mu}$, es una **"buena suposición"** del parametro poblacional desconocido, $\mu$.
+- Entonces, en vez de hacer un censo (costoso en muchos sentidos), podemos hacer **inferencia sobre una población usando muestreo**.
+
+--
+
+```{r sesgo_var, echo = FALSE, out.width="35%"}
+knitr::include_graphics("../Imagenes/sesgo_varianza.jpg")
+```
+
+
+---
+class: inverse, center, middle
+name: reg
+
+# Intervalo de confianza
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Qué acabamos de hacer
+
+- Al hacer muestras repetitivas desde una población pudimos ver que la media de edad se distribuye normalmente. Calculamos la **distribución muestral de la media de `edad`**.
+
+- Al tomar distintas muestras pudimos ver que las estimaciones variaban de muestra en muestra. Esto lo denominamos **variación muestral** y se puede cuantificar usando el **error estándar**, $\frac{\sigma}{\sqrt{n}}$. A mayor $n$ (tamaño muestral), menor error estándar (o estimaciones más precisas).
+
+--
+
+- Ahora bien, en "la vida real" no podremos hacer lo que mostramos ya que generalmente **contaremos con una muestra que sea lo más grande posible**. Además, no sabremos el valor del parámetro real que queremos estimar.
+
+- ¿Cómo podemos considerar los efectos de la variación muestral si tenemos solo una muestra?
+
+- Para esto ocuparemos un método de **remuestreo** conocido como **bootstrapping**. Además, puede ser que no querramos solo una estimación puntual del parámetro a estimar sino que un rango de valores posibles. Este rango de valores es lo que conocemos como **intervalos de confianza**.
+
+---
+
+# ¿Cuál es la edad promedio en Chile?
+
+- Para responder esta pregunta podríamos entrevistar a todas las personas del país y preguntarles su edad (censo).
+
+- Claramente esto es algo muy costoso por lo que normalmente lo que haríamos es tomar una muestra de la población. Digamos que en este caso solo contamos con una muestra, $n$, de 300 obtenida desde la población, $N$, de 10.000.
+
+--
+
+```{r}
+set.seed(1) # para tener los mismos resultados
+(muestra_censo <- censo %>% 
+    sample_n(300) %>% 
+    mutate(Id = row_number()) %>% 
+    select(Id, edad))
+```
+
+---
+
+# Explorar la muestra
+
+.pull-left[
+```{r}
+muestra_censo %>% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(color = "white")
+```
+]
+
+.pull-right[
+```{r}
+(edad_promedio_muestra <- muestra_censo %>% 
+  summarise(promedio_edad = mean(edad, 
+                                 na.rm = TRUE)))
+```
+]
+
+--
+
+- Si estamos dispuestos a asumir que `muestra_censo` es una muestra representativa de nuestra población, entonces una "buena suposición" de la edad promedio de Chile sería **38.13**.
+- $\hat{\mu}=38.13$ es nuestra estimación de $\mu$ (que en la práctica sería desconocido).
+- Antes calculamos los efectos de la variación muestral sacando muchas muestras repetitivamente pero **ahora solo contamos con una muestra**.
+
+---
+
+# Bootstrapping
+
+.pull-left[
+
+1. Consideremos nuestra muestra de $n = 300$ observaciones/personas.
+2. Imaginemos que ponemos 300 papeles con las edades de nuestra muestra en un gorro.
+3. Sacaremos una observación, registraremos su valor (ej. edad = 46) y pondremos de vuelta el papel en el gorro
+4. Repetiremos el paso **3.** tantas veces como sea nuestro $n$. En este caso 300 veces.
+5. Terminaremos con una **remuestra** con $n=300$ creada a partir de nuestra única muestra original, `muestra_censo`
+
+]
+
+.pull-right[
+
+```{r img_bootstrap, echo = FALSE}
+knitr::include_graphics("../Imagenes/Bootstrapping.PNG")
+```
+
+
+]
+
+---
+
+# Bootstrapping
+
+- Lo que acabamos de hacer es una **remuestra** desde la muestra original. No estamos yendo a la población, $N$, a buscar otras $n=300$ personas.
+
+- **¿Por qué volvemos a "poner en el gorro" cada valor remuestrado?** Porque de no hacerlo terminaríamos con exactamente la misma muestra original. Hacer el acto de "devolver" cada papel nos intruduce **variación muestral**.
+
+- En otras palabras, lo que hacemos es un **muestreo con reemplazo** desde la muestra original de 300 observaciones.
+
+```{r}
+set.seed(5)
+censo_muestra_r1 <- muestra_censo %>% 
+  sample_n(300, replace = TRUE)
+```
+
+---
+
+# Analizar la remuestra
+
+Si observamos como se distribuye nuestra muestra original, `muestra_censo`, y la remuestra que acabamos de hacer, `censo_muestra_r1`, vemos que son similares (no idénticas).
+
+.pull-left[
+
+```{r, echo = FALSE}
+ggplot(muestra_censo, aes(x = edad)) +
+  geom_histogram(color = "white") +
+  labs(title = "Muestra original de 300 observaciones")
+
+muestra_censo %>% 
+  summarise(promedio_edad = mean(edad, 
+                                 na.rm = TRUE))
+```
+]
+
+.pull-right[
+```{r, echo = FALSE}
+ggplot(censo_muestra_r1, aes(x = edad)) +
+  geom_histogram(color = "white") +
+  labs(title = "Remuestra de 300 observaciones")
+
+censo_muestra_r1 %>% 
+  summarise(promedio_edad = mean(edad, 
+                                 na.rm = TRUE))
+```
+]
+
+Obtenemos también un promedio distinto al calculado originalmente y esta variación es debido al remuestreo con reemplazo que hicimos. 
+
+¿Qué pasaría si repetimos este ejercicio de remuestreo muchas veces? **Ojo, esto ahora es algo que es factible "en la vida real"**.
+
+---
+
+# Muchas remuestras
+
+1. Consideremos nuestra muestra de $n = 300$ observaciones/personas.
+2. Imaginemos que ponemos 300 papeles con las edades de nuestra muestra en un gorro.
+3. Sacaremos una observación, registraremos su valor (ej. edad = 46) y pondremos de vuelta el papel en el gorro
+4. Repetiremos el paso **3.** tantas veces como sea nuestro $n$. En este caso 300 veces.
+5. Terminaremos con una **remuestra** con $n=300$ creada a partir de nuestra única muestra original, `muestra_censo`
+6. **Hacemos lo anterior 1.000 veces**.
+
+```{r cargar_remuestra}
+guardar_remuestras <- read_csv("../datos/remuestras_edad.csv")
+
+guardar_remuestras
+```
+
+---
+
+# Muchas remuestras
+
+.pull-left[
+```{r resumen_promedioremuestra}
+(promedio_remuestras <- 
+   guardar_remuestras %>%
+      group_by(remuestra) %>%
+      summarise(promedio_edad = mean(edad,
+                                                          na.rm = TRUE)))
+```
+]
+
+--
+
+.pull-right[
+
+```{r graf_promedioremuestra}
+promedio_remuestras %>% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white")
+```
+
+]
+
+---
+
+# ¿Qué hicimos?
+
+- Usamos bootstrap como una forma de representar la variación muestral vista anteriormente.
+- La distribución que vimos recién se denomina **distribución bootstrap** y es una **aproximación de la distribución muestral** de la media.
+- La distribución bootstrap probablemente no tendrá el mismo "centro" que la distribución muestral. En otras palabras, bootstrap no nos permite mejorar la "calidad" de nuestra estimación.
+- Pero, la distribución bootstrap si **tendrá una forma y dispersión similar a la distribución muestral**. Entonces, si nos da una buena estimación del **error estándar**.
+- Este último punto nos permitirá construir **intervalos de confianza**.
+
+---
+
+# Entendiendo intervalos de confianza
+
+.pull-left[
+- Podemos pescar tanto con una **caña** como con una **red**. La red probablemente te permite pescar más pescados que la caña.
+- Digamos que $\mu$, el parámetro a estimar,  es un pescado.
+- Una estimación puntual a partir de una muestra, $\hat{\mu}$, para representar $\mu$ sería como una caña.
+- ¿Cómo sería una red? Tratemos de ver entre que dos valores de `edad` se encuentra el mayor número de estimaciones. ¿Entre 37 y 41? ¿36.5 y 41.5?
+- Esta última idea es lo que llamaremos un **intervalo de confianza**. El intervalo de confianza nos da un **rango de valores posibles**.
+]
+
+.pull-right[
+
+.center[ **Distribución bootstrap** ]
+
+```{r, graf_promediomuestras2, echo = FALSE}
+promedio_remuestras %>% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white")
+```
+]
+
+---
+
+# ¿Qué necesitamos para construir un I.C.?
+
+- Una distribución bootstrap
+- Un nivel de confianza (90%, 95%, 99%). 
+  * A mayor nivel de confianza, los intervalos serán más amplios. 
+    * Normalmente trabajaremos con un nivel de confianza de 95%.
+
+- Construiremos intervalos de confianza a través de dos métodos: 
+  **(i)** método de percentiles
+  **(ii)** método del error estándar.
+
+---
+
+# Método de percentiles
+
+```{r metodo_percentiles}
+(metodo_percentiles <- promedio_remuestras %>% 
+  summarise(percentil_2.5 = quantile(promedio_edad, 0.025), # Calcular percentil 2.5
+            percentil_97.5 = quantile(promedio_edad, 0.975))) # Calcular percentil 97.5
+```
+
+--
+
+.pull-left[
+```{r metodo_percentiles_graf2, echo = FALSE}
+promedio_remuestras %>% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white") +
+  geom_vline(xintercept = c(metodo_percentiles$percentil_2.5, 
+                            metodo_percentiles$percentil_97.5),
+             size = 1)
+```
+]
+
+.pull-right[
+```{r metodo_percentiles_graf, eval = FALSE}
+promedio_remuestras %>% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white") +
+  geom_vline(xintercept = c(metodo_percentiles$percentil_2.5, 
+                            metodo_percentiles$percentil_97.5),
+             size = 1)
+```
+]
+
+---
+
+# Método error estándar
+
+```{r pnormest}
+pnorm(1.96, mean = 0, sd = 1) - pnorm(-1.96, mean = 0, sd = 1)
+```
+
+```{r normest, echo = FALSE, out.width="80%"}
+dnorm(seq(-4,4,length = 100), mean = 0, sd = 1) %>% 
+  enframe() %>% 
+  ggplot(aes(x = seq(-4,4,length = 100), y = value)) +
+  geom_line() +
+  geom_area(data = slice(enframe(dnorm(seq(-4,4,length = 100), mean = 0, sd = 1)), 26:75), aes(x = seq(-4,4,length = 100)[26:75], y = value), fill = "red", alpha = 0.5) +
+  theme_void()
+```
+
+$$\hat{\mu}\pm 1.96 \times EE$$
+
+---
+
+# Método error estándar
+
+```{r metodo_ee}
+(metodo_ee <- promedio_remuestras %>% 
+  summarise(EE = sd(promedio_edad), # Calcular error estándar
+            promedio = mean(promedio_edad)) %>%  # Calcular promedio
+  mutate(lim_inf = promedio - (1.96*EE), # Calcular límite inferior I.C.
+         lim_sup = promedio + (1.96*EE))) # Calcular límite superior I.C.
+```
+
+--
+
+.pull-left[
+```{r metodo_ee_graf, echo = FALSE}
+promedio_remuestras %>% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white") +
+  geom_vline(xintercept = c(metodo_percentiles$percentil_2.5, 
+                            metodo_percentiles$percentil_97.5),
+             size = 1) +
+  geom_vline(xintercept = c(metodo_ee$lim_inf, 
+                            metodo_ee$lim_sup),
+             size = 1, color = "red", linetype = 2)
+```
+]
+
+.pull-right[
+```{r metodo_ee_graf2, eval = FALSE}
+promedio_remuestras %>% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white") +
+  geom_vline(xintercept = c(metodo_percentiles$percentil_2.5, 
+                            metodo_percentiles$percentil_97.5),
+             size = 1) +
+  geom_vline(xintercept = c(metodo_ee$lim_inf, 
+                            metodo_ee$lim_sup),
+             size = 1, color = "red", linetype = 2)
+```
+
+]
+
+
+---
+
+# Paquete **infer**
+
+- `infer` es un paquete para inferencia estadística.
+- Relacionado al `tidyverse`
+
+--
+
+.pull-left[
+```{r}
+muestra_censo %>% 
+  summarise(promedio = mean(edad))
+```
+]
+
+.pull-right[
+```{r}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  calculate(stat = "mean")
+```
+]
+
+--
+
+- El cálculo usando `infer` es más largo. ¿Para qué entonces?
+- Nos presenta "verbos" más ligados a la estadística.
+- Será útil cuando veamos prueba de hipótesis.
+- Es más flexible para cuando queremos hacer inferencia para más de una variable.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+```{r, eval = FALSE}
+muestra_censo %>% 
+  specify(response = edad)
+```
+]
+
+.pull-right[
+```{r, echo = FALSE}
+muestra_censo %>% 
+  specify(response = edad)
+```
+]
+
+- `specify` permite identificar la variable (o variables) sobre la cuál haremos los cálculos.
+- Noten como en la práctica no cambia nada en el `data.frame`. En ese sentido es similar a `group_by`.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+```{r, eval = FALSE}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap")
+```
+]
+
+.pull-right[
+```{r, echo = FALSE}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap")
+```
+]
+
+- `generate` nos permite generar las 1.000 remuestras bootstrap.
+- El resultado tiene 300.000 filas debido a que son 1.000 remuestras de tamaño igual a 300.
+- Se genera una columna "replicate" correspondiente a cada una de las 1.000 remuestras.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+```{r, eval = FALSE}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap") %>% 
+  calculate(stat = "mean")
+```
+]
+
+.pull-right[
+```{r, echo = FALSE}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap") %>% 
+  calculate(stat = "mean")
+```
+]
+
+- Con `calculate` transformamos cada una de las 1.000 remuestras de 300 observaciones, en 1.000 medias.
+- Noten que el resultado son 1.000 filas con una columna correspondiente a cada "replica" y la otra con el cálculo hecho.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+```{r, eval = FALSE}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap") %>% 
+  calculate(stat = "mean") %>% 
+  visualise()
+```
+]
+
+.pull-right[
+```{r, echo = FALSE}
+muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap") %>% 
+  calculate(stat = "mean") %>% 
+  visualise()
+```
+]
+
+--
+
+```{r img_infer, echo = FALSE, out.width="70%"}
+knitr::include_graphics("../Imagenes/Infer.png")
+```
+
+---
+
+# Construir I.C. con **infer**
+
+```{r}
+set.seed(1)
+guardar_remuestras_i <- muestra_censo %>% 
+  specify(response = edad) %>% 
+  generate(reps = 1000, 
+           type = "bootstrap") %>% 
+  calculate(stat = "mean")
+```
+
+--
+
+.pull-left[
+
+### Método percentiles
+
+```{r}
+guardar_remuestras_i %>% 
+  get_confidence_interval(level = 0.95,
+                          type = "percentile")
+```
+]
+
+.pull-right[
+
+### Método error estándar
+
+```{r}
+guardar_remuestras_i %>% 
+  get_confidence_interval(level = 0.95,
+                          type = "se",
+                          point_estimate = edad_promedio_muestra)
+```
+]
+
+---
+
+# Interpretar I.C.
+
+- Ya pudimos construir intervalos de confianza a partir de una muestra tomada desde una población. Ahora podemos evaluar su efectividad.
+
+- La efectividad de un intervalo de confianza se juzga según si este contiene o no el verdadero valor del parámetro poblacional. *¿Capturó la red al pescado?*
+
+- En nuestro ejemplo, ¿nuestros intervalos de confianza, $[35.8, 40.5]$ o $[35.6, 40.6]$, capturan el verdadero promedio de `edad`, $\mu=36.0179$?
+
+- ¡Sí! nuestros intervalos construídos con un 95% de nivel de confianza a partir de una muestra con $n=300$ incluyen al valor real del parámetro poblacional. ¿Ocurrirá esto para todas las muestras que tomemos?
+
+---
+
+# Interpretar I.C.
+
+.pull-left[
+- 100 intervalos de confianza a partir de 100 muestras aleatorias distintas y considerando un nivel de confianza de 95%. 
+
+- La linea negra corresponde al valor real del parámetro poblacional, $\mu$ (edad de la población).
+
+- Las lineas horizontales corresponden a los intervalos de confianza y son de color gris si el intervalo incluye al valor real y rojas si no.
+
+- De los 100 intervalos, 95 incluyen el valor real del parámetro. En otras palabras, un nivel de confianza de 95% significa que de cada 100 intervalos **esperamos** que 95 incluyan $\mu$.
+
+]
+
+.pull-right[
+```{r muchos_ic_95, echo = FALSE, fig.height=10}
+guardar_95 <- data.frame()
+set.seed(4)
+for (i in 1:100){
+  
+  x <- censo %>% 
+    sample_n(100) %>% 
+    specify(response = edad) %>% 
+    generate(reps = 1000, type = "bootstrap") %>% 
+    calculate(stat = "mean") 
+  
+  x_med <- x %>% 
+    summarise(med = mean(stat))
+  
+  x_ci <- x %>% 
+    get_confidence_interval(level = 0.95, type = "percentile") %>% 
+    mutate(rep = i,
+           med = x_med$med, .before = 1)
+  
+  guardar_95 <- bind_rows(guardar_95, x_ci)
+}
+
+guardar_95 %>% 
+  mutate(contiene = ifelse(lower_ci <= datos_poblacion$promedio & upper_ci >= datos_poblacion$promedio, 
+                           "si", "no")) %>%
+  ggplot() +
+  geom_errorbar(aes(x = rep, 
+                    ymin = lower_ci, 
+                    ymax = upper_ci,
+                    color=contiene), width=.1) +
+  geom_point(aes(x = rep, y = med, color = contiene), size = 0.7) +
+  geom_hline(yintercept = datos_poblacion$promedio) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "N° de intervalo de confianza",
+       y = "Edad") +
+  scale_color_manual(values = c("red", "grey"))
+```
+]
+
+---
+
+# Distintos niveles de confianza
+
+.pull-left[
+
+### 95% nivel de confianza
+
+```{r, echo = FALSE, fig.height=7}
+guardar_95 %>% 
+  mutate(contiene = ifelse(lower_ci <= datos_poblacion$promedio & upper_ci >= datos_poblacion$promedio, 
+                           "si", "no")) %>%
+  ggplot() +
+  geom_errorbar(aes(x = rep, 
+                    ymin = lower_ci, 
+                    ymax = upper_ci,
+                    color=contiene), width=.1) +
+  geom_point(aes(x = rep, y = med, color = contiene), size = 0.7) +
+  geom_hline(yintercept = datos_poblacion$promedio) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "N° de intervalo de confianza",
+       y = "Edad") +
+  scale_color_manual(values = c("red", "grey")) +
+  ylim(25, 50)
+```
+
+]
+
+.pull-right[
+
+### 90% nivel de confianza
+
+```{r muchos_ic_90, echo = FALSE, fig.height=7}
+guardar_90 <- data.frame()
+set.seed(5)
+for (i in 1:100){
+  
+  x <- censo %>% 
+    sample_n(100) %>% 
+    specify(response = edad) %>% 
+    generate(reps = 1000, type = "bootstrap") %>% 
+    calculate(stat = "mean") 
+  
+  x_med <- x %>% 
+    summarise(med = mean(stat))
+  
+  x_ci <- x %>% 
+    get_confidence_interval(level = 0.9, type = "percentile") %>% 
+    mutate(rep = i,
+           med = x_med$med, .before = 1)
+  
+  guardar_90 <- bind_rows(guardar_90, x_ci)
+}
+
+guardar_90 %>% 
+  mutate(contiene = ifelse(lower_ci <= datos_poblacion$promedio & upper_ci >= datos_poblacion$promedio, 
+                           "si", "no")) %>%
+  ggplot() +
+  geom_errorbar(aes(x = rep, 
+                    ymin = lower_ci, 
+                    ymax = upper_ci,
+                    color=contiene), width=.1) +
+  geom_point(aes(x = rep, y = med, color = contiene), size = 0.7) +
+  geom_hline(yintercept = datos_poblacion$promedio) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "N° de intervalo de confianza",
+       y = "Edad") +
+  scale_color_manual(values = c("red", "grey")) +
+  ylim(25, 50)
+```
+
+]
+
+.center[**Mayores niveles de confianza llevan a intervalos más amplios**]
+
+---
+
+# Distintos $n$
+
+```{r ic_distintos_n, echo = FALSE}
+guardar_95_100 <- data.frame()
+set.seed(4)
+for (i in 1:100){
+  
+  x <- censo %>% 
+    sample_n(100) %>% 
+    specify(response = edad) %>% 
+    generate(reps = 1000, type = "bootstrap") %>% 
+    calculate(stat = "mean") 
+  
+  x_med <- x %>% 
+    summarise(med = mean(stat))
+  
+  x_ci <- x %>% 
+    get_confidence_interval(level = 0.95, type = "percentile") %>% 
+    mutate(rep = i,
+           med = x_med$med, .before = 1)
+  
+  guardar_95_100 <- bind_rows(guardar_95_100, x_ci)
+}
+
+
+guardar_95_1000 <- data.frame()
+set.seed(4)
+for (i in 1:100){
+  
+  x <- censo %>% 
+    sample_n(1000) %>% 
+    specify(response = edad) %>% 
+    generate(reps = 1000, type = "bootstrap") %>% 
+    calculate(stat = "mean") 
+  
+  x_med <- x %>% 
+    summarise(med = mean(stat))
+  
+  x_ci <- x %>% 
+    get_confidence_interval(level = 0.95, type = "percentile") %>% 
+    mutate(rep = i,
+           med = x_med$med, .before = 1)
+  
+  guardar_95_1000 <- bind_rows(guardar_95_1000, x_ci)
+}
+```
+
+.pull-left[
+
+### $n=100$
+
+```{r, echo = FALSE, fig.height=7}
+guardar_95_100 %>% 
+  mutate(contiene = ifelse(lower_ci <= datos_poblacion$promedio & upper_ci >= datos_poblacion$promedio, 
+                           "si", "no")) %>%
+  ggplot() +
+  geom_errorbar(aes(x = rep, 
+                    ymin = lower_ci, 
+                    ymax = upper_ci,
+                    color=contiene), width=.1) +
+  geom_point(aes(x = rep, y = med, color = contiene), size = 0.7) +
+  geom_hline(yintercept = datos_poblacion$promedio) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "N° de intervalo de confianza",
+       y = "Edad") +
+  scale_color_manual(values = c("red", "grey")) +
+  ylim(25, 50)
+```
+]
+
+.pull-right[
+
+### $n=1000$
+
+```{r, echo = FALSE, fig.height=7}
+guardar_95_1000 %>% 
+  mutate(contiene = ifelse(lower_ci <= datos_poblacion$promedio & upper_ci >= datos_poblacion$promedio, 
+                           "si", "no")) %>%
+  ggplot() +
+  geom_errorbar(aes(x = rep, 
+                    ymin = lower_ci, 
+                    ymax = upper_ci,
+                    color=contiene), width=.1) +
+  geom_point(aes(x = rep, y = med, color = contiene), size = 0.7) +
+  geom_hline(yintercept = datos_poblacion$promedio) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "N° de intervalo de confianza",
+       y = "Edad") +
+  scale_color_manual(values = c("red", "grey")) +
+  ylim(25, 50)
+```
+]
+
+.center[**Mayores tamaños muestrales llevan a intervalos más angostos**]
+
+---
+
+# Intervalos de confianza
+
+- Como dijimos, "un nivel de confianza de 95% significa que de cada 100 intervalos que pudieramos construir, **esperaríamos** que 95 incluyan $\mu$."
+
+- No es lo mismo que decir "hay un 95% de probabilidad de que el intervalo de confianza contenga a $\mu$.
+
+---
+
+# I.C. basados en teoría
+
+- Hasta este momento nuestros I.C. se construyeron usando el método de percentiles o el de error estándar.
+- 
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Ejercicio
+
+---
+class: inverse, center, middle
+name: reg
+
+# Prueba de hipótesis
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Un caso real
+
+- Un estudio de 1974 estudió el efecto que el sexo (masculino/femenino) en las posibilidades de ser ascendido en un trabajo.
+
+- A 48 supervisores de una industria se les pidió que asumieran el rol de un director de RRHH y se les entregó **un CV** para que decidieran si es que el o la candidato/a debiera ser ascendido/a.
+
+--
+
+- Los 48 CV eran exactamente iguales con excepción del nombre. A 24 de las personas se les dieron CVs con solo nombres "típicos de hombres" y al otro grupo de 24 solo con nombres "típicos de mujeres".
+
+- Considerando la asignación aleatoria y la posibilidad de que el CV sea "hombre" o "mujer" solamente, este experimento serviría como una aproximación para aislar el efecto del sexo de una persona en ser o no ascendido/a.
+
+--
+
+.smaller[
+```{r}
+ascensos <- read_csv("../datos/ascensos.csv")
+glimpse(ascensos)
+```
+]
+
+---
+
+# Resultados
+
+.pull-left[
+- De los 24 CVs con nombres de **hombre**, **21 fueron ascendidos** (87.5%).
+- De los 24 CVs con nombres de **mujer**, **14 fueron ascendidas** (58.3%).
+- 29.2 puntos % de diferencia entre hombres y mujeres.
+
+]
+
+.pull-right[
+.smaller[
+```{r}
+ascensos %>% 
+  group_by(sexo, decision) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = sexo, y = n, fill = decision)) +
+  geom_col() +
+  labs(x = "Sexo en el CV")
+```
+]
+]
+
+--
+
+- *¿Es esta evidencia concluyente de que en esta industria existe discriminación contra las mujeres a la hora de realizar ascensos laborales?*
+- *¿Podría ser esta diferencia solo "por casualidad" en un mundo hipotético donde no existe discriminación?*
+
+---
+
+# Mundo hipotético
+
+- Imaginemos un mundo donde la discriminación laboral hacia las mujeres no existe. Entonces, el ser mujer u hombre no tiene ninguna influencia en si alguien es o no ascendido/a.
+
+
+---
+
+# a
+
+
+
+---
+
+# a
+
+
+
+---
+
+# a
+
+
+
+---
+
+# a
+
+
+
+---
+
+# a
+
+
+
+---
+
+# a
+
+
+
+---
+ 
+# Prueba de hipótesis
+
+**Pregunta de investigación**: ¿Existen vacas rosadas?
+
+--
+
+### Hipótesis
+
+- Hipótesis **nula**: No existen vacas rosadas
+- Hipótesis **alternativa**: Existe al menos una vaca rosada
+
+--
+
+### Procedimiento para probar la hipótesis
+
+Buscaremos evidencia en contra de la hipótesis nula.
+
+- Si encontramos evidencia en contra de la hipótesis nula (al menos una vaca rosada), entonces podemos concluir que la hipótesis nula es falsa. En ese caso **rechazamos la hipótesis nula**.
+
+- Si no encontramos evidencia en contra de la hipótesis nula, entonces **no rechazamos la hipótesis nula**. Podemos seguir buscando evidencia en contra de la hipótesis nula por lo que nunca hablaremos de aceptar la hipótesis nula.
+
+---
+
+# Otro ejemplo
+
+**Pregunta de investigación**: ¿Hay algún problema con mi celular?
+
+--
+
+### Hipótesis
+
+- Hipótesis **nula**: No hay ningún problema con mi celular
+- Hipótesis **alternativa**: Hay al menos un problema con mi celular
+
+--
+
+### Buscar evidencia
+
+- Revisar si la pantalla está rota
+- Revisar si la batería dura poco
+- Revisar si el celular anda muy lento
+
+--
+
+### Conlusión 
+
+No se detectan problemas.
+
+- No se rechaza la hipótesis nula
+- **No se puede** concluir que no hay problemas con el celular
+- Solo se puede decir que no hay evidencia en contra de la hipótesis nula
+
+---
+
+# Un ejemplo más
+
+**Pregunta de investigación**: ¿Se trago un juguete el perro?
+
+--
+
+### Hipótesis
+
+- Hipótesis **nula**: No hay ningún objeto extraño en el cuerpo del perro
+- Hipótesis **alternativa**: Hay al menos un objeto extraño en el cuerpo del perro
+
+--
+
+### Buscar evidencia
+
+- Rayos X
+
+--
+
+### Conlusión 
+
+No se ve nada raro en los rayos X.
+
+- No podemos rechazar la hipótesis nula
+- Tampoco podemos concluir que la hipótesis nula es cierta. **No** aceptamos la hipótesis nula.
+
+---
+
+# Entonces
+
+- La hipótesis nula es siempre sobre la ausencia de algo: **no** hay vacas rosadas, **no** hay problemas con el celular, **no** hay un objecto raro en el perro.
+
+--
+
+- **Nunca** aceptamos la hipótesis nula. O bien la rechazamos o no la rechazamos.
+
+--
+
+- Siempre empezamos una prueba de hipótesis con el supuesto de que la hipótesis nula es cierta y buscaremos evidencia en contra de esta.
+
+---
+class: inverse, center, middle
+name: reg
+
+# Notación
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Notación prueba de hipótesis
+
+**Pregunta de investigación**: ¿Los estudiantes de la UAI duermen en promedio 8 horas cada noche?
+
+.pull-left[
+
+$$H_0:\mu=8$$
+$$H_A:\mu\neq 8$$
+
+]
+
+.pull-right[
+
+$$H_0:\mu-8=0$$
+$$H_A:\mu-8\neq 0$$
+
+]
+
+---
+
+# a
+
+---
+
+# a
+
+---
+
+# a
+
+---
+
+# a

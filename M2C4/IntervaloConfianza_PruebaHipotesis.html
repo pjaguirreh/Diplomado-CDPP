@@ -1,0 +1,2446 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Ciencia de Datos para Políticas Públicas</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pablo Aguirre Hormann" />
+    <meta name="date" content="2021-06-07" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":1,"eraser_size":10}) })</script>
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":false,"autoSearch":true}) })</script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Ciencia de Datos para Políticas Públicas
+## Módulo 2 - Clase 4: Intervalo de confianza / Prueba de hipótesis
+### Pablo Aguirre Hormann
+### 06/07/2021
+
+---
+
+
+&lt;style type="text/css"&gt;
+#.remark-slide-content {
+#  font-size: 28px;
+#  padding: 20px 80px 20px 80px;
+#}
+#.remark-code, .remark-inline-code {
+#  background: #f0f0f0;
+#}
+.small .remark-code {
+  font-size: 14px;
+}
+
+.smaller .remark-code {
+  font-size: 12px;
+}
+
+.tiny .remark-code {
+  font-size: 11px;
+}
+
+.pull-left2 {
+  float: left;
+  width: 40%;
+}
+
+.pull-right2 {
+  float: right;
+  width: 54%;
+}
+&lt;/style&gt;
+
+
+
+# ¿Qué veremos hoy?
+
+- Visualización de datos
+- Manejo de datos
+- Transformación de datos
+- **&lt;span style="color:red"&gt;Inferencia Estadística/Econometría&lt;/span&gt;**
+  + &lt;span style="color:red"&gt;Intervalos de confianza&lt;/span&gt;
+  + &lt;span style="color:red"&gt;Prueba de hipótesis&lt;/span&gt;
+
+&lt;img src="../Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Describir vs Inferir
+
+- La estadística descriptiva es una rama que apunta a **resumir información** de la mejor manera. 
+
+- Es decir, reducir datos a un par de indicadores y/o visualizaciones tratando de perder la menor cantidad de información.
+
+- La estadística descriptiva **no conlleva incertidumbre** ya que no buscamos extrapolar estas descripciones a otros datos.
+
+--
+
+- Por otro lado, la estadística inferencial busca **obtener conclusiones/aprendizajes** sobre algún fenómeno usando muestras.
+
+- En otras palabras, usamos información de una **muestra** para concluir algo sobre una **población**.
+
+- Dos de las herramientas más importantes en la estadística inferencial son los &lt;span style="color:red"&gt;**intervalos de confianza**&lt;/span&gt; y las &lt;span style="color:red"&gt;**pruebas de hipótesis**&lt;/span&gt;.
+
+---
+
+# Pie para la próxima clase
+
+&lt;img src="../Imagenes/RegOutput.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Teorema del Límite Central (TLC)
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+(y Ley de los Grandes Números - LGN)
+
+---
+
+# TLC/LGN
+
+*Si ciertas condiciones se cumplen, las estimaciones muestrales se distribuirán de forma normal con media igual al parámetro poblacional. La dispersión será inversamente proporcional al tamaño muestral*
+
+### Población vs Muestra
+
+- **Población**, `\(N\)`: grupo bien definido de sujetos (por ejemplo, población de un país).
+- **Muestra**, `\(n\)`: Subconjunto de individuos provenientes de una población que se obtienen a través de algún procedimiento de muestreo (ej. muestreo aleatorio simple).
+
+---
+
+# Censo
+
+Asumamos que estos datos corresponden al total del país ( `\(N=10.000\)`).
+
+
+```r
+censo &lt;- read_csv("../datos/muestra_censo_2017.csv")
+str(censo)
+```
+
+```
+## tibble [10,000 x 4] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+##  $ x           : num [1:10000] 1 2 3 4 5 6 7 8 9 10 ...
+*##  $ edad        : num [1:10000] 35 37 59 29 76 65 25 16 49 35 ...
+##  $ sexo        : chr [1:10000] "M" "H" "H" "M" ...
+##  $ p_originario: chr [1:10000] "no" "no" "no" "no" ...
+##  - attr(*, "spec")=
+##   .. cols(
+##   ..   x = col_double(),
+##   ..   edad = col_double(),
+##   ..   sexo = col_character(),
+##   ..   p_originario = col_character()
+##   .. )
+```
+
+Analicemos la variable `edad`.
+
+---
+
+# Distribución de edad
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/histedad-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+.center[**Claramente no sigue una distribución normal**]
+
+---
+
+# Sabemos `\(\mu\)` y `\(\sigma\)`
+
+Debido a que tenemos la información de todas las personas sabemos cual es el promedio y la desviación estándar de la población.
+
+
+```r
+(datos_poblacion &lt;- censo %&gt;% 
+  summarise(promedio = mean(edad, na.rm = TRUE),
+            sd = sd(edad, na.rm = TRUE)))
+```
+
+```
+##   promedio       sd
+## 1  36.0179 22.14836
+```
+
+Pero **practicamente nunca sabremos estos parámetros poblacionales**, y lo que tenemos que hacer es sacar conclusiones desde **muestras** (hacer estimaciones).
+
+Si sacamos una muestra desde una población y estimamos un parámetro, por ejemplo la media llamamos a esto una **estimación puntual**. A esta estimación la llamaremos `\(\hat{\mu}\)`.
+
+---
+
+# Muestras
+
+
+
+**Una muestra** aleatoria de 100 observaciones ( `\(n=100\)`)
+
+
+```r
+censo %&gt;% sample_n(100) %&gt;% 
+  summarise(promedio = mean(edad))
+```
+
+```
+##   promedio
+## 1    39.08
+```
+
+`\(\hat{\mu}=39.08\)`
+
+--
+
+**Una segunda muestra** aleatoria de 100 observaciones ( `\(n=100\)`)
+
+
+```r
+censo %&gt;% sample_n(100) %&gt;% 
+  summarise(promedio = mean(edad))
+```
+
+```
+##   promedio
+## 1    36.15
+```
+
+
+`\(\hat{\mu}=36.15\)`
+
+.center[**¿Qué pasa si repetimos esto muchas veces?**]
+.center[**¿Cómo se distribuyen todas las estimaciones?**]
+
+---
+
+# 10.000 muestras con `\(n\)`=100
+
+Sacamos **10.000 muestras aleatorias de 100 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/distpromediocenso-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+**¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada**.
+
+---
+
+# 10.000 muestras con `\(n\)`=200
+
+Sacamos **10.000 muestras aleatorias de 200 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/distpromediocenso11-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con `\(n\)`=300
+
+Sacamos **10.000 muestras aleatorias de 300 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/distpromediocenso13-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con `\(n\)`=400
+
+Sacamos **10.000 muestras aleatorias de 400 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/distpromediocenso14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con `\(n\)`=500
+
+Sacamos **10.000 muestras aleatorias de 500 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/distpromediocenso15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# 10.000 muestras con `\(n\)`=1000
+
+Sacamos **10.000 muestras aleatorias de 1000 individuos**, calculamos el promedio de edad para cada muestra, y graficamos la distribución de cada uno de los promedios calculados:
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/distpromediocenso2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+¡La distribución de las estimaciones de cada muestra aproximan una distribución normal con media igual a la media poblacional! Decimos entonces, que nuestra estimación es insesgada. **¡Y a mayor tamaño muestral menor la dispersión!**
+
+---
+
+# Comparar distribuciones muestrales
+
+.pull-left[
+
+`\(n = 100\)`
+
+
+```r
+mean(guardar_mediacenso)
+## [1] 35.99654
+sd(guardar_mediacenso)
+## [1] 2.212659
+```
+
+`\(n = 300\)`
+
+
+```r
+mean(guardar_mediacenso3)
+## [1] 36.02401
+sd(guardar_mediacenso3)
+## [1] 1.248814
+```
+
+`\(n = 500\)`
+
+
+```r
+mean(guardar_mediacenso5)
+## [1] 36.02631
+sd(guardar_mediacenso5)
+## [1] 0.9569096
+```
+
+]
+
+.pull-right[
+
+`\(n = 200\)`
+
+
+```r
+mean(guardar_mediacenso2)
+## [1] 36.02233
+sd(guardar_mediacenso2)
+## [1] 1.565967
+```
+
+`\(n = 400\)`
+
+
+```r
+mean(guardar_mediacenso4)
+## [1] 36.03845
+sd(guardar_mediacenso4)
+## [1] 1.091304
+```
+
+`\(n = 1000\)`
+
+
+```r
+mean(guardar_mediacenso6)
+## [1] 36.0231
+sd(guardar_mediacenso6)
+## [1] 0.6589096
+```
+
+]
+
+---
+
+# TLC/LGN
+
+*Si ciertas condiciones se cumplen, las estimaciones muestrales se distribuirán de forma normal con media igual al parámetro poblacional. La dispersión será inversamente proporcional al tamaño muestral*
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\Large \hat{\mu} \sim aproximadamente\ \mathcal{N}(\mu, \frac{\sigma^2}{n})$$`
+
+&lt;br&gt;
+&lt;br&gt;
+
+`\(\sqrt{\frac{\sigma^2}{n}}=\frac{\sigma}{\sqrt{n}}=error\ estándar\)`
+
+---
+
+# A tener en cuenta
+
+En general, si sacamos una **muestra aleatoria** de tamaño `\(n\)` desde una población `\(N\)`, entonces:
+- La muestra es **insesgada** y **representativa** de la población. Y a mayor `\(n\)` menor dispersión.
+- Los resultados basados en la muestra podrían ser **generalizados a la población**.
+- La estimación puntual, `\(\hat{\mu}\)`, es una **"buena suposición"** del parametro poblacional desconocido, `\(\mu\)`.
+- Entonces, en vez de hacer un censo (costoso en muchos sentidos), podemos hacer **inferencia sobre una población usando muestreo**.
+
+--
+
+&lt;img src="../Imagenes/sesgo_varianza.jpg" width="30%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: inverse, center, middle
+name: reg
+
+# Intervalo de confianza
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# ¿Qué acabamos de hacer?
+
+- Al hacer muestras repetitivas desde una población, obtenemos la **distribución muestral de la media de `edad`** y podemos ver que se distribuye normalmente.
+
+- Al tomar distintas muestras pudimos ver que las estimaciones puntuales variaban. Esto lo denominamos **variación muestral** y se puede cuantificar usando el **error estándar**. A mayor `\(n\)` (tamaño muestral), menor error estándar (o estimaciones más precisas).
+
+--
+
+- Ahora bien, en "la vida real" no podremos hacer lo que mostramos ya que generalmente **contaremos con una muestra (que ojalá sea lo más grande posible)**. Además, no sabremos el valor del parámetro real que queremos estimar.
+
+- &lt;span style="color:red"&gt;¿Cómo podemos considerar los efectos de la variación muestral si -usualmente- tenemos solo una muestra?&lt;/span&gt;
+
+- Para esto ocuparemos un **método de remuestreo** conocido como **bootstrapping**. Esto nos permitirá también obtener un rango de valores posibles para nuestro parámetro. Este rango de valores es lo que conocemos como **intervalos de confianza**.
+
+---
+
+# Asumamos que no sabemos `\(\mu\)`
+
+### ¿Cuál es la edad promedio en Chile?
+
+- Para responder esta pregunta podríamos entrevistar a todas las personas del país y preguntarles su edad (censo).
+
+- Claramente esto es algo muy costoso por lo que normalmente lo que haríamos es **tomar una muestra de la población**. Digamos que en este caso solo contamos con una muestra, `\(n\)`, de **300 personas** obtenida desde la población, `\(N\)`, de 10.000.
+
+--
+
+.pull-left[
+.small[
+
+```r
+set.seed(1) # para tener los mismos resultados
+(muestra_censo &lt;- censo %&gt;% 
+    sample_n(300) %&gt;% 
+    mutate(Id = row_number()) %&gt;% 
+    select(Id, edad))
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+##      Id edad
+## 1     1   89
+## 2     2   51
+## 3     3   48
+## 4     4    8
+## 5     5   38
+## 6     6   17
+## 7     7   18
+## 8     8   23
+## 9     9   38
+## 10   10   27
+## 11   11    9
+## 12   12   91
+## 13   13   86
+## 14   14   28
+## 15   15   59
+## 16   16   48
+## 17   17   76
+## 18   18   14
+## 19   19    3
+## 20   20   29
+## 21   21   11
+## 22   22    3
+## 23   23   53
+## 24   24   80
+## 25   25   58
+## 26   26   23
+## 27   27    7
+## 28   28   24
+## 29   29   18
+## 30   30   44
+## 31   31   12
+## 32   32   49
+## 33   33   50
+## 34   34   36
+## 35   35   28
+## 36   36   19
+## 37   37   66
+## 38   38   79
+## 39   39   38
+## 40   40   23
+## 41   41   29
+## 42   42   10
+## 43   43   19
+## 44   44   25
+## 45   45   39
+## 46   46   20
+## 47   47   62
+## 48   48   28
+## 49   49   56
+## 50   50   47
+## 51   51   76
+## 52   52   45
+## 53   53   38
+## 54   54   31
+## 55   55   32
+## 56   56   57
+## 57   57   43
+## 58   58   61
+## 59   59   47
+## 60   60    6
+## 61   61    9
+## 62   62   17
+## 63   63   45
+## 64   64   21
+## 65   65   56
+## 66   66   31
+## 67   67   50
+## 68   68   23
+## 69   69   42
+## 70   70    0
+## 71   71   59
+## 72   72   68
+## 73   73   58
+## 74   74   62
+## 75   75    5
+## 76   76    4
+## 77   77    6
+## 78   78   59
+## 79   79   24
+## 80   80   37
+## 81   81   12
+## 82   82   83
+## 83   83   44
+## 84   84   58
+## 85   85   49
+## 86   86   67
+## 87   87   65
+## 88   88   45
+## 89   89   40
+## 90   90   32
+## 91   91   59
+## 92   92   36
+## 93   93   15
+## 94   94   27
+## 95   95   46
+## 96   96   42
+## 97   97   58
+## 98   98   52
+## 99   99   26
+## 100 100   84
+## 101 101   74
+## 102 102    4
+## 103 103   41
+## 104 104   53
+## 105 105   62
+## 106 106   45
+## 107 107   56
+## 108 108   44
+## 109 109   32
+## 110 110    1
+## 111 111   43
+## 112 112   61
+## 113 113   27
+## 114 114   16
+## 115 115   27
+## 116 116   53
+## 117 117   51
+## 118 118   49
+## 119 119   43
+## 120 120   49
+## 121 121   27
+## 122 122    8
+## 123 123   26
+## 124 124   24
+## 125 125   30
+## 126 126   47
+## 127 127   33
+## 128 128   12
+## 129 129   37
+## 130 130   69
+## 131 131   52
+## 132 132    9
+## 133 133   56
+## 134 134   31
+## 135 135   27
+## 136 136   68
+## 137 137   21
+## 138 138   31
+## 139 139   66
+## 140 140   23
+## 141 141   23
+## 142 142   40
+## 143 143   40
+## 144 144   18
+## 145 145   24
+## 146 146   50
+## 147 147   29
+## 148 148   15
+## 149 149   34
+## 150 150   29
+## 151 151   28
+## 152 152   12
+## 153 153   48
+## 154 154   20
+## 155 155   24
+## 156 156   10
+## 157 157   17
+## 158 158   21
+## 159 159   47
+## 160 160   18
+## 161 161   63
+## 162 162   16
+## 163 163   15
+## 164 164    3
+## 165 165   37
+## 166 166   28
+## 167 167   35
+## 168 168   27
+## 169 169   16
+## 170 170   16
+## 171 171   37
+## 172 172   86
+## 173 173   79
+## 174 174   67
+## 175 175   58
+## 176 176   26
+## 177 177   79
+## 178 178   64
+## 179 179   14
+## 180 180   30
+## 181 181   15
+## 182 182   39
+## 183 183   40
+## 184 184   49
+## 185 185    5
+## 186 186   32
+## 187 187   24
+## 188 188   70
+## 189 189    2
+## 190 190   33
+## 191 191   52
+## 192 192   74
+## 193 193   46
+## 194 194   48
+## 195 195   39
+## 196 196   62
+## 197 197    6
+## 198 198   52
+## 199 199   11
+## 200 200   69
+## 201 201    0
+## 202 202   30
+## 203 203   57
+## 204 204   30
+## 205 205    7
+## 206 206   26
+## 207 207   26
+## 208 208   51
+## 209 209   41
+## 210 210    7
+## 211 211   48
+## 212 212   48
+## 213 213   23
+## 214 214   45
+## 215 215    6
+## 216 216   35
+## 217 217   40
+## 218 218   48
+## 219 219   13
+## 220 220   43
+## 221 221   60
+## 222 222   66
+## 223 223    4
+## 224 224   53
+## 225 225   11
+## 226 226    2
+## 227 227   63
+## 228 228   46
+## 229 229   75
+## 230 230   58
+## 231 231    4
+## 232 232   27
+## 233 233   46
+## 234 234   28
+## 235 235   41
+## 236 236   58
+## 237 237   55
+## 238 238   39
+## 239 239   61
+## 240 240   30
+## 241 241   30
+## 242 242   32
+## 243 243   34
+## 244 244   11
+## 245 245   50
+## 246 246   21
+## 247 247   80
+## 248 248   72
+## 249 249    0
+## 250 250   53
+## 251 251   49
+## 252 252   29
+## 253 253   10
+## 254 254   48
+## 255 255   87
+## 256 256   83
+## 257 257   21
+## 258 258   44
+## 259 259   28
+## 260 260   29
+## 261 261   27
+## 262 262   19
+## 263 263   14
+## 264 264   63
+## 265 265   26
+## 266 266   12
+## 267 267    6
+## 268 268   42
+## 269 269   59
+## 270 270    6
+## 271 271   48
+## 272 272   17
+## 273 273   27
+## 274 274   62
+## 275 275   78
+## 276 276   74
+## 277 277   60
+## 278 278   37
+## 279 279   54
+## 280 280   25
+## 281 281   69
+## 282 282   53
+## 283 283   24
+## 284 284   85
+## 285 285   65
+## 286 286    7
+## 287 287   17
+## 288 288   57
+## 289 289    5
+## 290 290   40
+## 291 291   27
+## 292 292    0
+## 293 293   27
+## 294 294   53
+## 295 295  100
+## 296 296   59
+## 297 297   74
+## 298 298   73
+## 299 299   26
+## 300 300   12
+```
+]
+]
+
+---
+
+# Explorar la muestra
+
+.pull-left[
+
+```r
+muestra_censo %&gt;% 
+  ggplot(aes(x = edad)) +
+  geom_histogram(color = "white")
+```
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+.small[
+
+```r
+(edad_promedio_muestra &lt;- muestra_censo %&gt;% 
+  summarise(promedio_edad = mean(edad, 
+                                 na.rm = TRUE)))
+```
+
+```
+##   promedio_edad
+## 1      38.12667
+```
+]
+]
+
+- Si estamos dispuestos a asumir que `muestra_censo` es una muestra representativa de nuestra población, entonces **una "buena suposición" de la edad promedio** de Chile sería **38.13**.
+- `\(\hat{\mu}=38.13\)` es nuestra estimación de `\(\mu\)` (que en la práctica sería desconocido).
+- Antes calculamos los efectos de la variación muestral sacando muchas muestras repetitivamente pero **ahora solo contamos con una muestra**.
+
+---
+
+# Bootstrapping
+
+.pull-left[
+
+1. Consideremos nuestra muestra de `\(n = 300\)` observaciones/personas.
+2. Imaginemos que ponemos 300 papeles con las edades de nuestra muestra en un gorro.
+3. Sacaremos una observación, registraremos su valor (ej. edad = 46) y **pondremos de vuelta el papel** en el gorro
+4. **Repetiremos el paso 3.** tantas veces como sea nuestro `\(n\)`. En este caso 300 veces.
+5. Terminaremos con una **remuestra** con `\(n=300\)` creada a partir de nuestra única muestra original, `muestra_censo`
+
+]
+
+.pull-right[
+
+&lt;img src="../Imagenes/Bootstrapping.PNG" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+
+# Bootstrapping
+
+- Lo que acabamos de hacer es una **remuestra** desde la muestra original. No estamos yendo a la población, `\(N\)`, a buscar otras `\(n=300\)` personas.
+
+- **¿Por qué volvemos a "poner en el gorro" cada valor remuestrado?** Porque de no hacerlo terminaríamos con exactamente la misma muestra original. Hacer el acto de "devolver" cada papel nos intruduce **variación muestral**.
+
+- En otras palabras, lo que hacemos es un **muestreo con reemplazo** desde la muestra original de 300 observaciones.
+
+
+```r
+set.seed(5)
+censo_muestra_r1 &lt;- muestra_censo %&gt;% 
+  sample_n(300, 
+*          replace = TRUE)
+```
+
+---
+
+# Analizar la remuestra
+
+Si observamos como se distribuye nuestra muestra original, `muestra_censo`, y la remuestra que acabamos de hacer, `censo_muestra_r1`, vemos que son similares (no idénticas).
+
+.pull-left[
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-15-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+```
+##   promedio_edad
+## 1      38.12667
+```
+]
+
+.pull-right[
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-16-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+```
+##   promedio_edad
+## 1      38.22667
+```
+]
+
+Obtenemos también un promedio distinto al calculado originalmente y esta **variación es debido al remuestreo con reemplazo** que hicimos. 
+
+¿Qué pasaría si repetimos este ejercicio de remuestreo muchas veces? **Ojo, esto si es algo factible "en la vida real"**.
+
+---
+
+# Muchas remuestras
+
+1. Consideremos nuestra muestra de `\(n = 300\)` observaciones/personas.
+2. Imaginemos que ponemos 300 papeles con las edades de nuestra muestra en un gorro.
+3. Sacaremos una observación, registraremos su valor (ej. edad = 46) y pondremos de vuelta el papel en el gorro
+4. Repetiremos el paso **3.** tantas veces como sea nuestro `\(n\)`. En este caso 300 veces.
+5. Terminaremos con una **remuestra** con `\(n=300\)` creada a partir de nuestra única muestra original, `muestra_censo`
+6. **Hacemos lo anterior 1.000 veces**.
+
+&lt;img src="../Imagenes/Infer0.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Muchas remuestras
+
+1. Consideremos nuestra muestra de `\(n = 300\)` observaciones/personas.
+2. Imaginemos que ponemos 300 papeles con las edades de nuestra muestra en un gorro.
+3. Sacaremos una observación, registraremos su valor (ej. edad = 46) y pondremos de vuelta el papel en el gorro
+4. Repetiremos el paso **3.** tantas veces como sea nuestro `\(n\)`. En este caso 300 veces.
+5. Terminaremos con una **remuestra** con `\(n=300\)` creada a partir de nuestra única muestra original, `muestra_censo`
+6. **Hacemos lo anterior 1.000 veces**.
+
+
+```r
+(guardar_remuestras &lt;- read_csv("../datos/remuestras_edad.csv"))
+```
+
+```
+## # A tibble: 300,000 x 2
+##     edad remuestra
+##    &lt;dbl&gt;     &lt;dbl&gt;
+##  1    35         1
+##  2    37         1
+##  3    26         1
+##  4     6         1
+##  5    24         1
+##  6    49         1
+##  7    60         1
+##  8    14         1
+##  9    24         1
+## 10    23         1
+## # ... with 299,990 more rows
+```
+
+---
+
+# Muchas remuestras
+
+.pull-left[
+.small[
+
+```r
+(promedio_remuestras &lt;- 
+   guardar_remuestras %&gt;%
+      group_by(remuestra) %&gt;%
+      summarise(promedio_edad = mean(edad,
+                                     na.rm = TRUE)))
+```
+
+```
+## # A tibble: 1,000 x 2
+##    remuestra promedio_edad
+##        &lt;dbl&gt;         &lt;dbl&gt;
+##  1         1          38.8
+##  2         2          38.4
+##  3         3          37.7
+##  4         4          39.1
+##  5         5          36.7
+##  6         6          36.1
+##  7         7          37.1
+##  8         8          37.2
+##  9         9          37.5
+## 10        10          39.3
+## # ... with 990 more rows
+```
+]
+]
+
+.pull-right[
+.small[
+
+```r
+promedio_remuestras %&gt;% 
+  ggplot(aes(x = promedio_edad)) +
+  geom_histogram(bins = 15, color = "white")
+```
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/graf_promedioremuestra-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+
+# ¿Qué hicimos?
+
+- Usamos **bootstrap como una forma de representar la variación muestral** vista anteriormente.
+
+- La distribución que vimos recién se denomina **distribución bootstrap** y es una **aproximación de la distribución muestral** de la media.
+
+- La distribución bootstrap probablemente **no tendrá el mismo "centro"** que la distribución muestral. En otras palabras, **bootstrap no nos permite mejorar la "calidad" de nuestra estimación**.
+
+- Pero, la distribución bootstrap si **tendrá una forma y dispersión similar a la distribución muestral**. Entonces, si nos da una **buena estimación del error estándar**.
+
+- Este último punto nos permitirá construir **intervalos de confianza**.
+
+---
+
+# Entendiendo intervalos de confianza
+
+.pull-left[
+- Podemos pescar tanto con una **caña** como con una **red**. La red probablemente te permite pescar más pescados que la caña.
+- Digamos que `\(\mu\)`, el parámetro a estimar,  es un pescado.
+- Una estimación puntual a partir de una muestra, `\(\hat{\mu}\)`, para representar `\(\mu\)` sería como una caña.
+- ¿Cómo sería una red? Tratemos de ver entre que dos valores de `edad` se encuentra el mayor número de estimaciones. ¿Entre 37 y 41? ¿36.5 y 41.5?
+- Esta última idea es lo que llamaremos un intervalo de confianza. El **intervalo de confianza nos da un rango de valores posibles**.
+]
+
+.pull-right[
+
+.center[ **Distribución bootstrap** ]
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/graf_promediomuestras2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# ¿Qué necesitamos para construir un I.C.?
+
+- Una **distribución bootstrap**.
+- Un **nivel de confianza** (90%, **95%**, 99%). 
+  * A mayor nivel de confianza, los intervalos serán más amplios. 
+  * Normalmente trabajaremos con un nivel de confianza de 95%.
+
+- Construiremos intervalos de confianza a través de dos métodos: 
+  * **método de percentiles**.
+  * **método del error estándar**.
+
+---
+
+# Método de percentiles
+
+Características de `promedio_edad` en `promedio_remuestras`.
+
+.pull-left[
+.small[
+
+```r
+promedio_remuestras %&gt;% 
+  select(promedio_edad) %&gt;% 
+  summary()
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+##  promedio_edad  
+##  Min.   :33.95  
+##  1st Qu.:37.28  
+##  Median :38.13  
+##  Mean   :38.15  
+##  3rd Qu.:39.08  
+##  Max.   :43.24
+```
+]
+]
+
+--
+
+Si queremos saber **entre que dos valores** están, por ejemplo, **el 95% de las observaciones**, necesitamos saber **bajo qué valor están el 2.5% inferior de los datos** y **sobre qué valor están el 2.5% superior de los datos**. 
+
+.small[
+
+```r
+promedio_remuestras %&gt;% 
+  arrange(-promedio_edad) %&gt;% # Ordenamos los datos
+  slice(25, 975) %&gt;% # Tenemos 1.000 valores
+  select(2)
+```
+
+```
+## # A tibble: 2 x 1
+##   promedio_edad
+##           &lt;dbl&gt;
+## 1          40.5
+## 2          35.8
+```
+]
+
+---
+
+# Método de percentiles
+
+
+```r
+(metodo_percentiles &lt;- promedio_remuestras %&gt;% 
+  summarise(percentil_2.5 = quantile(promedio_edad, 0.025), # Calcular percentil 2.5
+            percentil_97.5 = quantile(promedio_edad, 0.975))) # Calcular percentil 97.5
+```
+
+```
+## # A tibble: 1 x 2
+##   percentil_2.5 percentil_97.5
+##           &lt;dbl&gt;          &lt;dbl&gt;
+## 1          35.8           40.5
+```
+
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/metodo_percentiles_graf2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Método error estándar
+
+
+```r
+pnorm(1.96, mean = 0, sd = 1) - pnorm(-1.96, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.9500042
+```
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/normest-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+`$$\hat{\mu}\pm 1.96 \times EE$$`
+
+---
+
+# Método error estándar
+
+
+```r
+(metodo_ee &lt;- promedio_remuestras %&gt;% 
+  summarise(promedio = mean(promedio_edad), # Calcular promedio estándar
+            EE = sd(promedio_edad)) %&gt;%  # Calcular error
+* mutate(lim_inf = promedio - (1.96*EE), # Calcular límite inferior I.C.
+*        lim_sup = promedio + (1.96*EE))) # Calcular límite superior I.C.
+```
+
+```
+## # A tibble: 1 x 4
+##   promedio    EE lim_inf lim_sup
+##      &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1     38.1  1.28    35.6    40.7
+```
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/metodo_ee_graf-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Paquete **infer**
+
+- `infer` es un paquete para inferencia estadística.
+- Relacionado al `tidyverse`
+
+.pull-left[
+
+```r
+muestra_censo %&gt;% 
+  summarise(promedio = mean(edad))
+```
+
+```
+##   promedio
+## 1 38.12667
+```
+]
+
+.pull-right[
+
+```r
+muestra_censo %&gt;% 
+  specify(response = edad) %&gt;% 
+  calculate(stat = "mean")
+```
+
+```
+## # A tibble: 1 x 1
+##    stat
+##   &lt;dbl&gt;
+## 1  38.1
+```
+]
+
+--
+
+- El cálculo usando `infer` es más largo. ¿Para qué entonces?
+- Nos presenta "verbos" más ligados a la estadística.
+- Será útil cuando veamos prueba de hipótesis.
+- Es más flexible para cuando queremos hacer inferencia para más de una variable.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+
+```r
+muestra_censo %&gt;% 
+* specify(response = edad)
+```
+]
+
+.pull-right[
+
+```
+## Response: edad (integer)
+## # A tibble: 300 x 1
+##     edad
+##    &lt;int&gt;
+##  1    89
+##  2    51
+##  3    48
+##  4     8
+##  5    38
+##  6    17
+##  7    18
+##  8    23
+##  9    38
+## 10    27
+## # ... with 290 more rows
+```
+]
+
+- `specify` permite identificar la variable (o variables) sobre la cuál haremos los cálculos.
+- Noten como en la práctica no cambia nada en el `data.frame`. En ese sentido es similar a `group_by`.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+
+```r
+muestra_censo %&gt;% 
+  specify(response = edad) %&gt;% 
+* generate(reps = 1000,
+*          type = "bootstrap")
+```
+]
+
+.pull-right[
+
+```
+## Response: edad (integer)
+## # A tibble: 300,000 x 2
+## # Groups:   replicate [1,000]
+##    replicate  edad
+##        &lt;int&gt; &lt;int&gt;
+##  1         1    59
+##  2         1    37
+##  3         1    68
+##  4         1    23
+##  5         1    47
+##  6         1    15
+##  7         1    21
+##  8         1    56
+##  9         1    27
+## 10         1    21
+## # ... with 299,990 more rows
+```
+]
+
+- `generate` nos permite generar las 1.000 remuestras bootstrap.
+- El resultado tiene 300.000 filas debido a que son 1.000 remuestras de tamaño igual a 300.
+- Se genera una columna "replicate" correspondiente a cada una de las 1.000 remuestras.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+
+```r
+muestra_censo %&gt;% 
+  specify(response = edad) %&gt;% 
+  generate(reps = 1000, 
+           type = "bootstrap") %&gt;% 
+* calculate(stat = "mean")
+```
+]
+
+.pull-right[
+
+```
+## # A tibble: 1,000 x 2
+##    replicate  stat
+##        &lt;int&gt; &lt;dbl&gt;
+##  1         1  36.7
+##  2         2  38.4
+##  3         3  39.3
+##  4         4  39.5
+##  5         5  39.3
+##  6         6  38.7
+##  7         7  38.9
+##  8         8  38.8
+##  9         9  37.3
+## 10        10  39.2
+## # ... with 990 more rows
+```
+]
+
+- Con `calculate` transformamos cada una de las 1.000 remuestras de 300 observaciones, en 1.000 medias.
+- Noten que el resultado son 1.000 filas con una columna correspondiente a cada "replica" y la otra con el cálculo hecho.
+
+---
+
+# Paquete **infer**
+
+.pull-left[
+
+```r
+muestra_censo %&gt;% 
+  specify(response = edad) %&gt;% 
+  generate(reps = 1000, 
+           type = "bootstrap") %&gt;% 
+  calculate(stat = "mean") %&gt;% 
+* visualise()
+```
+]
+
+.pull-right[
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-29-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+&lt;img src="../Imagenes/Infer.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Construir I.C. con **infer**
+
+
+```r
+set.seed(1)
+guardar_remuestras_i &lt;- muestra_censo %&gt;% 
+  specify(response = edad) %&gt;% 
+  generate(reps = 1000, 
+           type = "bootstrap") %&gt;% 
+  calculate(stat = "mean")
+```
+
+--
+
+.pull-left[
+
+### Método percentiles
+
+.small[
+
+```r
+guardar_remuestras_i %&gt;% 
+  get_confidence_interval(level = 0.95,
+*                         type = "percentile")
+```
+
+```
+## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1     35.8     40.5
+```
+]
+]
+
+.pull-right[
+
+### Método error estándar
+
+.small[
+
+```r
+guardar_remuestras_i %&gt;% 
+  get_confidence_interval(level = 0.95,
+*                         type = "se",
+                          point_estimate = edad_promedio_muestra)
+```
+
+```
+## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1     35.6     40.6
+```
+]
+]
+
+---
+
+# Interpretar I.C.
+
+- Ya pudimos construir intervalos de confianza a partir de una muestra tomada desde una población. Ahora podemos **evaluar su efectividad**.
+
+- La efectividad de un intervalo de confianza se juzga según si este **contiene o no el verdadero valor del parámetro poblacional**. *¿Capturó la red al pescado?*
+
+- En nuestro ejemplo, ¿nuestros intervalos de confianza, `\([35.8, 40.5]\)` o `\([35.6, 40.6]\)`, capturan el verdadero promedio de `edad`, `\(\mu=36.0179\)`?
+
+- **¡Sí!** nuestros intervalos construídos con un 95% de nivel de confianza a partir de una muestra con `\(n=300\)` incluyen al valor real del parámetro poblacional. **¿Ocurrirá esto para todas las muestras que tomemos?**
+
+---
+
+# Interpretar I.C.
+
+.pull-left[
+- 100 intervalos de confianza a partir de 100 muestras aleatorias distintas y considerando un nivel de confianza de 95%. 
+
+- La linea negra corresponde al valor real del parámetro poblacional, `\(\mu\)` (edad de la población).
+
+- Las lineas horizontales corresponden a los intervalos de confianza y son de color gris si el intervalo incluye al valor real y rojas si no.
+
+- De los 100 intervalos, 95 incluyen el valor real del parámetro. En otras palabras, un nivel de confianza de 95% significa que de cada 100 intervalos **esperamos** que 95 incluyan `\(\mu\)`.
+
+]
+
+.pull-right[
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/muchos_ic_95-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Distintos niveles de confianza
+
+.pull-left[
+
+### 95% nivel de confianza
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-33-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+### 90% nivel de confianza
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/muchos_ic_90-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.center[**Mayores niveles de confianza llevan a intervalos más amplios**]
+
+---
+
+# Distintos `\(n\)`
+
+
+
+.pull-left[
+
+### `\(n=100\)`
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-34-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+### `\(n=1000\)`
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-35-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.center[**Mayores tamaños muestrales llevan a intervalos más angostos**]
+
+---
+
+# Resumiendo...
+
+- Como dijimos, "un nivel de confianza de 95% significa que de cada 100 intervalos que pudieramos construir, **esperaríamos** que 95 incluyan `\(\mu\)`."
+
+- No es lo mismo que decir "hay un 95% de probabilidad de que el intervalo de confianza contenga a `\(\mu\)`".
+
+---
+
+# I.C "basado en teoría"
+
+- Hasta este momento nuestros I.C. se construyeron usando el método de percentiles o el de error estándar **haciendo simulaciones**.
+
+- Otro método es simplemente ocupar una fórmula "basada en teoría" del tipo: `\(I.C. = Estimación\ Puntual \pm (Valor\ Crítico \times Error\ Estándar)\)`
+
+- **Esta fórmula es una aproximación**, usando solo la información de una muestra, a lo que obtenemos a través de simulaciones.
+
+- Por ende, ya que no realizaremos remuestras en este caso, **necesitamos una fórmula para estimar el error estándar**. 
+
+### Error estándar basado en teoría
+
+- Para el caso de una media: `\(\frac{s}{\sqrt{n}}\)`. Donde `\(s\)` es la desviación estándar de la muestra.
+
+- Para una proporción: `\(\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}\)`. Donde `\(\hat{p}\)` es la proporción calculada desde la muestra.
+
+---
+
+# Error estándar de formas distintas
+
+**Usando la dispersión de las remuestras (bootstrap)**
+
+
+```r
+promedio_remuestras %&gt;% 
+  summarise(sd = sd(promedio_edad, na.rm = TRUE)) %&gt;% transmute(error_est = sd)
+```
+
+**Usando fórmula con la desviación estándar de la población**, `\(\frac{\sigma}{\sqrt{n}}\)`
+
+
+```r
+censo %&gt;% 
+  summarise(sd = sd(edad, na.rm = TRUE)) %&gt;% transmute(error_est = sd/sqrt(300))
+```
+
+&lt;span style="color:red"&gt;**Usando  fórmula con la desviación estándar de la muestra**&lt;/span&gt;, `\(\frac{s}{\sqrt{n}}\)`
+
+
+```r
+muestra_censo %&gt;% 
+  summarise(sd = sd(edad, na.rm = TRUE)) %&gt;% transmute(error_est = sd/sqrt(300))
+```
+
+**Comparar**
+
+.center[
+.small[
+
+```
+## # A tibble: 1 x 3
+##   bootstrap_ee poblacion_ee formula_ee
+##          &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+## 1         1.28         1.28       1.28
+```
+]
+]
+
+---
+
+# I.C "basado en teoría"
+
+$$
+`\begin{aligned}
+I.C. &amp;= Estimación\ Puntual \pm (Valor\ Crítico \times Error\ Estándar) \\
+I.C. &amp;= \hat{\mu} \pm (1.96 \times \frac{s}{\sqrt{n}})
+\end{aligned}`
+$$
+
+.small[
+
+```r
+muestra_censo %&gt;% 
+  summarise(mu = mean(edad, na.rm = TRUE),
+            sd = sd(edad, na.rm = TRUE),
+            formula_ee = sd/sqrt(300),
+            IC_1 = mu - (1.96*formula_ee),
+            IC_2 = mu + (1.96*formula_ee))
+```
+
+```
+##         mu      sd formula_ee     IC_1     IC_2
+## 1 38.12667 22.1389    1.27819 35.62141 40.63192
+```
+]
+
+$$
+`\begin{aligned}
+I.C. &amp;= 38.13 \pm (1.96 \times 1.278) \\
+I.C. &amp;= 38.13 \pm (2.5) \\
+I.C. &amp;= [35.6,40.6]
+\end{aligned}`
+$$
+
+Al igual que en los otros I.C. que construimos, el promedio poblacional de `edad`, `\(\mu=36.0179\)`, también está incluído en este intervalo.
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio
+
+- `EjercicioIntervaloConfianza.R`
+
+---
+class: inverse, center, middle
+name: reg
+
+# Prueba de hipótesis
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Un caso real
+
+- Un estudio de 1974 analizó el **efecto que el sexo (masculino/femenino) en las posibilidades de ser ascendido/a** en un trabajo.
+
+- A 48 supervisores de una industria se les pidió que asumieran el rol de un director de RRHH y se les entregó **un CV** para que **decidieran si es que el o la candidato/a debiera ser ascendido/a**.
+
+--
+
+- Los **48 CV eran exactamente iguales con excepción del nombre**. A 24 de las personas se les dieron CVs con solo nombres "típicos de hombres" y al otro grupo de 24 solo con nombres "típicos de mujeres".
+
+- Considerando la asignación aleatoria y la posibilidad de que el CV sea "hombre" o "mujer" solamente, este experimento serviría como una aproximación para aislar el efecto del sexo de una persona en ser o no ascendido/a.
+
+--
+
+.smaller[
+
+```r
+ascensos &lt;- read_csv("../datos/ascensos.csv")
+glimpse(ascensos)
+```
+
+```
+## Rows: 48
+## Columns: 3
+## $ id       &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,...
+## $ decision &lt;chr&gt; "Con ascenso", "Con ascenso", "Con ascenso", "Con ascenso"...
+## $ sexo     &lt;chr&gt; "masculino", "masculino", "masculino", "masculino", "mascu...
+```
+]
+
+---
+
+# Resultados
+
+.pull-left[
+- 35 personas fueron seleccionadas para ser ascendidas.
+- De los 24 CVs con nombres de **hombre**, **21 fueron ascendidos** (87.5%).
+- De los 24 CVs con nombres de **mujer**, **14 fueron ascendidas** (58.3%).
+- **29.2 puntos % de diferencia** entre hombres y mujeres.
+
+]
+
+.pull-right[
+.smaller[
+
+```r
+ascensos %&gt;% 
+  group_by(sexo, decision) %&gt;% 
+  summarise(n = n()) %&gt;% 
+  ggplot(aes(x = sexo, y = n, fill = decision)) +
+  geom_col() +
+  labs(x = "Sexo en el CV")
+```
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-42-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]
+
+--
+
+- *¿Es esta evidencia concluyente de que en esta industria existe discriminación contra las mujeres a la hora de realizar ascensos laborales?*
+- *¿Podría ser esta diferencia solo "por casualidad" en un mundo hipotético donde no existe discriminación __o es una diferencia significativa__?*
+
+---
+
+# Mundo hipotético
+
+- Imaginemos un mundo donde la discriminación laboral hacia las mujeres no existe. Entonces, **en este mundo el ser mujer u hombre no tiene ninguna influencia** en si alguien es o no ascendido/a.
+
+- En términos de nuestros datos, `ascensos`, la variable `sexo` sería irrelevante. Puesto de otra forma, podríamos reordenar nuestros datos para que los **35 ascensos se repartan aleatoriamente entre los 24 `masculino` y 24 `femenino`**.
+
+--
+
+&lt;img src="../Imagenes/AleatorizacionCVs.PNG" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Mundo hipotético
+
+- Imaginemos un mundo donde la discriminación laboral hacia las mujeres no existe. Entonces, **en este mundo el ser mujer u hombre no tiene ninguna influencia** en si alguien es o no ascendido/a.
+
+- En términos de nuestros datos, `ascensos`, la variable `sexo` sería irrelevante. Puesto de otra forma, podríamos reordenar nuestros datos para que los **35 ascensos se repartan aleatoriamente entre los 24 `masculino` y 24 `femenino`**.
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-43-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Mundo hipotético
+
+
+```r
+ascensos_reordenado %&gt;% 
+  group_by(sexo, decision) %&gt;% 
+  summarise(n = n()) %&gt;% 
+  pivot_wider(names_from = sexo, values_from = n)
+```
+
+```
+## # A tibble: 2 x 3
+##   decision    femenino masculino
+##   &lt;chr&gt;          &lt;int&gt;     &lt;int&gt;
+## 1 Con ascenso       17        18
+## 2 Sin ascenso        7         6
+```
+
+- En este mundo hipotético de no discriminación, **18 de 24 hombres** fueron ascendidos (75%) y **17 de 24 mujeres** también (70.8%).
+- La diferencia que en nuestra muestra original era de 29.2 puntos % **en este caso es de 4.2 puntos %**.
+- Ahora, esta asignación aleatoria es solo un ejemplo. Podríamos repetir este proceso algunas veces más y tener una **distribución de diferencias**.
+
+---
+
+# 16 aleatorizaciones
+
+Distribución de 16 veces reordenar nuestros datos para que los **35 ascensos se repartan aleatoriamente entre los 24 `masculino` y 24 `femenino`**.
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/16_aleat-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.center[&lt;span style="color:red"&gt;**¿Cómo se vería nuestro cálculo inicial (real) en esta distribución?**&lt;/span&gt;]
+
+---
+
+# 16 aleatorizaciones
+
+Distribución de 16 veces reordenar nuestros datos para que los **35 ascensos se repartan aleatoriamente entre los 24 `masculino` y 24 `femenino`**.
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/16_aleat2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Qué significa esto?
+
+- Recordemos que este histograma representa la distribución de la diferencia de ascensos entre hombres y mujeres en un **mundo hipotético de no discriminación**.
+- De hecho, **la distribución esta centrada en cero**. Sin embargo, en este mundo hipotético igual pueden haber diferencias en ascensos debido a la **variación muestral**.
+- Teniendo todo eso en consideración, **¿qué tan factible es una diferencia de 29.2 puntos porcentuales de más ascensos para hombres que mujeres en un mundo de no discriminación?**
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-45-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Qué acabamos de hacer?
+
+- El procedimiento que hicimos se conoce como __*prueba de hipótesis* usando *permutaciones*__. En este caso el acto de permutar fue aleatorizar los ascensos entre `masculino` y `femenino`.
+
+- Las permutaciones son otra forma de **remuestreo** como el *bootstrap* que ya aplicamos. Mientras que el *bootstrap* fue un remuestreo con reemplazo, la __*permutación* es remuestreo sin reemplazo__.
+
+- En este caso usamos las permutaciones para simular un mundo de no discriminación y el resultado fue que **la realidad es poco probable bajo ese mundo supuesto**. 
+
+- En otras palabras, con la evidencia disponible tenderíamos a **rechazar que este mundo hipotético es factible** y que, por ende, **hay evidencia de que existe discriminación**.
+
+- Nuestra estimación de **29.2 puntos porcentuales de diferencia parece ser claramente mayor a 0**, sugiriendo discriminación en contra de las mujeres. Pero, **¿es esta diferencia significativamente diferente a 0?**
+
+- Las pruebas de hipótesis nos permitirán responder esto.
+
+---
+
+# Prueba de hipótesis: Algunos conceptos
+
+Una &lt;span style="color:red"&gt;hipótesis&lt;/span&gt; **es una declaración respecto al valor de un parámetro poblacional desconocido** (por ej. `\(\mu\)`). Para el caso que vimos recién, este parámetro sería la diferencia entre la proporción de "CV masculinos" con ascenso menos la proporción de "CVs femeninos" con ascenso, `\(p_{m}-p_{f}\)`.
+
+--
+
+Una &lt;span style="color:red"&gt;prueba de hipótesis&lt;/span&gt; consiste en una prueba entre **dos hipótesis contrarias**: *(i)* una **hipótesis nula**, `\(H_0\)`, versus *(ii)* una **hipótesis alternativa**, `\(H_A\)`.
+
+  + Generalmente **la hipótesis nula es una declaración de que no hay efecto** o no hay diferencia. Se habla de que la **hipótesis nula representa el status quo** o una situación de "no interés".
+
+  + Por otro lado, **la hipótesis nula sería la declaración que se quiere establecer** y que se probará a través de la evidencia.
+
+--
+
+`$$\small H_0:\ los\ hombres\ y\ las\ mujeres\ son\ ascendidos\ a\ tasas\ similares$$`
+
+`$$\small H_A:\ los\ hombres\ son\ ascendidos\ a\ tasas\ más\ altas\ que\ las\ mujeres$$`
+
+---
+
+# Prueba de hipótesis: Algunos conceptos
+
+Una &lt;span style="color:red"&gt;hipótesis&lt;/span&gt; **es una declaración respecto al valor de un parámetro poblacional desconocido** (por ej. `\(\mu\)`). Para el caso que vimos recién, este parámetro sería la diferencia entre la proporción de "CV masculinos" con ascenso menos la proporción de "CVs femeninos" con ascenso, `\(p_{m}-p_{f}\)`.
+
+Una &lt;span style="color:red"&gt;prueba de hipótesis&lt;/span&gt; consiste en una prueba entre **dos hipótesis contrarias**: *(i)* una **hipótesis nula**, `\(H_0\)`, versus *(ii)* una **hipótesis alternativa**, `\(H_A\)`.
+
+  + Generalmente **la hipótesis nula es una declaración de que no hay efecto** o no hay diferencia. Se habla de que la **hipótesis nula representa el status quo** o una situación de "no interés".
+
+  + Por otro lado, **la hipótesis nula sería la declaración que se quiere establecer** y que se probará a través de la evidencia.
+
+`$$\small H_0: p_m - p_f = 0$$`
+
+`$$\small H_A: p_m - p_f &gt;0$$`
+
+---
+
+# Prueba de hipótesis: Algunos conceptos
+
+Un &lt;span style="color:red"&gt;estadístico&lt;/span&gt; es una formula para una estimación/cálculo. Antes hablabamos de la estimación de la media muestral como `\(\hat{\mu}\)` (promedio muestral). Para este ejemplo **nuestro estadístico sería la diferencia de proporciones**, `\(\hat{p}_{m}-\hat{p}_{f}\)`.
+
+--
+
+El &lt;span style="color:red"&gt;estadístico observado&lt;/span&gt; es el valor calculado/observado. En nuestro ejemplo sería **29.2 puntos porcentuales**.
+
+--
+
+La &lt;span style="color:red"&gt;distribución nula&lt;/span&gt; es la distribución del estadístico **asumiendo** que la hipótesis nula, `\(H_0\)`, es cierta. No decimos que `\(H_0\)` sea necesariamente cierto sino que asumimos esto para ver **que tan factible es nuestro estadístico observado bajo este supuesto**.
+
+--
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-46-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Prueba de hipótesis: Algunos conceptos
+
+El **&lt;span style="color:red"&gt;valor p o p-value&lt;/span&gt;** es la probabilidad de observar un estadístico tan o más "extremo" que el que tenemos, **asumiendo que la hipótesis nula, `\(H_0\)`, es cierta**.
+
+  + Podríamos decir que es una cuantificación de "sorpresa" de los resultados. En nuestro ejemplo, **¿qué tan "sorprendidos" estamos de que la diferencia en ascensos fuera 29.2 puntos % dada la distribución nula?**
+  
+  + Puesto de otra forma, ¿que proporción de los datos son más "extremos" que este resultado?
+
+--
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-47-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+En este caso, **la respuesta es 0**. Por ende lo que observamos es **muy sorprendente** bajo la hipótesis nula, `\(H_0\)`. Tan raro es lo que vemos que lo más sensato sería **&lt;span style="color:red"&gt;rechazar la hipótesis nula&lt;/span&gt;** de que no existe diferencia.
+
+---
+
+# Prueba de hipótesis: Algunos conceptos
+
+El &lt;span style="color:red"&gt;nivel de significancia&lt;/span&gt; es un punto de corte que establecemos para el p-value. Normalmente se le denomina `\(\alpha\)`.
+
+  + Rechazaremos la hipótesis nula, `\(H_0\)`, si es que `\(p-value &lt; \alpha\)`
+  
+  + En caso contrario, `\(p-value &gt; \alpha\)`, decimos que "no rechazamos `\(H_0\)`" o "fallamos en rechazarla".
+  
+  + Valores comúnmente usados para `\(\alpha\)` son 0.1 (10%), **0.05 (5%)**, y 0.01 (1%). 
+
+---
+
+# Prueba de hipótesis con **infer**
+
+&lt;img src="../Imagenes/Infer2.png" width="110%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Prueba de hipótesis con **infer**
+
+&lt;img src="../Imagenes/Infer3.png" width="110%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+ascensos %&gt;% 
+* specify(formula = decision ~ sexo,
+*         success = "Con ascenso")
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+## Response: decision (factor)
+## Explanatory: sexo (factor)
+## # A tibble: 48 x 2
+##    decision    sexo     
+##    &lt;fct&gt;       &lt;fct&gt;    
+##  1 Con ascenso masculino
+##  2 Con ascenso masculino
+##  3 Con ascenso masculino
+##  4 Con ascenso masculino
+##  5 Con ascenso masculino
+##  6 Con ascenso masculino
+##  7 Con ascenso masculino
+##  8 Con ascenso masculino
+##  9 Con ascenso masculino
+## 10 Con ascenso masculino
+## # ... with 38 more rows
+```
+]
+]
+
+- A diferencia del ejemplo anterior con `infer`, ahora queremos ver el efecto de una **variable explicatoria**, `sexo`, en una **variable respuesta**, `decision`. 
+
+- También le indicamos a la función que en este caso nos queremos enfocar en los casos "Con ascenso".
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+ascensos %&gt;% 
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+* hypothesise(null = "independence")
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+## Response: decision (factor)
+## Explanatory: sexo (factor)
+## Null Hypothesis: independence
+## # A tibble: 48 x 2
+##    decision    sexo     
+##    &lt;fct&gt;       &lt;fct&gt;    
+##  1 Con ascenso masculino
+##  2 Con ascenso masculino
+##  3 Con ascenso masculino
+##  4 Con ascenso masculino
+##  5 Con ascenso masculino
+##  6 Con ascenso masculino
+##  7 Con ascenso masculino
+##  8 Con ascenso masculino
+##  9 Con ascenso masculino
+## 10 Con ascenso masculino
+## # ... with 38 more rows
+```
+]
+]
+
+- Este es un nuevo paso que no vimos para los intervalos de confianza. 
+- `null` tiene dos opciones: `point` o `independence`. El primero es para cuando trabajamos con "una muestra" y el segundo cuando tenemos dos.
+- En este caso nuestras "dos muestras" son los CVs con nombres masculinos y los CVs con nombres femeninos.
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+ascensos %&gt;% 
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+  hypothesise(null = "independence") %&gt;% 
+* generate(reps = 1000,
+*          type = "permute")
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+## Response: decision (factor)
+## Explanatory: sexo (factor)
+## Null Hypothesis: independence
+## # A tibble: 48,000 x 3
+## # Groups:   replicate [1,000]
+##    decision    sexo      replicate
+##    &lt;fct&gt;       &lt;fct&gt;         &lt;int&gt;
+##  1 Con ascenso masculino         1
+##  2 Con ascenso masculino         1
+##  3 Sin ascenso masculino         1
+##  4 Sin ascenso masculino         1
+##  5 Con ascenso masculino         1
+##  6 Con ascenso masculino         1
+##  7 Con ascenso masculino         1
+##  8 Con ascenso masculino         1
+##  9 Con ascenso masculino         1
+## 10 Sin ascenso masculino         1
+## # ... with 47,990 more rows
+```
+]
+]
+
+- Acá generamos la aleatorización asumiendo que la hipótesis nula es cierta. Antes hicimos 16 veces esto, ahora 1.000.
+
+- A diferencia de los intervalos de confianza, donde usamos `"bootstrap"`, ahora usamos `type = "permute"`.
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+ascensos %&gt;% 
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+  hypothesise(null = "independence") %&gt;% 
+  generate(reps = 1000, 
+           type = "permute") %&gt;% 
+* calculate(stat = "diff in props",
+*           order = c("masculino", "femenino"))
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+## # A tibble: 1,000 x 2
+##    replicate    stat
+##        &lt;int&gt;   &lt;dbl&gt;
+##  1         1  0.125 
+##  2         2  0.125 
+##  3         3 -0.0417
+##  4         4 -0.208 
+##  5         5  0.125 
+##  6         6 -0.208 
+##  7         7 -0.0417
+##  8         8  0.292 
+##  9         9  0.125 
+## 10        10  0.0417
+## # ... with 990 more rows
+```
+]
+]
+
+- Teniendo las 1.000 replicas, ahora podemos **calcular el estadístico**. 
+
+- En este caso sería la diferencia de proporción con ascensos para CVs "masculinos" y "femeninos", `\(\hat{p}_{m}-\hat{p}_{f}\)`
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+*(distribucion_nula &lt;- ascensos %&gt;%
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+  hypothesise(null = "independence") %&gt;% 
+  generate(reps = 1000, 
+           type = "permute") %&gt;% 
+  calculate(stat = "diff in props", 
+            order = c("masculino", "femenino")))
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+## # A tibble: 1,000 x 2
+##    replicate    stat
+##        &lt;int&gt;   &lt;dbl&gt;
+##  1         1  0.125 
+##  2         2  0.125 
+##  3         3 -0.0417
+##  4         4 -0.208 
+##  5         5  0.125 
+##  6         6 -0.208 
+##  7         7 -0.0417
+##  8         8  0.292 
+##  9         9  0.125 
+## 10        10  0.0417
+## # ... with 990 more rows
+```
+]
+]
+
+- Crearemos un objeto `distribucion_nula` para guardar los 1.000 resultados de `\(\hat{p}_{m}-\hat{p}_{f}\)`.
+
+---
+
+# Prueba de hipótesis con **infer**
+
+### ¿Cuál era el estadístico observado?
+
+Podemos hacer este cálculo usando `infer`
+
+
+```r
+(dif_observada &lt;- ascensos %&gt;% 
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+  calculate(stat = "diff in props", 
+            order = c("masculino", "femenino")))
+```
+
+```
+## # A tibble: 1 x 1
+##    stat
+##   &lt;dbl&gt;
+## 1 0.292
+```
+
+**29.2 puntos porcentuales** más de ascensos para hombres que para mujeres.
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+distribucion_nula %&gt;% 
+* visualise(bins = 10)
+```
+]
+]
+
+.pull-right[
+.small[
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-60-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]
+
+- Visualicemos la distribución nula creada a partir de los 1.000 estadísticos calculados, `\(\hat{p}_{m}-\hat{p}_{f}\)`.
+
+---
+
+# Prueba de hipótesis con **infer**
+
+.pull-left[
+.small[
+
+```r
+distribucion_nula %&gt;% 
+  visualise(bins = 10) +
+* shade_p_value(obs_stat = dif_observada,
+*               direction = "right")
+```
+]
+]
+
+.pull-right[
+.small[
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-62-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]
+
+- Visualicemos la distribución nula creada a partir de los 1.000 estadísticos calculados, `\(\hat{p}_{m}-\hat{p}_{f}\)`.
+
+- Y agreguemos el estadístico observado que guardamos como `dif_observada` (línea roja). 
+
+--
+
+- El argumento `direction = "right"` es debido a que `\(H_{A}:p_{m}-p_{f}&gt;0\)`
+
+- El área sombreada a la derecha de la línea roja corresponde al **p-value**.
+
+- Pareciera que, **asumiendo como cierta la hipótesis nula, ver el resultado de 29.2 es poco probable**. ¿Qué tan poco?
+
+---
+
+# Prueba de hipótesis con **infer**
+
+
+```r
+distribucion_nula %&gt;% 
+* get_p_value(obs_stat = dif_observada,
+*             direction = "right")
+```
+
+```
+## # A tibble: 1 x 1
+##   p_value
+##     &lt;dbl&gt;
+## 1   0.019
+```
+
+- **La probabilidad de observar una diferencia en ascensos al menos tan grande como 29.2** puntos porcentuales, dado que la distribución nula sea cierta, es `\(0.019 = 1.9\%\)`.
+
+- Ya que este **p-value** es menor al nivel de significancia planteado inicialmente, `\(\alpha=0.05\)`, **rechazamos la hipótesis nula**, `\(H_0:p_{m}-p_{f}=0\)`.
+
+- En otras palabras, hay evidencia para hacernos cambiar de opinión sobre el *status quo*, `\(H_0\)`, y pensar que si hay discriminación.
+
+- Noten  que la conclusión depende del nivel de `\(\alpha\)` definido.
+
+---
+
+# Prueba de hipótesis vs I.C.
+
+Una ventaja del paquete `infer` es que podemos pasar rápidamente de hacer una prueba de hipótesis a construir un intervalo de confianza.
+
+.pull-left[
+.small[
+
+```r
+distribucion_nula &lt;- ascensos %&gt;% 
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+* hypothesise(null = "independence") %&gt;%
+  generate(reps = 1000, 
+*          type = "permute") %&gt;%
+  calculate(stat = "diff in props", 
+            order = c("masculino", "femenino"))
+```
+]
+]
+
+.pull-right[
+.small[
+
+```r
+distribucion_bootstrap &lt;- ascensos %&gt;% 
+  specify(formula = decision ~ sexo, 
+          success = "Con ascenso") %&gt;% 
+* #hypothesise(null = "independence") %&gt;%
+  generate(reps = 1000, 
+*          type = "bootstrap") %&gt;%
+  calculate(stat = "diff in props", 
+            order = c("masculino", "femenino"))
+```
+]
+]
+
+---
+
+# Prueba de hipótesis vs I.C.
+
+### Calculemos el intervalo de confianza (95%)
+
+.pull-left[
+.small[
+
+```r
+(ic_percentil &lt;- distribucion_bootstrap %&gt;% 
+  get_confidence_interval(level = 0.95, 
+                          type = "percentile"))
+```
+
+```
+## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1   0.0423    0.525
+```
+]
+]
+
+.pull-right[
+.small[
+
+```r
+distribucion_bootstrap %&gt;% 
+  visualise() +
+  shade_confidence_interval(endpoints = ic_percentil)
+```
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-67-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]
+
+- Noten que en este intervalo de confianza **un valor que NO cae dentro es 0**. 
+
+- Prácticamente toda la distribución está sobre 0, sugiriendo que la diferencia de ascensos es en favor de los hombres.
+
+---
+
+# Prueba de hipótesis basada en teoría
+
+- Al igual como construimos I.C. a partir de formulas, podemos hacer lo mismo con las pruebas de hipótesis. 
+
+- Nuevamente, estos métodos se desarrollaron hace mucho tiempo y se convirtieron en norma ante la imposibilidad de poder hacer miles de cálculos de forma simple y eficiente. 
+
+- A través de las formulas derivadas hace tiempo se logra aproximar lo que hoy podemos hacer a través de simulaciones.
+
+---
+
+# Recordemos: Z-score
+
+`$$Z=\frac{X-\mu}{\sigma}$$`
+
+- El **Z-score** es una estandarización de una variable aleatoria, `\(X\)`, en términos de la media poblacional, `\(\mu\)`, y su desviación estándar, `\(\sigma\)`.
+
+- Esto resulta en que cada valor de `\(X\)` estandarizado ahora representa a cuantas desviaciones estándar de la media se encuentra ese valor.
+
+- Al estandarizar podemos comparar variables.
+
+- **Un valor estandarizado que ocuparemos normalmente en inferencia será el estadístico-t**:
+
+`$$\frac{\hat{\mu}-\mu}{\frac{s}{\sqrt{n}}} \sim t_{n-1}$$`
+
+---
+
+# Distribución `\(t\)`
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-68-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$PDF=\frac{\Gamma (\frac{n}{2})}{\sqrt{(n-1)\pi}\Gamma (\frac{n-1}{2}) }(1+\frac{x^2}{n-1})^{-\frac{n}{2}}$$`
+
+---
+
+# ¿Cómo usar esto en hipótesis?
+
+### Ejemplo: Promedio de edad
+
+
+`$$H_0=35;\ H_A\neq35$$`
+
+--
+
+.pull-left[
+.small[
+
+```r
+muestra_censo %&gt;% 
+  summarise(promedio_muestra = mean(edad),
+            s = sd(edad))
+```
+
+```
+##   promedio_muestra       s
+## 1         38.12667 22.1389
+```
+]
+
+`$$\small t=\frac{\hat{\mu}-\mu}{\frac{s}{\sqrt{n}}}=\frac{38.127-35}{\frac{22.1389}{\sqrt{300}}}=2.446$$`
+
+]
+
+.pull-right[
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/unnamed-chunk-70-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+&lt;br&gt;
+
+.center[
+
+```r
+pt(2.446, df = 299, lower.tail = FALSE)*2
+```
+
+```
+## [1] 0.01502134
+```
+
+`\(pvalue&lt;\alpha=0.015&lt;0.05\)`, se rechaza `\(H_0\)`
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio
+
+- `EjercicioPruebaHipotesis.R`
+
+---
+
+# Próxima clase
+
+- Regresiones
+
+&lt;img src="IntervaloConfianza_PruebaHipotesis_files/figure-html/regresiones-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Próxima clase
+
+&lt;img src="../Imagenes/RegOutput.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
