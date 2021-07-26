@@ -1653,11 +1653,11 @@ En este caso, **la respuesta es 0**. Por ende lo que observamos es **muy sorpren
 
 # Prueba de hipótesis: Algunos conceptos
 
-El <span style="color:red">nivel de significancia</span> es un punto de corte que establecemos para el p-value. Normalmente se le denomina $\alpha$.
+El <span style="color:red">nivel de significancia</span> es un punto de corte que establecemos para el $p.value$. Normalmente se le denomina $\alpha$.
 
-  + Rechazaremos la hipótesis nula, $H_0$, si es que $p-value < \alpha$
+  + Rechazaremos la hipótesis nula, $H_0$, si es que $p.value < \alpha$
   
-  + En caso contrario, $p-value > \alpha$, decimos que "no rechazamos $H_0$" o "fallamos en rechazarla".
+  + En caso contrario, $p.value > \alpha$, decimos que "no rechazamos $H_0$" o "fallamos en rechazarla".
   
   + Valores comúnmente usados para $\alpha$ son 0.1 (10%), **0.05 (5%)**, y 0.01 (1%). 
 
@@ -2011,6 +2011,38 @@ distribucion_bootstrap %>%
 
 ---
 
+# Tipos de errores
+
+- Aunque la evidencia que tenemos nos sugiere que debemos rechazar la hipótesis nula, $H_0$ de que no existe discriminación, podría ser que nos estemos equivocando. Esto debido a que solo trabajamos con una muestra.
+
+- De forma similar, la evidencia de una muestra podría decirnos que no podemos rechazar la hipótesis nula cuando en realidad si deberíamos.
+
+--
+
+- El error de **rechazar la hipótesis nula**, $H_0$, **cuando esta es en realidad verdad** (ej. rechazar la hipótesis de no discriminación cuando en realidad no existe discriminación) se denomina **Error Tipo I**.
+
+- Por otro lado, el error de **no rechazar la hipótesis nula cuando esta no es verdad** (ej. no rechazar la hipótesis de no discrimnación cuando en realidad existe discriminación) se denomina **Error Tipo II**.
+
+```{r tipo_errores, echo = FALSE}
+knitr::include_graphics("../Imagenes/TipoErrores.PNG")
+```
+
+---
+
+# Tipos de errores
+
+- La probabilidad de un **Error Tipo I** es igual a $\alpha$ (nivel de significancia).
+
+- La probabilidad de un **Error Tipo II** se denomina $\beta$. Y el valor $1-\beta$ se denomina **poder** de la prueba de hipótesis.
+
+--
+
+- Idealmente, queremos que $\alpha=0$ y $\beta=0$ pero esto no es posible. De hecho, si nada más cambia, estos errores están inversamente relacionados. Al aumentar $\alpha$ disminuye $\beta$ y viceversa.
+
+- Normalmente lo que se hace es fijar $\alpha$ (normalmente 0.05) y se busca minimizar $\beta$ (normalmente al buscar tener una muestra con $n$ lo más grande posible).
+
+---
+
 # Prueba de hipótesis basada en teoría
 
 - Al igual como construimos I.C. a partir de formulas, podemos hacer lo mismo con las pruebas de hipótesis. 
@@ -2129,7 +2161,7 @@ ggplot(data.frame(x = c(-4, 4)), aes(x = x)) +
 pt(2.446, df = 299, lower.tail = FALSE)*2
 ```
 
-$pvalue<\alpha=0.015<0.05$, se rechaza $H_0$
+$p.value<\frac{\alpha}{2}=0.015<0.025$, se rechaza $H_0$
 ]
 
 ---
