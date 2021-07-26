@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Ciencia de Datos para Políticas Públicas</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pablo Aguirre Hormann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":1,"eraser_size":10}) })</script>
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":false,"autoSearch":true}) })</script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Ciencia de Datos para Políticas Públicas
+## Módulo 2 - Clase 6: Logit y otros
+### Pablo Aguirre Hormann
+### 20/07/2021
+
+---
+
+
+&lt;style type="text/css"&gt;
+#.remark-slide-content {
+#  font-size: 28px;
+#  padding: 20px 80px 20px 80px;
+#}
+#.remark-code, .remark-inline-code {
+#  background: #f0f0f0;
+#}
+.small .remark-code {
+  font-size: 14px;
+}
+
+.smaller .remark-code {
+  font-size: 12px;
+}
+
+.tiny .remark-code {
+  font-size: 11px;
+}
+
+.pull-left2 {
+  float: left;
+  width: 40%;
+}
+
+.pull-right2 {
+  float: right;
+  width: 54%;
+}
+&lt;/style&gt;
+
+
+
+# ¿Qué veremos hoy?
+
+- Visualización de datos
+- Manejo de datos
+- Transformación de datos
+- **&lt;span style="color:red"&gt;Inferencia Estadística/Econometría&lt;/span&gt;**
+  + &lt;span style="color:red"&gt;Modelo logit&lt;/span&gt;
+  + &lt;span style="color:red"&gt;Aplicaciones&lt;/span&gt;
+
+&lt;img src="../Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Modelos
+
+**Objetivo**: representar la relación entre una variable dependiente `\(Y\)` y una o varias variables explicativas/independientes `\(X_1, X_2,..., X_k\)`.
+
+&lt;/br&gt;
+
+$$
+`\begin{aligned}
+\hat{Y} &amp;= E(Y|X) \\
+  &amp;= \hat{f}(X)
+\end{aligned}`
+$$
+
+&lt;/br&gt;
+
+- Si `\(Y\)` es una variable *continua*: **regresión**
+- Si `\(Y\)` es una variable *categórica*: **clasificación** (próxima clase)
+
+---
+class: inverse, center, middle
+name: reg
+
+# Regresión Logística/Clasificación
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Variable dependiente binaria
+
+- Hasta ahora consideramos una variable dependiente `\(Y\)` continua (Resultados de prueba)
+
+--
+
+- Pero también podemos tener casos en que `\(Y\)` es una variable categórica/binaria (1 o 0)
+  * Otorgamiento de subsidio (sí/no)
+  * Participación en el mercado laboral (sí/no)
+  
+--
+
+- Esto conlleva algunos desafíos extra a los que hemos visto hasta ahora
+
+---
+
+# Variable dependiente binaria
+
+
+
+&lt;img src="RegresionII_files/figure-html/graf_datos-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+.center[**No existe dispersión en el eje Y**]
+
+--
+
+¿Qué ocurre si modelamos esto al igual que una regresión con `\(Y\)` continua?
+
+---
+
+# Modelo de probabilidad lineal
+
+`$$\hat{Y}=P(Y=1|X)=\hat{\beta_0}+\hat{\beta_1}X$$`
+
+--
+
+.pull-left[
+.small[
+
+```r
+lm(Y~X, data = datos_logit)
+```
+
+```
+## 
+## Call:
+## lm(formula = Y ~ X, data = datos_logit)
+## 
+## Coefficients:
+*## (Intercept)            X  
+*##    -0.32360      0.07912
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionII_files/figure-html/modelo_datos_sim-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+El modelo de probabilidad lineal tiene la ventaja de que la interpretación es directa, *el aumento en una unidad de `\(X\)` esta asociado, en promedio, con un aumento de 7.9% en `\(Y\)`*
+
+--
+
+**Pero modelo permite valores ajustados menores a 0 y superiores a 1**. 
+
+¿Cómo interpretamos, por ejemplo, `\(\hat{Y}=1.2\)`?
+
+
+---
+
+# Residuales
+
+**Otro problema**: los residuales claramente muestran que algo anda mal.
+
+&lt;img src="RegresionII_files/figure-html/resid_datos_sim-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+--
+
+Debemos buscar una forma de limitar los valores de `\(Y\)`: `\(P(Y=1|X)=F(\hat{\beta_0}+\hat{\beta_1}X)\)`
+  
+---
+
+# Modelo logit
+
+El modelo logit (o logístico) nos permite limitar los valores de `\(Y\)` entre 0 y 1 usando como función auxiliar `\(F = \frac{exp(z)}{1+exp(z)}\)` con `\(z=\hat{\beta_0}+\hat{\beta_1}X\)`.
+
+--
+
+&lt;/br&gt;
+
+`$$P(Y=1|X)=\frac{e^{(\hat{\beta_0}+\hat{\beta_0}X)}}{1+e^{(\hat{\beta_0}+\hat{\beta_0}X)}}$$`
+El proceso de estimación es algo distinto a lo que vimos para regresiones hasta el momento. En este caso se hace por algo llamado **máxima verosimilitud** (no entraremos en detalles).
+
+--
+
+#### Pero en R...
+
+
+```r
+*modelo_logit &lt;- glm(Y ~ X, family = "binomial", data = datos_logit)
+```
+
+Noten que usamos `glm` ahora y no `lm`.
+
+---
+
+# ¿Cómo se ve esto?
+
+&lt;img src="RegresionII_files/figure-html/graf_modelo_logit-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+
+.pull-left[
+.tiny[
+
+```
+## 
+## Call:  glm(formula = Y ~ X, family = "binomial", data = datos_logit)
+## 
+## Coefficients:
+*## (Intercept)            X  
+*##     -19.646        1.896  
+## 
+## Degrees of Freedom: 199 Total (i.e. Null);  198 Residual
+## Null Deviance:	    277.3 
+## Residual Deviance: 61.44 	AIC: 65.44
+```
+]
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+$$
+P(Y=1|X)=\frac{e^{(-19.6+1.9X)}}{1+e^{(-19.6+1.9X)}}
+$$
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Con datos reales
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Datos laborales
+
+
+```r
+(datos_trabajo &lt;- read_xlsx("../datos/datos_trabajo.xlsx"))
+```
+
+```
+## # A tibble: 687 x 4
+##    trabajando  educ exper exper_cuad
+##         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;
+##  1          0    11     1          1
+##  2          1    13     4         16
+##  3          1    11     4         16
+##  4          1    12    19        361
+##  5          1     8     2          4
+##  6          0    17    10        100
+##  7          1     6    14        196
+##  8          0    17     1          1
+##  9          1     8    25        625
+## 10          1    10    11        121
+## # ... with 677 more rows
+```
+
+- `trabajando` es una variable categórica que toma el valor **1** cuando una persona/observación se encuentra trabajando y **0** en caso contrario.
+
+- `educ` y `exper` son variables numéricas representando años de educación y de experiencia laboral, respectivamente.
+
+---
+
+# Visualicemos los datos
+
+.small[
+
+```r
+datos_trabajo %&gt;% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_point() +
+  theme_minimal()
+```
+
+&lt;img src="RegresionII_files/figure-html/viz_datos_trabajo-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Un pequeño ajuste
+
+.small[
+
+```r
+datos_trabajo %&gt;% 
+  ggplot(aes(x = educ, y = trabajando)) +
+* geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+  theme_minimal()
+```
+
+&lt;img src="RegresionII_files/figure-html/jitter-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Modelo de probabilidad lineal
+
+.small[
+
+```r
+datos_trabajo %&gt;% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+* geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+```
+
+&lt;img src="RegresionII_files/figure-html/mpl_trabajo-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Modelo logit
+
+.small[
+
+```r
+datos_trabajo %&gt;% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+* geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) +
+  theme_minimal()
+```
+
+&lt;img src="RegresionII_files/figure-html/logit_trabajo1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Modelo logit con otra variable
+
+.small[
+
+```r
+datos_trabajo %&gt;% 
+* ggplot(aes(x = exper, y = trabajando)) +
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) + 
+  theme_minimal()
+```
+
+&lt;img src="RegresionII_files/figure-html/logit_trabajo2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Estimemos un modelo logit
+
+.small[
+
+```r
+modelo_logit_trabajo &lt;- glm(trabajando ~ educ, 
+                            family = "binomial", 
+                            data = datos_trabajo)
+tidy(modelo_logit_trabajo)
+```
+
+```
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic    p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+## 1 (Intercept)   -1.80     0.438      -4.12 0.0000383 
+## 2 educ           0.164    0.0354      4.65 0.00000332
+```
+]
+
+--
+
+&lt;br&gt;
+
+$$
+P(trabajando=1|educ)=\frac{e^{(-1.8+0.16educ)}}{1+e^{(-1.8+0.16*educ)}}
+$$
+
+&lt;br&gt;
+
+.center[**¿Cómo interpretamos esto?**]
+
+---
+
+# Un poco de algebra
+
+`$$\small \begin{align} P(trabajando=1|educ)=p&amp;=\frac{e^{(-1.8+0.16*educ)}}{1+e^{(-1.8+0.16*educ)}} \\
+                                                                                          \\
+                     \frac{1}{p}&amp;=\frac{1+e^{(-1.8+0.16*educ)}}{e^{(-1.8+0.16*educ)}}       \\ 
+                                                                                          \\ 
+                     \frac{1}{p}&amp;=1+\frac{1}{e^{(-1.8+0.16*educ)}}                         \\ 
+                                                                                          \\   
+                     \frac{1-p}{p}&amp;=\frac{1}{e^{(-1.8+0.16*educ)}}                         \\ 
+                                                                                          \\  
+                     \frac{p}{1-p}&amp;=e^{(-1.8+0.16*educ)}                                   \\ 
+                                                                                          \\
+                     log(\frac{p}{1-p})&amp;=-1.8+0.16*educ                                    \\
+                                                                                          \\ 
+                     log\left(\frac{P(trabajando=1|educ)}{P(trabajando=0|educ)}\right)&amp;=-1.8+0.16*educ                                    \\
+                                                                                          \\ 
+                     \end{align}$$`
+
+---
+
+# Interpretación
+
+`$$log\left(\frac{P(trabajando=1|educ)}{P(trabajando=0|educ)}\right)=-1.8+0.16*educ$$`
+
+El aumento en una unidad de `educ` se asocia con un incremento promedio de 0.16 en el **_log-odds_** de `trabajando`.
+
+--
+
+El efecto depende del "lugar de la curva" donde estemos.
+
+
+```r
+nuevos_datos &lt;- data.frame("educ" = c(5, 7, 9, 11, 13, 15, 17))
+predict(modelo_logit_trabajo,
+        newdata = nuevos_datos,
+        type = "response") %&gt;% round(4)
+```
+
+```
+##      1      2      3      4      5      6      7 
+## 0.2724 0.3422 0.4195 0.5010 0.5825 0.6597 0.7292
+```
+
+---
+
+# ¿Cómo evaluamos este modelo?
+
+### Pseudo `\(R^2\)`
+
+Logit es un ejemplo de modelos de regresión no lineal y es importante destacar que en estos casos una métrica como el `\(R^2\)` no tiene sentido ya que sus supuestos son para modelos lineales.
+
+--
+
+Una alternatva es utilizar una métrica conocida como el *pseudo*- `\(R^2\)`.
+
+`$$pseudo\ R^2=1-\frac{ln(f^{max}_{full})}{ln(f^{max}_{nulo})}=1-\frac{devianza}{devianza\ nula}$$`
+
+--
+
+.small[
+
+```r
+glance(modelo_logit_trabajo)
+```
+
+```
+## # A tibble: 1 x 8
+##   null.deviance df.null logLik   AIC   BIC deviance df.residual  nobs
+##           &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt; &lt;int&gt;
+## 1          945.     686  -461.  926.  935.     922.         685   687
+```
+]
+
+.smaller[
+
+```r
+1-(select(glance(modelo_logit_trabajo), deviance)/select(glance(modelo_logit_trabajo), null.deviance)) %&gt;% pull()
+```
+
+```
+## [1] 0.02437236
+```
+]
+
+---
+
+# ¿Cómo evaluamos este modelo?
+
+.small[
+
+```r
+summary(modelo_logit_trabajo)
+```
+
+```
+## 
+## Call:
+## glm(formula = trabajando ~ educ, family = "binomial", data = datos_trabajo)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6165  -1.2498   0.8521   1.1067   1.6128  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -1.80473    0.43832  -4.117 3.83e-05 ***
+## educ         0.16444    0.03536   4.650 3.32e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+*##     Null deviance: 945.03  on 686  degrees of freedom
+*## Residual deviance: 922.00  on 685  degrees of freedom
+## AIC: 926
+## 
+## Number of Fisher Scoring iterations: 4
+```
+]
+
+---
+
+# ¿Cómo evaluamos este modelo?
+
+Otra forma de evaluar es convertir los *valores ajustados* (resultado del modelo) que corresponde a valores entre 0 y 1 (ver `.fitted` ) en categorías que se puedan comparar con `trabajando` (0 o 1).
+
+.small[
+
+```r
+(estimacion_logit &lt;- augment(modelo_logit_trabajo, type.predict = "response") %&gt;% 
+  transmute(valor_real = trabajando,
+            .fitted,
+*           valor_estimado = ifelse(.fitted &gt;= 0.5, 1, 0),
+            check = valor_real == valor_estimado))
+```
+
+```
+## # A tibble: 687 x 4
+##    valor_real .fitted valor_estimado check
+##         &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt; &lt;lgl&gt;
+##  1          0   0.501              1 FALSE
+##  2          1   0.582              1 TRUE 
+##  3          1   0.501              1 TRUE 
+##  4          1   0.542              1 TRUE 
+##  5          1   0.380              0 FALSE
+##  6          0   0.729              1 FALSE
+##  7          1   0.306              0 FALSE
+##  8          0   0.729              1 FALSE
+##  9          1   0.380              0 FALSE
+## 10          1   0.460              0 FALSE
+## # ... with 677 more rows
+```
+]
+
+---
+
+# ¿Qué significa esto?
+
+### Clasificación usando 0.5
+
+&lt;img src="RegresionII_files/figure-html/unnamed-chunk-10-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# ¿Qué significa esto?
+
+### Clasificación usando 0.5 para otra variable X
+
+&lt;img src="RegresionII_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Matriz de confusión
+
+.small[
+
+```r
+(matriz_confusion &lt;- estimacion_logit %&gt;% 
+  group_by(valor_real, valor_estimado) %&gt;% 
+  summarise(n = n()) %&gt;% 
+  pivot_wider(names_from = valor_estimado, values_from = n))
+```
+
+```
+## # A tibble: 2 x 3
+## # Groups:   valor_real [2]
+##   valor_real   `0`   `1`
+##        &lt;dbl&gt; &lt;int&gt; &lt;int&gt;
+## 1          0    63   245
+## 2          1    47   332
+```
+]
+
+No pareciera ser un buen modelo
+
+--
+
+.pull-left[
+.small[
+
+```r
+VP &lt;- matriz_confusion[2,3]
+FP &lt;- matriz_confusion[1,3]
+VN &lt;- matriz_confusion[1,2]
+FN &lt;- matriz_confusion[2,2]
+(tasa_VP &lt;- VP/(VP+FN))
+##           1
+## 1 0.8759894
+(tasa_FP &lt;- FP/(FP+VN))
+##           1
+## 1 0.7954545
+```
+]
+]
+
+.pull-right[
+En general, queremos maximizar la tasa de Verdados Positivos y minimizar la tasa de Falsos Positivos.
+]
+
+---
+
+# Inferencia vs Predicción
+
+### Modelos para Inferencia/Explicación: 
+  * Aprender y concluir algo sobre como se relacionan variables. Relaciones causales.
+  * Evitar sesgo
+  * Predicción *dentro de muestra*
+  * `\(\hat{f}\)` / `\(\hat{\beta}\)` 
+
+### Modelos para Predicción: 
+  * Que la predicción esté lo más cerca posible del valor real
+  * Evitar sobreajuste al entrenar modelos
+  * Predicción *fuera de muestra*
+  * `\(\hat{Y}\)`
+  
+---
+class: inverse, center, middle
+name: reg
+
+# Aplicaciones
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# SMA - Preferencias de fiscalización
+
+**Situación**: Elaboración de programas de fiscalización a partir de criterio experto (muy valioso) considerando información "objetiva" (denuncias, por ej.) e información "subjetiva" (percepciones).
+
+**Antecedente**: ¿Cómo ordenar el proceso de manera de sistematizar al menos la información "objetiva".
+  + **Solución propuesta**: a través de ponderadores para distintos criterios, generar un ranking de establecimientos a fiscalizar.
+  + **Problema**: ¿por qué valorar un componente más que otro?
+  
+--
+
+&lt;br&gt;
+
+**Propuesta actual**: de alguna forma capturar la preferencia de funcionarios/as de la SMA a distintos criterios "objetivos". Con esas preferencia **estimar los "ponderadores"**.
+
+---
+
+# Experimento de elección
+
+- Basados en la teoría de utilidad aleatoria (McFadden 1973) que propone que la utilidad de un bien se descompone en un **componente observable** y otro **no observable** (error).
+
+- Los componentes observables corresponden a **atributos ligados a las elecciones** que un individuo hace así como a **características del individuo** que hace la elección.
+
+- Dados ciertos supuestos para la distribución del error, la **probabilidad de elegir una opción se puede expresar como una distribución logística**.
+
+---
+
+# En la práctica
+
+- 48 elecciones a casi 200 funcionarios/as de distintas áreas.
+- **¿Qué establecimiento fiscalizarías?**
+- Cada elección se traduce en elegir una opción A o una opción B.
+- Cada elección depende de las características descritas y también de la persona que responde.
+- Esto nos deja con una base de datos de casi 10.000 observaciones que podemos modelar.
+
+&lt;img src="../Imagenes/Tarjeta_3.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Resultados
+
+&lt;img src="../Imagenes/ResultadoDCE.PNG" width="60%" style="display: block; margin: auto;" /&gt;
+
+`$$\small \begin{align} \widehat{Utilidad}=&amp;(0.32*1_{Aire})+(0.34*1_{Ext.Ag})+(0.36*1_{FyF})+(0.09*1_{RuO})+(0.47*1_{Ag\_Suelo}) \\ &amp;+ (0.83*1_{Con\_ImpSign}) + (0.81*1_{Con\_Den}) +(0.74*1_{Sin\_Fisc}) +(0.25*1_{Sin\_Accion\_Correc})  \end{align}$$`
+
+.center[Con esta formula podemos asignarle un puntaje a cada establecimiento y a través de esto hacer rankings para priorizar.]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

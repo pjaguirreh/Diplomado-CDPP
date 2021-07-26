@@ -1,0 +1,622 @@
+---
+title: "Ciencia de Datos para Políticas Públicas"
+subtitle: "Módulo 2 - Clase 6: Logit y otros"
+author: "Pablo Aguirre Hormann"
+date: "20/07/2021"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{css, echo = FALSE}
+#.remark-slide-content {
+#  font-size: 28px;
+#  padding: 20px 80px 20px 80px;
+#}
+#.remark-code, .remark-inline-code {
+#  background: #f0f0f0;
+#}
+.small .remark-code {
+  font-size: 14px;
+}
+
+.smaller .remark-code {
+  font-size: 12px;
+}
+
+.tiny .remark-code {
+  font-size: 11px;
+}
+
+.pull-left2 {
+  float: left;
+  width: 40%;
+}
+
+.pull-right2 {
+  float: right;
+  width: 54%;
+}
+```
+
+```{r setup, include = FALSE, purl = FALSE}
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  fig.align="center",  
+  fig.height=4, #fig.width=6,
+  dpi=300, #fig.path='Figs/',
+  cache=T,#, echo=F, warning=F, message=F,
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE,
+  out.width = "90%"
+  )
+library(tidyverse)
+library(ggExtra)
+library(hrbrthemes)
+library(fontawesome)
+library(patchwork)
+library(infer)
+library(broom)
+library(AER)
+library(readxl)
+xaringanExtra::use_scribble(pen_size = 1)
+xaringanExtra::use_search(show_icon = FALSE)
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+```
+
+# ¿Qué veremos hoy?
+
+- Visualización de datos
+- Manejo de datos
+- Transformación de datos
+- **<span style="color:red">Inferencia Estadística/Econometría</span>**
+  + <span style="color:red">Modelo logit</span>
+  + <span style="color:red">Aplicaciones</span>
+
+```{r, out.width='80%',  echo = FALSE, out.width='750px'}
+knitr::include_graphics("../Imagenes/ProcesoDS.png")
+```
+
+---
+
+# Modelos
+
+**Objetivo**: representar la relación entre una variable dependiente $Y$ y una o varias variables explicativas/independientes $X_1, X_2,..., X_k$.
+
+</br>
+
+$$
+\begin{aligned}
+\hat{Y} &= E(Y|X) \\
+  &= \hat{f}(X)
+\end{aligned}
+$$
+
+</br>
+
+- Si $Y$ es una variable *continua*: **regresión**
+- Si $Y$ es una variable *categórica*: **clasificación** (próxima clase)
+
+---
+class: inverse, center, middle
+name: reg
+
+# Regresión Logística/Clasificación
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Variable dependiente binaria
+
+- Hasta ahora consideramos una variable dependiente $Y$ continua (Resultados de prueba)
+
+--
+
+- Pero también podemos tener casos en que $Y$ es una variable categórica/binaria (1 o 0)
+  * Otorgamiento de subsidio (sí/no)
+  * Participación en el mercado laboral (sí/no)
+  
+--
+
+- Esto conlleva algunos desafíos extra a los que hemos visto hasta ahora
+
+---
+
+# Variable dependiente binaria
+
+```{r simular_datos, echo = FALSE}
+set.seed(1)
+X1 <- sample(1:11, 100, replace = TRUE)
+X2 <- sample(10:20, 100, replace = TRUE)
+
+datos_logit <- bind_rows(data.frame(X = X1, Y = rep(0, 100)),
+          data.frame(X = X2, Y = rep(1, 100))) 
+```
+
+```{r graf_datos, echo = FALSE}
+datos_logit %>% 
+  ggplot(aes(x = X, y = Y)) +
+  geom_point() +
+  theme_minimal()
+```
+
+.center[**No existe dispersión en el eje Y**]
+
+--
+
+¿Qué ocurre si modelamos esto al igual que una regresión con $Y$ continua?
+
+---
+
+# Modelo de probabilidad lineal
+
+$$\hat{Y}=P(Y=1|X)=\hat{\beta_0}+\hat{\beta_1}X$$
+
+--
+
+.pull-left[
+.small[
+```{r modelo_sim, highlight.output = c(6,7)}
+lm(Y~X, data = datos_logit)
+```
+]
+]
+
+.pull-right[
+```{r modelo_datos_sim, echo = FALSE}
+datos_logit %>% 
+  ggplot(aes(x = X, y = Y)) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme_minimal() 
+```
+
+]
+
+El modelo de probabilidad lineal tiene la ventaja de que la interpretación es directa, *el aumento en una unidad de $X$ esta asociado, en promedio, con un aumento de 7.9% en $Y$*
+
+--
+
+**Pero modelo permite valores ajustados menores a 0 y superiores a 1**. 
+
+¿Cómo interpretamos, por ejemplo, $\hat{Y}=1.2$?
+
+
+---
+
+# Residuales
+
+**Otro problema**: los residuales claramente muestran que algo anda mal.
+
+```{r resid_datos_sim, echo = FALSE}
+datos_logit %>% 
+  lm(Y ~ X, data = .) %>% 
+  augment() %>% 
+  ggplot(aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 0) +
+  geom_smooth(se = FALSE) +
+  theme_minimal()
+```
+
+--
+
+Debemos buscar una forma de limitar los valores de $Y$: $P(Y=1|X)=F(\hat{\beta_0}+\hat{\beta_1}X)$
+  
+---
+
+# Modelo logit
+
+El modelo logit (o logístico) nos permite limitar los valores de $Y$ entre 0 y 1 usando como función auxiliar $F = \frac{exp(z)}{1+exp(z)}$ con $z=\hat{\beta_0}+\hat{\beta_1}X$.
+
+--
+
+</br>
+
+$$P(Y=1|X)=\frac{e^{(\hat{\beta_0}+\hat{\beta_0}X)}}{1+e^{(\hat{\beta_0}+\hat{\beta_0}X)}}$$
+El proceso de estimación es algo distinto a lo que vimos para regresiones hasta el momento. En este caso se hace por algo llamado **máxima verosimilitud** (no entraremos en detalles).
+
+--
+
+#### Pero en R...
+
+```{r como_modelar_logit}
+modelo_logit <- glm(Y ~ X, family = "binomial", data = datos_logit) #<<
+```
+
+Noten que usamos `glm` ahora y no `lm`.
+
+---
+
+# ¿Cómo se ve esto?
+
+```{r graf_modelo_logit, out.width='70%', echo = FALSE}
+datos_logit %>% 
+  ggplot(aes(x = X, y = Y)) +
+  geom_point() +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) +
+  theme_minimal()
+```
+
+
+.pull-left[
+.tiny[
+```{r, echo = FALSE, highlight.output = c(5,6)}
+modelo_logit
+```
+]
+]
+
+.pull-right[
+
+<br>
+
+$$
+P(Y=1|X)=\frac{e^{(-19.6+1.9X)}}{1+e^{(-19.6+1.9X)}}
+$$
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Con datos reales
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Datos laborales
+
+```{r datos_trabajo}
+(datos_trabajo <- read_xlsx("../datos/datos_trabajo.xlsx"))
+```
+
+- `trabajando` es una variable categórica que toma el valor **1** cuando una persona/observación se encuentra trabajando y **0** en caso contrario.
+
+- `educ` y `exper` son variables numéricas representando años de educación y de experiencia laboral, respectivamente.
+
+---
+
+# Visualicemos los datos
+
+.small[
+```{r viz_datos_trabajo}
+datos_trabajo %>% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_point() +
+  theme_minimal()
+```
+]
+
+---
+
+# Un pequeño ajuste
+
+.small[
+```{r, jitter}
+datos_trabajo %>% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) + #<<
+  theme_minimal()
+```
+]
+
+---
+
+# Modelo de probabilidad lineal
+
+.small[
+```{r, mpl_trabajo}
+datos_trabajo %>% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+  geom_smooth(method = "lm", se = FALSE) + #<<
+  theme_minimal()
+```
+]
+
+---
+
+# Modelo logit
+
+.small[
+```{r logit_trabajo1}
+datos_trabajo %>% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) + #<<
+  theme_minimal()
+```
+]
+
+---
+
+# Modelo logit con otra variable
+
+.small[
+```{r logit_trabajo2}
+datos_trabajo %>% 
+  ggplot(aes(x = exper, y = trabajando)) + #<<
+  geom_jitter(width = 0.1, height = 0.03, size = 0.3) +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) + 
+  theme_minimal()
+```
+]
+
+---
+
+# Estimemos un modelo logit
+
+.small[
+```{r}
+modelo_logit_trabajo <- glm(trabajando ~ educ, 
+                            family = "binomial", 
+                            data = datos_trabajo)
+tidy(modelo_logit_trabajo)
+```
+]
+
+--
+
+<br>
+
+$$
+P(trabajando=1|educ)=\frac{e^{(-1.8+0.16educ)}}{1+e^{(-1.8+0.16*educ)}}
+$$
+
+<br>
+
+.center[**¿Cómo interpretamos esto?**]
+
+---
+
+# Un poco de algebra
+
+$$\small \begin{align} P(trabajando=1|educ)=p&=\frac{e^{(-1.8+0.16*educ)}}{1+e^{(-1.8+0.16*educ)}} \\
+                                                                                          \\
+                     \frac{1}{p}&=\frac{1+e^{(-1.8+0.16*educ)}}{e^{(-1.8+0.16*educ)}}       \\ 
+                                                                                          \\ 
+                     \frac{1}{p}&=1+\frac{1}{e^{(-1.8+0.16*educ)}}                         \\ 
+                                                                                          \\   
+                     \frac{1-p}{p}&=\frac{1}{e^{(-1.8+0.16*educ)}}                         \\ 
+                                                                                          \\  
+                     \frac{p}{1-p}&=e^{(-1.8+0.16*educ)}                                   \\ 
+                                                                                          \\
+                     log(\frac{p}{1-p})&=-1.8+0.16*educ                                    \\
+                                                                                          \\ 
+                     log\left(\frac{P(trabajando=1|educ)}{P(trabajando=0|educ)}\right)&=-1.8+0.16*educ                                    \\
+                                                                                          \\ 
+                     \end{align}$$
+
+---
+
+# Interpretación
+
+$$log\left(\frac{P(trabajando=1|educ)}{P(trabajando=0|educ)}\right)=-1.8+0.16*educ$$
+
+El aumento en una unidad de `educ` se asocia con un incremento promedio de 0.16 en el **_log-odds_** de `trabajando`.
+
+--
+
+El efecto depende del "lugar de la curva" donde estemos.
+
+```{r}
+nuevos_datos <- data.frame("educ" = c(5, 7, 9, 11, 13, 15, 17))
+predict(modelo_logit_trabajo,
+        newdata = nuevos_datos,
+        type = "response") %>% round(4)
+```
+
+---
+
+# ¿Cómo evaluamos este modelo?
+
+### Pseudo $R^2$
+
+Logit es un ejemplo de modelos de regresión no lineal y es importante destacar que en estos casos una métrica como el $R^2$ no tiene sentido ya que sus supuestos son para modelos lineales.
+
+--
+
+Una alternatva es utilizar una métrica conocida como el *pseudo*- $R^2$.
+
+$$pseudo\ R^2=1-\frac{ln(f^{max}_{full})}{ln(f^{max}_{nulo})}=1-\frac{devianza}{devianza\ nula}$$
+
+--
+
+.small[
+```{r}
+glance(modelo_logit_trabajo)
+```
+]
+
+.smaller[
+```{r}
+1-(select(glance(modelo_logit_trabajo), deviance)/select(glance(modelo_logit_trabajo), null.deviance)) %>% pull()
+```
+]
+
+---
+
+# ¿Cómo evaluamos este modelo?
+
+.small[
+```{r, highlight.output=c(18,19)}
+summary(modelo_logit_trabajo)
+```
+]
+
+---
+
+# ¿Cómo evaluamos este modelo?
+
+Otra forma de evaluar es convertir los *valores ajustados* (resultado del modelo) que corresponde a valores entre 0 y 1 (ver `.fitted` ) en categorías que se puedan comparar con `trabajando` (0 o 1).
+
+.small[
+```{r}
+(estimacion_logit <- augment(modelo_logit_trabajo, type.predict = "response") %>% 
+  transmute(valor_real = trabajando,
+            .fitted,
+            valor_estimado = ifelse(.fitted >= 0.5, 1, 0), #<<
+            check = valor_real == valor_estimado))
+```
+]
+
+---
+
+# ¿Qué significa esto?
+
+### Clasificación usando 0.5
+
+```{r, echo = FALSE}
+modelo_logit_trabajo %>% 
+  augment(type.predict = "response") %>% 
+  mutate(estimacion = as.factor(ifelse(.fitted >= 0.5, 1, 0))) %>% 
+  ggplot(aes(x = educ, y = trabajando)) +
+  geom_point(size = 1, aes(col = estimacion)) +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) +
+  theme_minimal()
+```
+
+---
+
+# ¿Qué significa esto?
+
+### Clasificación usando 0.5 para otra variable X
+
+```{r, echo = FALSE}
+datos_trabajo %>% 
+  glm(trabajando ~ exper, data = ., family = "binomial") %>% 
+  augment(type.predict = "response") %>% 
+  mutate(estimacion = as.factor(ifelse(.fitted >= 0.5, 1, 0))) %>% 
+  ggplot(aes(x = exper, y = trabajando)) +
+  geom_point(size = 1, aes(col = estimacion)) +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial")) +
+  theme_minimal()
+```
+
+
+---
+
+# Matriz de confusión
+
+.small[
+```{r}
+(matriz_confusion <- estimacion_logit %>% 
+  group_by(valor_real, valor_estimado) %>% 
+  summarise(n = n()) %>% 
+  pivot_wider(names_from = valor_estimado, values_from = n))
+```
+]
+
+No pareciera ser un buen modelo
+
+--
+
+.pull-left[
+.small[
+```{r, collapse = TRUE}
+VP <- matriz_confusion[2,3]
+FP <- matriz_confusion[1,3]
+VN <- matriz_confusion[1,2]
+FN <- matriz_confusion[2,2]
+(tasa_VP <- VP/(VP+FN))
+(tasa_FP <- FP/(FP+VN))
+```
+]
+]
+
+.pull-right[
+En general, queremos maximizar la tasa de Verdaderos Positivos y minimizar la tasa de Falsos Positivos.
+]
+
+---
+
+# Inferencia vs Predicción
+
+### Modelos para Inferencia/Explicación: 
+  * Aprender y concluir algo sobre como se relacionan variables. Relaciones causales.
+  * Evitar sesgo
+  * Predicción *dentro de muestra*
+  * $\hat{f}$ / $\hat{\beta}$ 
+
+### Modelos para Predicción: 
+  * Que la predicción esté lo más cerca posible del valor real
+  * Evitar sobreajuste al entrenar modelos
+  * Predicción *fuera de muestra*
+  * $\hat{Y}$
+  
+---
+class: inverse, center, middle
+name: reg
+
+# Aplicaciones
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# SMA - Preferencias de fiscalización
+
+**Situación**: Elaboración de programas de fiscalización a partir de criterio experto (muy valioso) considerando información "objetiva" (denuncias, por ej.) e información "subjetiva" (percepciones).
+
+**Antecedente**: ¿Cómo ordenar el proceso de manera de sistematizar al menos la información "objetiva".
+  + **Solución propuesta**: a través de ponderadores para distintos criterios, generar un ranking de establecimientos a fiscalizar.
+  + **Problema**: ¿por qué valorar un componente más que otro?
+  
+--
+
+<br>
+
+**Propuesta actual**: de alguna forma capturar la preferencia de funcionarios/as de la SMA a distintos criterios "objetivos". Con esas preferencia **estimar los "ponderadores"**.
+
+---
+
+# Experimento de elección
+
+- Basados en la teoría de utilidad aleatoria (McFadden 1973) que propone que la utilidad de un bien se descompone en un **componente observable** y otro **no observable** (error).
+
+- Los componentes observables corresponden a **atributos ligados a las elecciones** que un individuo hace así como a **características del individuo** que hace la elección.
+
+- Dados ciertos supuestos para la distribución del error, la **probabilidad de elegir una opción se puede expresar como una distribución logística**.
+
+---
+
+# En la práctica
+
+- 48 elecciones a casi 200 funcionarios/as de distintas áreas.
+- **¿Qué establecimiento fiscalizarías?**
+- Cada elección se traduce en elegir una opción A o una opción B.
+- Cada elección depende de las características descritas y también de la persona que responde.
+- Esto nos deja con una base de datos de casi 10.000 observaciones que podemos modelar.
+
+```{r, echo = FALSE, out.width="80%"}
+knitr::include_graphics("../Imagenes/Tarjeta_3.png")
+```
+
+---
+
+# Resultados
+
+```{r, echo = FALSE, out.width="60%"}
+knitr::include_graphics("../Imagenes/ResultadoDCE.PNG")
+```
+
+$$\small \begin{align} \widehat{Utilidad}=&(0.32*1_{Aire})+(0.34*1_{Ext.Ag})+(0.36*1_{FyF})+(0.09*1_{RuO})+(0.47*1_{Ag\_Suelo}) \\ &+ (0.83*1_{Con\_ImpSign}) + (0.81*1_{Con\_Den}) +(0.74*1_{Sin\_Fisc}) +(0.25*1_{Sin\_Accion\_Correc})  \end{align}$$
+
+.center[Con esta formula podemos asignarle un puntaje a cada establecimiento y a través de esto hacer rankings para priorizar.]
