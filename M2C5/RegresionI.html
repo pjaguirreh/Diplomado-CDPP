@@ -1,0 +1,3744 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Ciencia de Datos para Políticas Públicas</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Pablo Aguirre Hormann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":1,"eraser_size":10}) })</script>
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":false,"autoSearch":true}) })</script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Ciencia de Datos para Políticas Públicas
+## Módulo 2 - Clase 5: Regresiones
+### Pablo Aguirre Hormann
+### 13/07/2021
+
+---
+
+
+&lt;style type="text/css"&gt;
+#.remark-slide-content {
+#  font-size: 28px;
+#  padding: 20px 80px 20px 80px;
+#}
+#.remark-code, .remark-inline-code {
+#  background: #f0f0f0;
+#}
+.small .remark-code {
+  font-size: 14px;
+}
+
+.smaller .remark-code {
+  font-size: 12px;
+}
+
+.tiny .remark-code {
+  font-size: 11px;
+}
+
+.pull-left2 {
+  float: left;
+  width: 40%;
+}
+
+.pull-right2 {
+  float: right;
+  width: 54%;
+}
+&lt;/style&gt;
+
+
+
+# ¿Qué veremos hoy?
+
+- Visualización de datos
+- Manejo de datos
+- Transformación de datos
+- **&lt;span style="color:red"&gt;Inferencia Estadística/Econometría&lt;/span&gt;**
+  + &lt;span style="color:red"&gt;Regresiones lineales (simple y múltiple)&lt;/span&gt;
+  + &lt;span style="color:red"&gt;¿Qué son? ¿Cómo se "construyen?&lt;/span&gt;
+  + &lt;span style="color:red"&gt;Inferencia usando regresiones&lt;/span&gt;
+
+&lt;img src="../Imagenes/ProcesoDS.png" width="750px" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+name: reg
+
+# Distribuciones conjuntas
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Medir la relación entre variables
+
+### Covarianza
+
+Medición de la variación/dependencia conjunta entre dos aleatorias.
+
+$$
+`\begin{aligned}
+\large
+Cov(X,Y) &amp;= \frac{\sum(X-\bar{X})(Y-\bar{Y})}{n} \\
+                                                 \\
+         &amp; = E(XY)-E(X)E(Y)
+\end{aligned}`
+$$
+
+--
+
+### Correlación
+
+Normalización de la covarianza. Mismo signo que `\(Cov(X,Y)\)` pero adimensional (entre -1 y 1)
+
+$$
+`\begin{aligned}
+\large
+\rho_{x,y}&amp;=\frac{\sigma_{X,Y}}{\sigma_X \sigma_Y} \\ 
+                                                   \\ 
+          &amp;=\frac{Cov(X,Y)}{\sqrt{Var(X)Var(Y)}}
+\end{aligned}`
+$$
+
+---
+
+# Relaciones entre variables
+
+.pull-left[
+
+&lt;img src="RegresionI_files/figure-html/cov_cor-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+
+```r
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+*##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+*##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+
+]
+
+---
+
+# Relaciones entre variables
+
+.pull-left[
+
+**Covarianza caballos de fuerza (`hp`)/millas por galón (`mpg`)**
+
+
+```r
+mtcars %&gt;% 
+  summarise(covarianza = cov(hp, mpg))
+```
+
+```
+##   covarianza
+## 1  -320.7321
+```
+
+
+**Correlación caballos de fuerza (`hp`)/millas por galón (`mpg`)**
+
+
+```r
+mtcars %&gt;% 
+  summarise(correlacion = cor(hp, mpg))
+```
+
+```
+##   correlacion
+## 1  -0.7761684
+```
+
+]
+
+.pull-right[
+
+
+```r
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+*##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+*##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+
+]
+
+---
+
+# Distribuciones conjuntas
+
+Si `\(X\)` e `\(Y\)` son dos variables aleatorias, la **distribución conjunta** de `\(X\)` e `\(Y\)` permite calcular las probabilidades de eventos que involucren a ambas variables.
+
+Por ejemplo, la probabilidad de que alguien mida entre 1.7 y 1.8 metros y que pese entre 60 y 80 kilogramos.
+
+Desde una distribución conjunta podemos obtener **distribuciones marginales** y **distribuciones condicionales**.
+
+--
+
+### Esperanzas condicionales
+
+Si `\(X\)` e `\(Y\)` no son independientes, entonces saber algo de `\(X\)` me puede ayudar a predecir/explicar `\(Y\)`.
+
+`\(E(Y|X)\)` es una **función** que me dice para cada valor de `\(X\)`, la esperanza de `\(Y\)` de aquellos individuos con ese valor de `\(X\)`.
+
+---
+
+# Distribuciones marginales
+
+&lt;img src="RegresionI_files/figure-html/dist_marginal1-1.png" width="110%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Distribuciones marginales
+
+&lt;img src="RegresionI_files/figure-html/dist_marginal2-1.png" width="110%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Esperanzas condicionales
+
+`$$E(mpg|hp&lt;100)$$`
+
+&lt;img src="RegresionI_files/figure-html/dist_condicional1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Esperanzas condicionales
+
+`$$E(mpg|100 &lt; hp&lt;160)$$`
+
+&lt;img src="RegresionI_files/figure-html/dist_condicional2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Esperanzas condicionales
+
+`$$E(mpg|160 &lt; hp&lt;230)$$`
+
+&lt;img src="RegresionI_files/figure-html/dist_condicional3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Esperanzas condicionales
+
+`$$E(mpg|hp&gt;230)$$`
+
+&lt;img src="RegresionI_files/figure-html/dist_condicional4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Esperanzas condicionales
+
+`$$E(mpg|hp)=\hat{f}$$`
+
+&lt;img src="RegresionI_files/figure-html/dist_condicional5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Esperanzas condicionales
+
+.center[**ggplot2**: `geom_smooth()`]
+
+&lt;img src="RegresionI_files/figure-html/geom_smooth-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: inverse, center, middle
+name: reg
+
+# Modelos
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Modelos
+
+**Objetivo**: representar la relación entre una variable dependiente `\(Y\)` y una o varias variables explicativas/independientes `\(X_1, X_2,..., X_k\)`.
+
+&lt;/br&gt;
+
+$$
+`\begin{aligned}
+\hat{Y} &amp;= E(Y|X) \\
+  &amp;= \hat{f}(X)
+\end{aligned}`
+$$
+
+&lt;/br&gt;
+
+- Si `\(Y\)` es una variable *continua*: **regresión**
+- Si `\(Y\)` es una variable *categórica*: **clasificación** (próxima clase)
+
+--
+
+&lt;/br&gt;
+&lt;/br&gt;
+
+.center[*"Todos los modelos están mal... pero algunos son útiles"*]
+
+---
+
+# Inferencia vs Predicción
+
+### Modelos para Inferencia/Explicación: 
+  * Aprender y concluir algo sobre como se relacionan variables. Relaciones causales.
+  * Evitar sesgo
+  * Predicción *dentro de muestra*
+  * `\(\hat{f}\)` / `\(\hat{\beta}\)` 
+
+### Modelos para Predicción: 
+  * Que la predicción esté lo más cerca posible del valor real
+  * Evitar sobreajuste al entrenar modelos
+  * Predicción *fuera de muestra*
+  * `\(\hat{Y}\)`
+
+--
+
+Algunos algorítmos pueden servir para ambos objetivos pero con diferencias en la implementación (*ej. Regresión lineal para inferencia o para predicción*).
+
+.center[**Nosotros no hablaremos de predicción (_Machine Learning_). Eso lo verán en el módulo 3.**]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Regresión Lineal
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ecuación de la curva
+
+Probablemente recordarán de alguna clase de matemáticas:
+
+`$$y = mx + b$$`
+
+donde `\(m\)` es la pendiente y `\(b\)` es el intercepto en el eje **y**. Por ejemplo:
+
+&lt;img src="RegresionI_files/figure-html/ec_recta-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+`$$y = 2x -1$$`
+
+---
+
+# Ec. de la curva vs Regresión
+
+.pull-left[
+
+Clase de **matemáticas**:
+
+`\(y = b + mx\)`
+
+`\(b\)` es el intercepto en el eje
+
+`\(m\)` es la pendiente
+
+]
+
+.pull-right[
+
+Clase de **estadística**:
+
+`\(\hat{Y} = \hat{\beta}_0 +\hat{\beta}_1X + u\)`
+
+`\(\hat{\beta}_0\)` es el intercepto en el eje
+
+`\(\hat{\beta}_1\)` es la pendiente 
+
+`\(u\)` es el error/residual
+
+]
+
+&lt;br&gt;
+
+- `\(\hat{\beta}_0\)` y `\(\hat{\beta}_1\)` se conocen también como coeficientes de regresión y serán **parámetros a estimar**.
+
+- `\(\hat{Y}\)` lo denominamos como los **valores ajustados** o bien los valores estimados por nuestra función para cada valor posible de `\(X\)`.
+
+---
+
+# Estudiantes/Profesor vs Resultados
+
+
+```r
+datos_colegio &lt;- data.frame(REP = c(15, 17, 19, 20, 22, 23.5, 25), 
+                            Resultados = c(680, 640, 670, 660, 630, 660, 635))
+
+ggplot(datos_colegio, aes(REP, Resultados)) +
+  geom_point(size = 3) +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/simular_datos_colegio-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# El modelo más simple
+
+$$
+\small
+`\begin{aligned}
+\widehat{Y}_i &amp;= E(Y) \\
+\widehat{Y}_i &amp;= \bar{Y}
+\end{aligned}`
+$$
+.small[
+
+]
+
+---
+
+# El modelo más simple
+
+$$
+\small
+`\begin{aligned}
+\widehat{Resultados}_i &amp;= E(Resultados) \\
+  &amp;= \overline{Resultado} = 653.57
+\end{aligned}`
+$$
+.small[
+
+```r
+ggplot(datos_colegio, aes(REP, Resultados)) +
+  geom_point(size = 3) +
+* geom_abline(aes(intercept = mean(Resultados), slope = 0),
+              size = 2, col = "blue") +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/modelo_simple2-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Una línea que describe esta relación 
+
+$$
+\small
+`\begin{aligned}
+\widehat{Resultados}_i &amp;= f(REP) \\
+                       &amp;= 713 - (3*REP_i)
+\end{aligned}`
+$$
+
+.small[
+
+```r
+ggplot(datos_colegio, aes(REP, Resultados)) +
+  geom_point(size = 3) +
+* geom_abline(aes(intercept = 713, slope = -3),
+              size = 2, col = "blue") +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/una_curva-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Ahora muchas (50) líneas
+
+`$$\widehat{Resultados}_i = ¿? - (¿?*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/muchas_curvas-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+--
+
+.center[**¿Cómo podemos elegir una de estas (u otra)?**]
+
+---
+
+# Residuales
+
+`$$\widehat{Resultados}_i = 713 - (3*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales0-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Residuales
+
+`$$\widehat{Resultados}_i = 713 - (3*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales00-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Residuales
+
+`$$\widehat{Resultados}_i = 713 - (3*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+.pull-right[
+`$$\small X_6=23.5;\ Y_6=660$$`
+
+`$$\small \hat{Y}_6=713-(3*23.5)=642.5$$`
+
+`$$\small u_6=(660-642.5)=17.5$$`
+]
+
+---
+
+# Residuales
+
+`$$\widehat{Resultados}_i = 713 - (3*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales2-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+.pull-left[
+`$$\small X_2=17;\ Y_6=640$$`
+
+`$$\small \hat{Y}_2=713-(3*17)=662$$`
+
+`$$\small u_2=(660-642.5)=-22$$`
+]
+
+.pull-right[
+`$$\small X_6=23.5;\ Y_6=660$$`
+
+`$$\small \hat{Y}_6=713-(3*23.5)=642.5$$`
+
+`$$\small u_6=(660-642.5)=17.5$$`
+]
+
+---
+
+# Suma de Cuadrados Residuales
+
+`$$\widehat{Resultados}_i = 713 - (3*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales3-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+
+`$$u_1=12;\ u_2=-22;\ u_3=14;\ u_4=7;\ u_5=-17;\ u_6=17.5;\ u_7=-3$$`
+--
+
+.center[
+**Suma de cuadrados residuales** = `\(\sum_{i}^{7}(u_{i}^2) = \sum_{i}^{7}((Y_{i}-\hat{Y}_{i})^2) = 1477.25\)`
+]
+
+---
+
+# Suma de Cuadrados Residuales
+
+`$$\widehat{Resultados}_i = E(Resultados) = 653.57$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales4-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+`$$u_1=26.4;\ u_2=-13.6;\ u_3=16.4;\ u_4=6.4;\ u_5=-23.6;\ u_6=6.4;\ u_7=-18.6$$`
+
+.center[
+**Suma de cuadrados residuales** = `\(\sum_{i}^{7}(u_{i}^2) = \sum_{i}^{7}((Y_{i}-\hat{Y}_{i})^2) = 2135.71\)`
+]
+
+---
+
+# Suma de Cuadrados Residuales
+
+`$$\widehat{Resultados}_i = 740 - (4.3*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales5-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+`$$u_1=4.5;\ u_2=-26.9;\ u_3=11.7;\ u_4=6;\ u_5=-15.4;\ u_6=21;\ u_7=2.5$$`
+
+.center[
+**Suma de cuadrados residuales** = `\(\sum_{i}^{7}(u_{i}^2) = \sum_{i}^{7}((Y_{i}-\hat{Y}_{i})^2) = 1603.26\)`
+]
+
+---
+
+# Suma de Cuadrados Residuales
+
+`$$\widehat{Resultados}_i = 713.57 - (2.97*REP_i)$$`
+
+&lt;img src="RegresionI_files/figure-html/residuales6-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+`$$u_1=10.9;\ u_2=-23.1;\ u_3=12.8;\ u_4=5.8;\ u_5=-18.3;\ u_6=16.2;\ u_7=-4.4$$`
+
+.center[
+**Suma de cuadrados residuales** = `\(\sum_{i}^{7}(u_{i}^2) = \sum_{i}^{7}((Y_{i}-\hat{Y}_{i})^2) = 1466.85\)`
+]
+
+---
+
+# ¿Cómo se estiman los coeficientes?
+
+### Mínimos Cuadrados Ordinarios (*OLS en inglés*)
+
+- Modelo de regresión simple (una variable independiente) a estimar:
+
+`$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$$`
+
+--
+
+- ¿Cómo se estiman los parámetros?
+  * **objetivo**: *minimizar la suma del cuadrado de los residuales *
+  
+$$
+`\begin{aligned}
+\min\sum_{i=1}^nu_i^2 &amp;= \min\sum_{i=1}^n(Y_i-\hat{Y}_i)^2 \\
+&amp;= \min_{{\hat{\beta}_0},{\hat{\beta}_1}}\sum_{i=1}^n(Y_i-(\hat{\beta}_0 + \hat{\beta}_1X_i))^2
+\end{aligned}`
+$$
+
+--
+
+- Parámetros estimados:
+
+$$
+`\begin{aligned}
+\hat{\beta}_1 &amp;= \frac{Cov(X,Y)}{Var(X)}=\rho_{x,y}\frac{\sigma_Y}{\sigma_X}\\
+\hat{\beta}_0 &amp;= \bar{Y} - \hat{\beta}_1 \bar{X}
+\end{aligned}`
+$$
+
+---
+
+# "Mejor" línea
+
+La "mejor línea" (o la que **minimiza la suma de cuadrados residuales**) es, de hecho: 
+
+$$
+\small 
+`\begin{aligned}
+\widehat{Resultados}_i &amp;= 713.57 - (2.97*REP_i) \\
+E(Resultados|REP)      &amp;= 713.57 - (2.97*REP) \\
+\end{aligned}`
+$$
+
+--
+
+.pull-left[
+.small[
+
+```r
+ggplot(datos_colegio, aes(REP, Resultados)) +
+  geom_point(size = 3) +
+* geom_smooth(method = "lm",
+*             se = FALSE,
+*             size = 2) +
+  theme_minimal()
+```
+]
+]
+
+.pull-right[
+.smaller[
+&lt;img src="RegresionI_files/figure-html/mejor_linea_ext-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+]
+
+`$$\small \widehat{Resultados}_i = \hat{\beta_0} + \hat{\beta_1}REP_i$$`
+
+`\(\hat{\beta}_1=-2.97\)` se interpreta como que **cada aumento en una unidad de `REP` esta asociado, en promedio, a una disminución de 2.97 unidades en `Resultados`**. 
+
+`\(\hat{\beta}_0=713.57\)` es el valor promedio de `Resultados` cuando `REP` es igual a 0 (no necesariamente tiene interpretación práctica).
+
+---
+
+# Predicción/Interporlación
+
+$$
+`\begin{aligned}
+\widehat{Resultados}_i &amp;= 713.57 - (2.97*REP_i) \\
+                       &amp;= E(Resultados|REP)
+\end{aligned}`
+$$
+
+.pull-left[
+.center[
+
+```
+##    REP Resultados
+## 1 15.0        680
+## 2 17.0        640
+## 3 19.0        670
+## 4 20.0        660
+## 5 22.0        630
+## 6 23.5        660
+## 7 25.0        635
+```
+]
+]
+
+
+.pull-right[
+.smaller[
+Aún cuando nuestra curva **fue estimada** usando 7 valores, podemos usar la curva para "predecir" el valor de `Resultados` esperado para otros valores de `REP`.
+
+$$
+\small
+`\begin{aligned}
+E(Resultados|REP = 18) &amp;=713.57-(2.97*18) \\
+                       &amp;=660.11
+\end{aligned}`
+$$
+
+]
+]
+
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-5-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+
+# Ahora con "datos reales"
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+(Disponibles en el paquete **AER**)
+
+---
+
+# Datos California (USA)
+
+
+```r
+library(AER)
+data("CASchools")
+str(CASchools)
+```
+
+```
+## 'data.frame':	420 obs. of  14 variables:
+##  $ district   : chr  "75119" "61499" "61549" "61457" ...
+##  $ school     : chr  "Sunol Glen Unified" "Manzanita Elementary" "Thermalito Union Elementary" "Golden Feather Union Elementary" ...
+##  $ county     : Factor w/ 45 levels "Alameda","Butte",..: 1 2 2 2 2 6 29 11 6 25 ...
+##  $ grades     : Factor w/ 2 levels "KK-06","KK-08": 2 2 2 2 2 2 2 2 2 1 ...
+*##  $ students   : num  195 240 1550 243 1335 ...
+*##  $ teachers   : num  10.9 11.1 82.9 14 71.5 ...
+##  $ calworks   : num  0.51 15.42 55.03 36.48 33.11 ...
+##  $ lunch      : num  2.04 47.92 76.32 77.05 78.43 ...
+##  $ computer   : num  67 101 169 85 171 25 28 66 35 0 ...
+##  $ expenditure: num  6385 5099 5502 7102 5236 ...
+##  $ income     : num  22.69 9.82 8.98 8.98 9.08 ...
+*##  $ english    : num  0 4.58 30 0 13.86 ...
+##  $ read       : num  692 660 636 652 642 ...
+*##  $ math       : num  690 662 651 644 640 ...
+```
+
+---
+
+# Preparar datos
+
+.small[
+
+```r
+(datos_reg &lt;- CASchools %&gt;% 
+  rename(ingresos = income) %&gt;%
+  transmute(distrito = district, colegio = school,
+            Resultados = (read + math)/2,
+            REP = students/teachers,
+            ingresos,
+            grupo_ingresos = as.factor(ifelse(ingresos &gt;= median(ingresos), 1, 0)),
+            computadores = computer,
+            almuerzo = lunch))
+```
+
+```
+##     distrito                                 colegio Resultados      REP
+## 1      75119                      Sunol Glen Unified     690.80 17.88991
+## 2      61499                    Manzanita Elementary     661.20 21.52466
+## 3      61549             Thermalito Union Elementary     643.60 18.69723
+## 4      61457         Golden Feather Union Elementary     647.70 17.35714
+## 5      61523                Palermo Union Elementary     640.85 18.67133
+## 6      62042                 Burrel Union Elementary     605.55 21.40625
+## 7      68536                   Holt Union Elementary     606.75 19.50000
+## 8      63834                     Vineland Elementary     609.00 20.89412
+## 9      62331                Orange Center Elementary     612.50 19.94737
+## 10     67306             Del Paso Heights Elementary     612.65 20.80556
+## 11     65722               Le Grand Union Elementary     615.75 21.23810
+## 12     62174                  West Fresno Elementary     616.30 21.00000
+## 13     71795                  Allensworth Elementary     616.30 20.60000
+## 14     72181              Sunnyside Union Elementary     616.30 20.00822
+## 15     72298                    Woodville Elementary     616.45 18.02778
+## 16     72041                 Pixley Union Elementary     617.35 20.25196
+## 17     63594             Lost Hills Union Elementary     618.05 16.97787
+## 18     63370           Buttonwillow Union Elementary     618.30 16.50980
+## 19     64709                       Lennox Elementary     619.80 22.70402
+## 20     63560                       Lamont Elementary     620.30 19.91111
+## 21     63230            Westmorland Union Elementary     620.50 18.33333
+## 22     72058                Pleasant View Elementary     621.40 22.61905
+## 23     63842                  Wasco Union Elementary     621.75 19.44828
+## 24     71811                   Alta Vista Elementary     622.05 25.05263
+## 25     65748             Livingston Union Elementary     622.60 20.67544
+## 26     72272               Woodlake Union Elementary     623.10 18.68235
+## 27     65961                 Alisal Union Elementary     623.20 22.84553
+## 28     63313                  Arvin Union Elementary     623.45 19.26667
+## 29     72199            Terra Bella Union Elementary     623.60 19.25000
+## 30     72215                       Tipton Elementary     624.15 20.54545
+## 31     68379                   San Ysidro Elementary     624.55 20.60697
+## 32     75440                         Soledad Unified     624.95 21.07268
+## 33     64816                Mountain View Elementary     625.30 21.53581
+## 34     66050              King City Union Elementary     625.85 19.90400
+## 35     67819            Ontario-Montclair Elementary     626.10 21.19407
+## 36     64758                   Los Nietos Elementary     626.80 21.86535
+## 37     65870                       Winton Elementary     626.90 18.32965
+## 38     62380                  Raisin City Elementary     627.10 16.22857
+## 39     68999              Ravenswood City Elementary     627.25 19.17857
+## 40     63578         Richland-Lerdo Union Elementary     627.30 20.27737
+## 41     72538                       Oxnard Elementary     628.25 22.98614
+## 42     65680                      El Nido Elementary     628.40 20.44444
+## 43     63461                      Fairfax Elementary     628.55 19.82085
+## 44     63404                 Delano Union Elementary     628.65 23.20522
+## 45     67199                       Perris Elementary     628.75 19.26697
+## 46     65078                  Valle Lindo Elementary     629.80 23.30189
+## 47     69369              Alum Rock Union Elementary     630.35 21.18829
+## 48     63438                       Edison Elementary     630.40 20.87179
+## 49     63321             Bakersfield City Elementary     630.55 19.01749
+## 50     69450            Franklin-McKinley Elementary     630.55 21.91938
+## 51     64592                    Hawthorne Elementary     631.05 20.10124
+## 52     65193                   Chowchilla Elementary     631.40 21.47651
+## 53     66142                 Salinas City Elementary     631.85 20.06579
+## 54     69120           Santa Maria-Bonita Elementary     631.90 20.37509
+## 55     65110                Whittier City Elementary     631.95 22.44648
+## 56     64477               Eastside Union Elementary     632.00 22.89524
+## 57     64691                     Lawndale Elementary     632.20 20.49797
+## 58     67421                        Robla Elementary     632.25 20.00000
+## 59     66191             Santa Rita Union Elementary     632.45 22.25658
+## 60     72561                          Rio Elementary     632.85 21.56436
+## 61     72157             Strathmore Union Elementary     632.95 19.47737
+## 62     67397             North Sacramento Elementary     633.05 17.67002
+## 63     66423                      Anaheim Elementary     633.15 21.94756
+## 64     63974                Lemoore Union Elementary     633.65 21.78339
+## 65     63875                 Armona Union Elementary     633.90 19.14000
+## 66     63339                    Beardsley Elementary     634.00 18.11050
+## 67     65037               South Whittier Elementary     634.05 20.68243
+## 68     63917                      Hanford Elementary     634.10 22.62361
+## 69     68221                     National Elementary     634.10 21.78650
+## 70     70904                     Roseland Elementary     634.15 18.58293
+## 71     63420                   Di Giorgio Elementary     634.20 21.54545
+## 72     64642                 Keppel Union Elementary     634.40 21.15289
+## 73     63966               Lakeside Union Elementary     634.55 16.63333
+## 74     65771                  Merced City Elementary     634.70 21.14438
+## 75     69203              Guadalupe Union Elementary     634.90 19.78182
+## 76     67694                    Cucamonga Elementary     634.95 18.98373
+## 77     61705                    Knightsen Elementary     635.05 17.66767
+## 78     63008                     Rio Dell Elementary     635.20 17.75499
+## 79     70417                     Montague Elementary     635.45 15.27273
+## 80     70409                McCloud Union Elementary     635.60 14.00000
+## 81     72587                  Santa Paula Elementary     635.60 20.59613
+## 82     62539                    West Park Elementary     635.75 16.31169
+## 83     65631                      Atwater Elementary     635.95 21.12796
+## 84     65862                 Weaver Union Elementary     636.10 17.48801
+## 85     62356                Pacific Union Elementary     636.50 17.88679
+## 86     75051                  Lucerne Valley Unified     636.60 19.30676
+## 87     67231                     Romoland Elementary     636.70 20.89231
+## 88     64501                El Monte City Elementary     636.90 21.28684
+## 89     63503             Greenfield Union Elementary     636.95 20.19560
+## 90     72033             Palo Verde Union Elementary     637.00 24.95000
+## 91     67322                Elverta Joint Elementary     637.10 18.13043
+## 92     64048                      Lucerne Elementary     637.35 20.00000
+## 93     69542               Luther Burbank Elementary     637.65 18.72951
+## 94     61382                 Bangor Union Elementary     637.95 18.25000
+## 95     68858                     Bayshore Elementary     637.95 18.99257
+## 96     72017             Oak Valley Union Elementary     638.00 19.88764
+## 97     65151                      Wilsona Elementary     638.20 19.37895
+## 98     63073                      Brawley Elementary     638.30 20.46259
+## 99     63198                Meadows Union Elementary     638.30 22.29157
+## 100    64717             Little Lake City Elementary     638.35 20.70474
+## 101    63719                   Pond Union Elementary     638.55 19.06005
+## 102    63800                    Taft City Elementary     638.70 20.23247
+## 103    71357                      Brittan Elementary     639.25 19.69012
+## 104    65557                  Arena Union Elementary     639.30 20.36254
+## 105    67587                     Adelanto Elementary     639.35 19.75422
+## 106    67470               Hollister School District     639.50 19.37977
+## 107    64857                     Palmdale Elementary     639.75 22.92351
+## 108    61507                Oroville City Elementary     639.80 19.37340
+## 109    63792                     Standard Elementary     639.85 19.15516
+## 110    72447                       Briggs Elementary     639.90 21.30000
+## 111    62323                       Monroe Elementary     640.10 18.30357
+## 112    64667                    Lancaster Elementary     640.15 21.07926
+## 113    65177       Alview-Dairyland Union Elementary     640.50 18.79121
+## 114    66589                     Magnolia Elementary     640.75 19.62662
+## 115    71985                      Liberty Elementary     640.90 19.59016
+## 116    69617                 Mt. Pleasant Elementary     641.10 20.87187
+## 117    63123                    El Centro Elementary     641.45 21.11500
+## 118    68395              South Bay Union Elementary     641.45 20.08452
+## 119    69914                Cascade Union Elementary     641.55 19.91049
+## 120    71969            Kings River Union Elementary     641.80 17.81285
+## 121    71548                 Gerber Union Elementary     642.20 18.13333
+## 122    71910                 Exeter Union Elementary     642.20 19.22221
+## 123    62000               American Union Elementary     642.40 18.66071
+## 124    66167            San Antonio Union Elementary     642.75 19.60000
+## 125    71837                       Burton Elementary     643.05 19.28384
+## 126    67157                 Nuview Union Elementary     643.20 22.81818
+## 127    70615               Bellevue Union Elementary     643.25 18.80922
+## 128    64550                       Garvey Elementary     643.40 21.37363
+## 129    71498                Corning Union Elementary     643.40 20.02041
+## 130    68916                    Jefferson Elementary     643.50 21.49861
+## 131    70185            Big Springs Union Elementary     643.50 15.42857
+## 132    63487              General Shafter Elementary     643.70 22.40000
+## 133    71308                Turlock Joint Elementary     643.70 20.12709
+## 134    72421  Twain Harte-Long Barn Union Elementary     644.20 19.03797
+## 135    69005                 Redwood City Elementary     644.20 17.34216
+## 136    61846                 Camino Union Elementary     644.40 17.01863
+## 137    65813             Plainsburg Union Elementary     644.45 20.80000
+## 138    68486                        Banta Elementary     644.45 21.15385
+## 139    62513            Washington Colony Elementary     644.50 18.45833
+## 140    67405              Rio Linda Union Elementary     644.55 19.14082
+## 141    71050                 Chatom Union Elementary     644.70 19.40766
+## 142    73726           Merced River Union Elementary     644.95 19.56896
+## 143    72462                      Hueneme Elementary     645.10 21.50120
+## 144    62737              Cuddeback Union Elementary     645.25 17.52941
+## 145    62703              Blue Lake Union Elementary     645.55 16.43017
+## 146    68205                  Lemon Grove Elementary     645.55 19.79654
+## 147    64063             Upper Lake Union Elementary     645.60 17.18613
+## 148    62984              Peninsula Union Elementary     645.75 17.61589
+## 149    72512                   Ocean View Elementary     645.75 20.12537
+## 150    71647                  Reeds Creek Elementary     646.00 22.16667
+## 151    67280                 Arcohe Union Elementary     646.20 19.96154
+## 152    68627                New Jerusalem Elementary     646.35 19.03945
+## 153    70243                     Dunsmuir Elementary     646.40 15.22436
+## 154    71282             Stanislaus Union Elementary     646.50 21.14475
+## 155    62240        Kingsburg Joint Union Elementary     646.55 19.64390
+## 156    66456                   Buena Park Elementary     646.70 21.04869
+## 157    66746                  Westminster Elementary     646.90 20.17544
+## 158    63933                 Island Union Elementary     646.95 21.39130
+## 159    72231                  Tulare City Elementary     647.05 20.00832
+## 160    68023                  Chula Vista Elementary     647.25 20.29137
+## 161    69880            Black Butte Union Elementary     647.30 17.66667
+## 162    65763                McSwain Union Elementary     647.60 18.22055
+## 163    71381                     Franklin Elementary     647.60 20.27100
+## 164    68098              Escondido Union Elementary     648.00 20.19895
+## 165    64485           East Whittier City Elementary     648.20 21.38424
+## 166    73544      Rio Bravo-Greeley Union Elementary     648.25 20.97368
+## 167    71407        Marcum-Illinois Union Elementary     648.35 20.00000
+## 168    68437                   Vallecitos Elementary     648.70 17.15328
+## 169    67918                       Victor Elementary     648.95 22.34977
+## 170    66696                      Savanna Elementary     649.15 22.17007
+## 171    71001              West Side Union Elementary     649.30 18.18182
+## 172    69971                   Enterprise Elementary     649.50 18.95714
+## 173    71621              Red Bluff Union Elementary     649.70 19.74533
+## 174    72363                    Jamestown Elementary     649.85 16.42623
+## 175    70482                   Weed Union Elementary     650.45 16.62540
+## 176    63032              South Bay Union Elementary     650.55 16.38177
+## 177    61655              Brentwood Union Elementary     650.60 20.07416
+## 178    72405                  Summerville Elementary     650.65 17.99544
+## 179    66860                        Ophir Elementary     650.90 19.39130
+## 180    70821                   Montgomery Elementary     650.90 16.42857
+## 181    70912                   Santa Rosa Elementary     651.15 16.72949
+## 182    71266                 Salida Union Elementary     651.20 24.41345
+## 183    70128                 Shasta Union Elementary     651.35 18.26415
+## 184    62802                Fortuna Union Elementary     651.40 18.95504
+## 185    72090                    Rockford  Elementary     651.45 21.03896
+## 186    62638                        Plaza Elementary     651.80 20.74074
+## 187    70813              Monte Rio Union Elementary     651.85 18.10000
+## 188    64105             Janesville Union Elementary     651.90 19.84615
+## 189    63172               Magnolia Union Elementary     652.00 21.60000
+## 190    64188                Shaffer Union Elementary     652.10 22.44242
+## 191    66506                    Fullerton Elementary     652.10 23.01438
+## 192    70649                     Cinnabar Elementary     652.30 17.74892
+## 193    69278                Santa Barbara Elementary     652.30 18.28664
+## 194    63016                  Rohnerville Elementary     652.35 19.26544
+## 195    71431   Pleasant Grove Joint Union Elementary     652.40 22.66667
+## 196    73700               Mountain Union Elementary     652.40 19.29412
+## 197    63784             South Fork Union Elementary     652.50 17.36364
+## 198    68155          Jamul-Dulzura Union Elementary     652.85 19.82143
+## 199    69765                     Live Oak Elementary     653.10 20.43378
+## 200    67116                Menifee Union Elementary     653.40 21.03721
+## 201    63552               Lakeside Union Elementary     653.50 19.92462
+## 202    69724                      Whisman Elementary     653.55 19.00986
+## 203    63180                 McCabe Union Elementary     653.55 23.82222
+## 204    68551                 Lammersville Elementary     653.70 19.36908
+## 205    71563            Lassen View Union Elementary     653.80 19.82857
+## 206    62927                 Loleta Union Elementary     653.85 15.25886
+## 207    70045                     Junction Elementary     653.95 17.16129
+## 208    64931                     Rosemead Elementary     654.10 21.81333
+## 209    66332                 Grass Valley Elementary     654.20 19.07471
+## 210    71829                  Buena Vista Elementary     654.20 25.78512
+## 211    63545              Kernville Union Elementary     654.30 18.21261
+## 212    67348             Galt Joint Union Elementary     654.60 18.16606
+## 213    67553                    Southside Elementary     654.85 16.97297
+## 214    68189               Lakeside Union Elementary     654.85 21.50087
+## 215    71423                      Nuestro Elementary     654.90 20.60000
+## 216    61994                       Alvina Elementary     655.05 16.99029
+## 217    61762                 Oakley Union Elementary     655.05 20.77955
+## 218    70268                   Etna Union Elementary     655.05 15.51247
+## 219    68544                    Jefferson Elementary     655.20 19.88506
+## 220    69377              Berryessa Union Elementary     655.30 21.39882
+## 221    63958             Kit Carson Union Elementary     655.35 20.49751
+## 222    71290                 Sylvan Union Elementary     655.35 19.36376
+## 223    68635               Oak View Union Elementary     655.40 17.65958
+## 224    66787                 Auburn Union Elementary     655.55 21.01796
+## 225    67504     North County Joint Union Elementary     655.70 19.05565
+## 226    61945                Pioneer Union Elementary     655.80 22.53846
+## 227    67645                      Central Elementary     655.85 21.10787
+## 228    70094                Pacheco Union Elementary     656.40 20.05135
+## 229    66316                 Chicago Park Elementary     656.50 14.20176
+## 230    68874                     Brisbane Elementary     656.55 18.47687
+## 231    63883                Central Union Elementary     656.65 18.63542
+## 232    70011           Happy Valley Union Elementary     656.70 20.94595
+## 233    61572             Mark Twain Union Elementary     656.80 21.08548
+## 234    65458              San Rafael City Elementary     656.80 18.69288
+## 235    67991           Cajon Valley Union Elementary     657.00 20.86808
+## 236    69393               Campbell Union Elementary     657.00 19.82558
+## 237    71365                       Browns Elementary     657.15 19.75000
+## 238    66324                  Clear Creek Elementary     657.40 19.50000
+## 239    63057               Trinidad Union Elementary     657.50 18.39081
+## 240    70722                  Guerneville Elementary     657.55 18.78676
+## 241    69013               San Bruno Park Elementary     657.65 19.77018
+## 242    71472                     Antelope Elementary     657.75 19.33333
+## 243    66472                    Centralia Elementary     657.80 21.46392
+## 244    67702                     Etiwanda Elementary     657.90 23.08492
+## 245    65169                     Wiseburn Elementary     658.00 21.06299
+## 246    63024                 Scotia Union Elementary     658.35 18.68687
+## 247    67785                Mountain View Elementary     658.60 20.77024
+## 248    68791  Pleasant Valley Joint Union Elementary     658.80 19.30556
+## 249    69625                    Oak Grove Elementary     659.05 20.13280
+## 250    61960                Pollock Pines Elementary     659.15 20.66963
+## 251    64345                Castaic Union Elementary     659.35 22.28155
+## 252    63255                 Bishop Union Elementary     659.40 20.60027
+## 253    69138               Buellton Union Elementary     659.40 20.82734
+## 254    75135               Chawanakee Jt. Elementary     659.80 19.22492
+## 255    70508                  Yreka Union Elementary     659.90 17.65477
+## 256    70599       Alexander Valley Union Elementary     660.05 17.00000
+## 257    66415                  Twin Ridges Elementary     660.10 16.49773
+## 258    72173                Sundale Union Elementary     660.20 19.78261
+## 259    72207           Three Rivers Union Elementary     660.30 22.30216
+## 260    72348               Columbia Union Elementary     660.75 17.73077
+## 261    65102               Westside Union Elementary     660.95 20.44836
+## 262    65649              Ballico-Cressey Elementary     661.35 20.37169
+## 263    68973                     Millbrae Elementary     661.45 20.16479
+## 264    69435                    Evergreen Elementary     661.60 21.61538
+## 265    70730                Harmony Union Elementary     661.60 20.56143
+## 266    63362     Panama Buena Vista Union Elementary     661.85 19.95551
+## 267    68932          Laguna Salada Union Elementary     661.85 21.18387
+## 268    72371                       Sonora Elementary     661.85 18.81042
+## 269    66910               Roseville City Elementary     661.90 20.57838
+## 270    71084                      Gratton Elementary     661.90 18.32461
+## 271    64196                   Susanville Elementary     661.95 18.82063
+## 272    69872                  Bella Vista Elementary     662.40 20.81633
+## 273    71852                    Columbine Elementary     662.40 20.00000
+## 274    64626 Hughes-Elizabeth Lakes Union Elementary     662.45 19.68182
+## 275    69591                Mountain View Elementary     662.50 19.39018
+## 276    65045        Sulphur Springs Union Elementary     662.55 20.92732
+## 277    70680            Forestville Union Elementary     662.55 19.94437
+## 278    63750               Rosedale Union Elementary     662.65 20.79109
+## 279    69948                     Columbia Elementary     662.70 19.20354
+## 280    66795                       Colfax Elementary     662.75 19.02439
+## 281    70425             Mt. Shasta Union Elementary     662.90 17.62058
+## 282    70870           Piner-Olivet Union Elementary     663.35 20.23715
+## 283    65185              Bass Lake Joint Elementary     663.45 19.29374
+## 284    62745                       Cutten Elementary     663.50 18.82998
+## 285    61952            Placerville Union Elementary     663.85 20.33949
+## 286    71035                       Wright Elementary     663.85 19.22900
+## 287    71522              Evergreen Union Elementary     663.90 17.89130
+## 288    70847              Old Adobe Union Elementary     664.00 19.51881
+## 289    71019                 Wilmar Union Elementary     664.00 19.08451
+## 290    66761                     Ackerman Elementary     664.15 19.93548
+## 291    69815              Santa Cruz City Elementary     664.15 18.87326
+## 292    62679                       Arcata Elementary     664.30 20.14179
+## 293    67595                    Alta Loma Elementary     664.40 23.55637
+## 294    66837             Foresthill Union Elementary     664.45 21.46479
+## 295    61929            Mother Lode Union Elementary     664.70 19.19101
+## 296    66613                   Ocean View Elementary     664.75 20.13080
+## 297    62596                         Lake Elementary     664.95 25.80000
+## 298    69039        San Mateo-Foster City Elementary     664.95 18.77774
+## 299    69195                 Goleta Union Elementary     665.10 19.10981
+## 300    67736                    Helendale Elementary     665.20 19.70109
+## 301    70854                Petaluma City Elementary     665.35 18.61594
+## 302    69690                    Sunnyvale Elementary     665.65 20.99721
+## 303    69179                      College Elementary     665.90 20.00000
+## 304    68197                   La Mesa-Spring Valley     665.95 20.98325
+## 305    66530        Huntington Beach City Elementary     666.00 21.64262
+## 306    69336                      Solvang Elementary     666.05 20.02967
+## 307    69849                       Soquel Elementary     666.10 19.81140
+## 308    62554            Capay Joint Union Elementary     666.15 18.00000
+## 309    70714            Gravenstein Union Elementary     666.15 19.35811
+## 310    66381              Pleasant Valley Elementary     666.45 20.17912
+## 311    63990                Pioneer Union Elementary     666.55 21.11986
+## 312    68361                       Santee Elementary     666.60 23.38974
+## 313    64113                Johnstonville Elementary     666.65 22.18182
+## 314    72553              Pleasant Valley Elementary     666.65 19.94283
+## 315    72355                 Curtis Creek Elementary     666.70 17.78826
+## 316    70300             Fort Jones Union Elementary     666.85 14.70588
+## 317    70805              Mark West Union Elementary     666.85 19.04077
+## 318    67967                 Alpine Union Elementary     667.15 20.89195
+## 319    70938             Sebastopol Union Elementary     667.20 19.83851
+## 320    62828                   Freshwater Elementary     667.45 19.52191
+## 321    63693                       Norris Elementary     667.45 20.68622
+## 322    72132            Springville Union Elementary     667.60 18.18182
+## 323    69575                     Moreland Elementary     668.00 18.89224
+## 324    63610                        Maple Elementary     668.10 24.88889
+## 325    63941   Kings River-Hardwick Union Elementary     668.40 18.58065
+## 326    68163                 Julian Union Elementary     668.60 18.04000
+## 327    68007                      Cardiff Elementary     668.65 17.73399
+## 328    72108                    Saucelito Elementary     668.80 21.45455
+## 329    67975                Bonsall Union Elementary     668.90 19.92342
+## 330    66480                      Cypress Elementary     668.95 20.33942
+## 331    64766                 Lowell Joint Elementary     669.10 22.54608
+## 332    64832                      Newhall Elementary     669.30 21.10344
+## 333    65359                    Lagunitas Elementary     669.30 18.19743
+## 334    69385                     Cambrian Elementary     669.35 20.10768
+## 335    71654                    Richfield Elementary     669.35 19.15984
+## 336    62794                   Fieldbrook Elementary     669.80 19.54545
+## 337    68049                       Dehesa Elementary     669.85 20.88889
+## 338    69955             Cottonwood Union Elementary     669.95 18.39150
+## 339    63479                    Fruitvale Elementary     670.00 19.17990
+## 340    69708                        Union Elementary     670.70 19.39771
+## 341    66498              Fountain Valley Elementary     671.25 21.67827
+## 342    61879               Gold Oak Union Elementary     671.30 19.28889
+## 343    61838                Buckeye Union Elementary     671.60 20.34927
+## 344    75085                         Rocklin Unified     671.60 20.96416
+## 345    61887             Gold Trail Union Elementary     671.65 19.46039
+## 346    62885                   Hydesville Elementary     671.70 19.28572
+## 347    64998                 Saugus Union Elementary     671.75 20.91979
+## 348    66845                 Loomis Union Elementary     671.90 20.90021
+## 349    66886           Placer Hills Union Elementary     671.90 20.59574
+## 350    70672                       Dunham Elementary     671.95 19.37500
+## 351    69021                   San Carlos Elementary     672.05 19.95122
+## 352    66399          Ready Springs Union Elementary     672.05 18.84973
+## 353    65219             Coarsegold Union Elementary     672.30 18.11787
+## 354    68726                      Cayucos Elementary     672.35 19.18341
+## 355    64170                     Richmond Elementary     672.45 22.00000
+## 356    62109                   Clay Joint Elementary     672.55 21.58416
+## 357    70995                        Waugh Elementary     672.70 20.38889
+## 358    70979               Two Rock Union Elementary     673.05 16.29310
+## 359    68866       Belmont-Redwood Shores Elementary     673.25 18.27778
+## 360    61978                 Rescue Union Elementary     673.30 19.37472
+## 361    66779        Alta-Dutch Flat Union Elementary     673.55 18.90909
+## 362    68353            San Pasqual Union Elementary     673.55 16.40693
+## 363    61911                      Latrobe Elementary     673.90 15.59140
+## 364    66407                   Union Hill Elementary     674.25 18.70694
+## 365    70961             Twin Hills Union Elementary     675.40 18.32985
+## 366    62976                Pacific Union Elementary     675.70 17.90235
+## 367    71696                 Douglas City Elementary     676.15 18.91156
+## 368    66373         Pleasant Ridge Union Elementary     676.55 20.32497
+## 369    66852                    Newcastle Elementary     676.60 20.02457
+## 370    72470                   Mesa Union Elementary     676.85 24.00000
+## 371    71787                  Weaverville Elementary     676.95 17.60784
+## 372    70078              North Cow Creek Elementary     677.25 19.34853
+## 373    66340                  Nevada City Elementary     677.95 19.67847
+## 374    62893                 Jacoby Creek Elementary     678.05 18.72861
+## 375    70698                    Fort Ross Elementary     678.40 15.88235
+## 376    68080              Encinitas Union Elementary     678.80 20.05491
+## 377    65318                        Dixie Elementary     679.40 17.98825
+## 378    69492               Lakeside Joint Elementary     679.50 16.96629
+## 379    64600           Hermosa Beach City Elementary     679.65 19.23937
+## 380    70896          Rincon Valley Union Elementary     679.75 19.19586
+## 381    66233             Washington Union Elementary     679.80 19.59906
+## 382    70623         Bennett Valley Union Elementary     680.05 20.54348
+## 383    69500          Loma Prieta Joint Union Elemen     680.45 18.58848
+## 384    70789                      Kenwood Elementary     681.30 15.60419
+## 385    70797                      Liberty Elementary     681.30 15.29304
+## 386    71142                Knights Ferry Elementary     681.60 17.65537
+## 387    65334                    Kentfield Elementary     681.90 17.57976
+## 388    69104                      Ballard Elementary     682.15 22.33333
+## 389    70839              Oak Grove Union Elementary     682.45 18.75000
+## 390    75002                  Ross Valley Elementary     682.55 18.10241
+## 391    69773                     Mountain Elementary     682.65 20.25641
+## 392    68882                   Burlingame Elementary     683.35 18.80207
+## 393    70003                        Grant Elementary     683.40 18.77231
+## 394    69757                 Happy Valley Elementary     684.30 20.40521
+## 395    69732             Bonny Doon Union Elementary     684.35 18.65079
+## 396    61812                 Walnut Creek Elementary     684.80 20.70707
+## 397    69211                         Hope Elementary     684.95 22.00000
+## 398    65367                     Larkspur Elementary     686.05 17.69978
+## 399    69419              Cupertino Union Elementary     686.70 21.48329
+## 400    69781                      Pacific Elementary     687.55 16.70103
+## 401    69526              Los Gatos Union Elementary     689.10 19.57567
+## 402    69252              Montecito Union Elementary     691.05 17.25806
+## 403    68387                 Solana Beach Elementary     691.35 17.37526
+## 404    68965              Menlo Park City Elementary     691.90 17.34931
+## 405    65425                   Reed Union Elementary     693.95 16.26228
+## 406    65391                  Mill Valley Elementary     694.25 17.70045
+## 407    61713                    Lafayette Elementary     694.80 20.12882
+## 408    68056                Del Mar Union Elementary     695.20 18.26539
+## 409    69088                     Woodside Elementary     695.30 14.54214
+## 410    61747                       Moraga Elementary     696.55 19.15261
+## 411    61770                 Orinda Union Elementary     698.20 17.36574
+## 412    68908            Hillsborough City Elementary     698.25 15.13899
+## 413    69161                  Cold Spring Elementary     698.45 17.84266
+## 414    68981               Portola Valley Elementary     699.10 15.40704
+## 415    69682               Saratoga Union Elementary     700.30 18.86534
+## 416    68957                  Las Lomitas Elementary     704.30 16.47413
+## 417    69518                    Los Altos Elementary     706.75 17.86263
+## 418    72611                  Somis Union Elementary     645.00 21.88586
+## 419    72744                       Plumas Elementary     672.20 20.20000
+## 420    72751                    Wheatland Elementary     655.75 19.03640
+##      ingresos grupo_ingresos computadores almuerzo
+## 1   22.690001              1           67   2.0408
+## 2    9.824000              0          101  47.9167
+## 3    8.978000              0          169  76.3226
+## 4    8.978000              0           85  77.0492
+## 5    9.080333              0          171  78.4270
+## 6   10.415000              0           25  86.9565
+## 7    6.577000              0           28  94.6237
+## 8    8.174000              0           66 100.0000
+## 9    7.385000              0           35  93.1398
+## 10  11.613333              0            0  87.3164
+## 11   8.931000              0           86  85.8744
+## 12   7.385000              0           56  98.6056
+## 13   5.335000              0           25  98.1308
+## 14   8.279000              0            0  77.1484
+## 15   9.630000              0           31  76.2712
+## 16   7.454000              0           80  94.2957
+## 17   6.216000              0          100  97.7597
+## 18   7.764000              0           50  77.9097
+## 19   7.022000              0          960  94.9712
+## 20   5.699000              0          139  93.2292
+## 21   7.941000              0           69 100.0000
+## 22   9.630000              0           53  91.5464
+## 23   7.405000              0          169  70.8167
+## 24   9.630000              0            0 100.0000
+## 25   8.019000              0          216  90.6237
+## 26   8.523000              0          198  85.1472
+## 27   7.983181              0          742  88.0349
+## 28   7.305000              0          269  92.1953
+## 29   8.934000              0           67  90.2007
+## 30   8.554000              0           55  81.0235
+## 31   6.613000              0          569  81.5065
+## 32  12.409000              0          224  90.2849
+## 33   8.126616              0          721  91.5934
+## 34  11.431000              0          202  55.0930
+## 35  11.722225              0         1713  80.1956
+## 36  11.332500              0          177  84.4338
+## 37   9.598000              0          204  84.7314
+## 38  14.558000              1           18  94.9324
+## 39  22.059999              1          562  81.1173
+## 40   9.709000              0          275  87.7782
+## 41  11.482944              0         1762  71.4331
+## 42   8.178000              0           40  85.8696
+## 43   8.174000              0           78  88.0952
+## 44   7.500000              0          571 100.0000
+## 45  10.050500              0          324  92.7431
+## 46   7.332000              0          175  62.1302
+## 47  12.581577              0         1423  69.7399
+## 48  15.177000              1           85  67.4447
+## 49  12.109128              0         3324  84.2950
+## 50  11.785000              0         1306  70.8957
+## 51  14.062000              1          786  79.5120
+## 52  10.472000              0          242  79.7255
+## 53  13.405117              0          669  69.9425
+## 54  12.301800              0          896  77.5256
+## 55  15.404071              1          560  61.7382
+## 56  13.762000              1          202  52.9435
+## 57  14.184000              1          480  81.1165
+## 58   8.865000              0          196  84.5539
+## 59  12.997000              0          152  52.3964
+## 60  11.592000              0          249  66.1949
+## 61   8.279000              0           45  83.1579
+## 62  10.905643              0          560  84.9990
+## 63  13.400625              0         1048  82.3926
+## 64  11.081000              0          496  56.0636
+## 65   9.082000              0          149  82.1317
+## 66  13.390000              0          287  80.6042
+## 67  14.601625              1          284  93.9227
+## 68  11.116000              0          585  63.8036
+## 69   8.423000              0          505 100.0000
+## 70  11.665000              0          129  84.9206
+## 71   7.305000              0           13  76.7932
+## 72  13.730599              1          273  68.3964
+## 73  11.116000              0           94  83.1193
+## 74  10.364429              0         1248  77.0089
+## 75   6.983000              0          107  86.0294
+## 76  14.467800              1          259  74.8510
+## 77  14.653000              1            8  33.0623
+## 78  10.629000              0           37  85.5422
+## 79   9.781000              0           32  66.2551
+## 80  10.656000              0           31  68.8235
+## 81  11.938000              0          897  72.8628
+## 82   7.385000              0            8  93.6306
+## 83  10.676000              0          445  72.3208
+## 84   9.972000              0          112  73.5976
+## 85   8.258000              0           36  75.7384
+## 86   8.896000              0          277  62.2128
+## 87  12.062000              0          178  80.8683
+## 88   9.428895              0         1015  83.8737
+## 89   8.920333              0         1261  68.5719
+## 90  10.098000              0           35  80.9249
+## 91  11.830000              0           27  46.0432
+## 92  11.553000              0           55  72.1854
+## 93  19.707001              1           50  67.7130
+## 94   7.105000              0           34  54.1096
+## 95  13.725000              0           71  66.9492
+## 96  10.098000              0           28  59.7222
+## 97  13.762000              1          315  64.7474
+## 98   9.665000              0          717  65.7961
+## 99  10.264000              0           70  83.0000
+## 100 11.569201              0          383  59.7235
+## 101  7.405000              0           28  66.4384
+## 102 12.077000              0          134  65.3828
+## 103 11.283000              0          144  56.0656
+## 104 10.035000              0           26  60.1329
+## 105  8.384000              0          597  63.9055
+## 106 13.630000              0          313  37.0456
+## 107 14.127667              1         1182  51.2421
+## 108 11.266125              0          560  74.2723
+## 109 13.390000              0          397  64.0977
+## 110 11.938000              0           87  64.7887
+## 111  8.258000              0           24  80.9756
+## 112 14.226727              1         1321  56.2994
+## 113 10.472000              0           98  68.0912
+## 114 14.242901              1          499  71.0238
+## 115 14.066000              1           30  69.6203
+## 116 15.968000              1          281  52.9735
+## 117 10.264000              0         1338  71.7624
+## 118 10.602470              0         1435  70.8064
+## 119 10.523000              0          222  75.5043
+## 120 11.238000              0           96  82.0675
+## 121 10.056000              0          145  74.8624
+## 122 11.183000              0          283  54.6541
+## 123  7.385000              0           50  63.4328
+## 124 13.579000              0           40  47.1503
+## 125  9.630000              0           92  53.2106
+## 126 15.274000              1          165  44.2597
+## 127 14.034250              1           65  80.2587
+## 128 10.239667              0          680  82.5722
+## 129  9.485000              0          170  67.7518
+## 130 15.029875              1          658  44.4766
+## 131  9.781000              0           47  48.8789
+## 132 13.192000              0           31  58.0357
+## 133 12.216000              0         1004  57.0722
+## 134 14.076000              1            0  34.0789
+## 135 25.487333              1         1719  39.0368
+## 136 14.867000              1           35  31.3869
+## 137  9.972000              0           19  49.5238
+## 138 14.578000              1            4  45.8182
+## 139  7.385000              0           52  69.9774
+## 140 12.343000              0         1268  58.5454
+## 141 12.431333              0           36  56.6751
+## 142 14.906000              1           25  59.0308
+## 143 12.669900              0         1333  71.9121
+## 144 10.333000              0           30  59.0604
+## 145 11.972000              0           48  52.1739
+## 146 12.827000              0          601  65.9150
+## 147 10.040000              0           71  70.6577
+## 148 13.335000              0           25  72.1429
+## 149  9.854000              0          116  47.0299
+## 150 11.426000              0            0  35.8209
+## 151 15.131000              1           65  37.9576
+## 152 14.578000              1           30  40.6250
+## 153 10.268000              0           36  76.2774
+## 154 15.592857              1          471  55.7901
+## 155 11.238000              0          167  40.5646
+## 156 15.051375              1          316  55.0939
+## 157 15.413177              1         1218  62.5039
+## 158 11.081000              0           38  43.9024
+## 159 10.098000              0          800  68.8579
+## 160 14.298300              1         2889  45.9950
+## 161 11.803000              0           27  59.5388
+## 162  9.972000              0           50  32.1871
+## 163 15.409000              1           46   7.4866
+## 164 15.293799              1         2001  58.5331
+## 165 15.532928              1         1058  32.4830
+## 166 16.292999              1           60  35.7591
+## 167 12.875000              0           40  39.2857
+## 168 16.622999              1           51  67.2340
+## 169 12.549883              0         1295  51.5674
+## 170 14.258572              1          354  52.1202
+## 171 18.326000              1           16  23.2258
+## 172 12.749143              0          606  51.7709
+## 173 11.426000              0          345  52.2523
+## 174  8.830000              0          163  54.7619
+## 175 11.176000              0           48  89.6996
+## 176 14.228000              1           59  59.1304
+## 177 15.027000              1          789  29.7812
+## 178 10.521000              0           61  54.9898
+## 179 18.625999              1           60  17.5439
+## 180 22.528999              1           22   0.0000
+## 181 18.298389              1          500  55.1008
+## 182 11.885750              0          226  32.3697
+## 183  9.926000              0           32  51.6529
+## 184 14.197000              1           75  50.7634
+## 185  9.630000              0           50  58.2043
+## 186 10.639000              0           25  45.7143
+## 187 14.475000              1           26  66.8508
+## 188 13.467000              0           65  24.8148
+## 189  9.665000              0           25  32.1101
+## 190 12.708000              0           58  50.0000
+## 191 17.823000              1         1099  40.3995
+## 192 17.156000              1           65  31.0345
+## 193 19.589636              1          634  47.7025
+## 194 14.197000              1          134  46.0504
+## 195 11.912000              0           41  32.3529
+## 196 13.386000              0           36  65.8537
+## 197 11.554000              0           75  59.2138
+## 198 19.025999              1          250  25.3071
+## 199 16.407000              1          213  36.4499
+## 200 14.058000              1          409  29.1987
+## 201 19.068001              1           49  30.7692
+## 202 20.770000              1          254  38.2002
+## 203 10.264000              0           35  28.1716
+## 204 14.578000              1           36  28.6645
+## 205 10.202000              0           56  53.6023
+## 206 12.502000              0           30  63.6905
+## 207 13.906000              1           81  29.6435
+## 208  9.986000              0          374  76.7726
+## 209 13.712000              0          268  40.9291
+## 210 10.098000              0            7  47.8528
+## 211 11.291000              0          164  62.2675
+## 212 13.225000              0          500  41.0546
+## 213 13.630000              0           19  10.1266
+## 214 14.623000              1          618  25.8885
+## 215  8.776000              0           13  23.3010
+## 216 10.338000              0           17  70.2857
+## 217 16.323000              1          241  23.4409
+## 218 10.656333              0           67  56.5217
+## 219 14.578000              1           96  12.5741
+## 220 18.630600              1         1120  21.3434
+## 221 11.116000              0           72  60.9223
+## 222 14.597667              1          624  36.8900
+## 223 15.493000              1           73  34.0361
+## 224 16.271999              1          192  34.4471
+## 225 13.630000              0           60  36.6372
+## 226 12.394000              0           78  37.8840
+## 227 15.331000              1          626  34.2344
+## 228 12.666000              0          118  40.1630
+## 229 13.712000              0           20  20.0000
+## 230 17.780334              1          155  19.5686
+## 231 10.556667              0          435  56.0089
+## 232 10.523000              0           50  61.4194
+## 233 13.243000              0          148  39.8487
+## 234 22.473000              1          419  49.4269
+## 235 15.684654              1         2401  50.9708
+## 236 23.483749              1         1158  32.1368
+## 237 11.649000              0           34  25.3165
+## 238 16.356001              1           42  36.1345
+## 239 14.074000              1           37  36.7816
+## 240 13.437000              0           30  51.8519
+## 241 18.337999              1          296  25.5596
+## 242 11.426000              0           46  51.5625
+## 243 15.749917              1          474  37.2911
+## 244 15.779000              1          622  17.1508
+## 245 14.062000              1          122  32.6519
+## 246 12.174000              0           56  36.3144
+## 247 12.900000              0          328  26.9433
+## 248 10.971000              0           32  29.4964
+## 249 17.435200              1         1507  32.7655
+## 250 14.760000              1          129  36.7978
+## 251 14.603000              1          224  31.3709
+## 252 13.522333              0          141  37.1086
+## 253 16.669001              1           60  31.5000
+## 254 13.522250              0          140  33.6301
+## 255 12.518000              0          107  47.1247
+## 256 18.326000              1           23  33.6000
+## 257 11.466000              0           78  30.6780
+## 258 10.098000              0           60  54.7619
+## 259 15.365000              1           51  21.2687
+## 260 10.311333              0          150  48.8121
+## 261 16.986626              1          496  22.6930
+## 262  9.612000              0           62  66.2069
+## 263 21.110500              1          302  15.6559
+## 264 16.473312              1         1790  30.4417
+## 265 18.368999              1           46  21.3793
+## 266 16.654112              1         1671  31.0189
+## 267 18.544222              1          529  18.3878
+## 268 14.180000              1           70  42.4468
+## 269 18.029554              1          489  30.0691
+## 270 13.586000              0           16   0.0000
+## 271 12.640000              0          125  42.6009
+## 272 11.103000              0           95  45.8824
+## 273  7.500000              0           39  56.8750
+## 274 15.506000              1           50  25.1037
+## 275 22.841400              1          411  44.3907
+## 276 19.823126              1          576  27.3545
+## 277 16.347000              1          100  24.7222
+## 278 16.292999              1          335  14.8509
+## 279 13.248000              0           78  29.8387
+## 280 14.010000              1           60  37.0874
+## 281 14.163000              1          105  25.6055
+## 282 15.771000              1          143  20.9263
+## 283 14.483333              1          190  35.8462
+## 284 14.209000              1           58  26.2136
+## 285 15.167000              1          263  36.4845
+## 286 12.584250              0          113  43.2165
+## 287 10.551000              0          127  55.2855
+## 288 16.955999              1          258  13.3692
+## 289 17.709000              1           81  25.4296
+## 290 16.271999              1           85  32.6861
+## 291 17.900801              1          308  33.8103
+## 292 11.834000              0          114  47.3054
+## 293 18.620199              1          814  15.9299
+## 294 12.431000              0           54  30.3732
+## 295 15.167000              1          206  29.0398
+## 296 20.875750              1         1113  30.6437
+## 297 10.639000              0           10  50.3876
+## 298 25.029619              1         1150  28.3766
+## 299 16.757801              1          494  31.0828
+## 300 15.297000              1          114  30.1724
+## 301 17.369446              1          326  24.7471
+## 302 22.096001              1          756  36.0007
+## 303 22.841999              1           47  13.8696
+## 304 18.319876              1         1962  45.7234
+## 305 25.030001              1          706  15.0886
+## 306 21.957001              1           87  31.8519
+## 307 18.796833              1          193  24.6035
+## 308 10.639000              0           14  44.4444
+## 309 17.507999              1           48  15.2098
+## 310 18.593000              1           82  18.4941
+## 311 11.116000              0          160  22.8831
+## 312 14.097667              1            0  22.9839
+## 313 12.640000              0           15  40.1639
+## 314 20.936428              1          785  13.2762
+## 315 14.180000              1           95  32.6087
+## 316 11.826000              0           38  53.5032
+## 317 18.671000              1          220  20.5810
+## 318 17.332001              1          307  16.0651
+## 319 17.507999              1           65  19.8302
+## 320 15.572000              1           30  13.0612
+## 321 15.567250              1          259   8.6731
+## 322 15.752000              1           65  29.8643
+## 323 20.469999              1          637  23.6420
+## 324  9.709000              0           15  35.2679
+## 325 11.116000              0           92  28.1250
+## 326 16.320999              1           75  11.7517
+## 327 21.966999              1          145  24.3363
+## 328  8.934000              0           10  51.6667
+## 329 19.997000              1            0  42.9640
+## 330 18.827230              1          586  19.3725
+## 331 18.118666              1          379  16.9543
+## 332 23.667376              1          540  30.0851
+## 333 22.139000              1           39  15.3302
+## 334 20.546000              1          615  23.0989
+## 335  9.485000              0           37  44.6809
+## 336 11.834000              0           17  27.1318
+## 337 18.799000              1           41  36.7021
+## 338 10.551000              0          116  46.1221
+## 339 15.519000              1          249  19.5300
+## 340 21.631727              1          753  12.1748
+## 341 21.095751              1          930  15.5128
+## 342 15.167000              1          122  19.0092
+## 343 19.117001              1          934   8.3443
+## 344 17.620001              1          855  14.2660
+## 345 15.167000              1           47  15.9292
+## 346 10.643000              0           23  33.9181
+## 347 20.739056              1          834  11.7013
+## 348 21.566000              1          231  21.0892
+## 349 17.656000              1          183  10.4142
+## 350 17.709000              1           32  12.2581
+## 351 27.816000              1          343   2.0328
+## 352 18.593000              1          103  29.0210
+## 353 14.263000              1          135  33.9212
+## 354 22.757999              1           42  25.9868
+## 355 12.640000              0           24  12.7451
+## 356 11.238000              0           49  25.1121
+## 357 16.955999              1          117  12.8205
+## 358 17.709000              1           50  32.1244
+## 359 25.622000              1          482   2.4456
+## 360 18.726000              1          290  11.1818
+## 361 13.443000              0           21  32.8638
+## 362 15.180000              1           29  22.1636
+## 363 19.117001              1           27   0.0000
+## 364 13.712000              0          103  23.0548
+## 365 17.507999              1          105  15.7500
+## 366 11.834000              0           75  25.3782
+## 367 13.273000              0           40  66.9065
+## 368 16.356001              1          318  14.0370
+## 369 18.625999              1           42  11.0429
+## 370 23.733000              1           50  27.7132
+## 371 12.934000              0           50  48.4848
+## 372 13.906000              1           70   4.0404
+## 373 15.428000              1          165  21.7803
+## 374 15.381000              1           49  10.1828
+## 375 22.528999              1           14   0.0000
+## 376 23.806099              1          701  19.0911
+## 377 24.603001              1          223   3.7302
+## 378 36.174000              1           31   8.6093
+## 379 33.455002              1          310   6.5353
+## 380 20.480223              1          300  19.2308
+## 381 20.134001              1          141   0.0000
+## 382 19.346500              1          216  10.6515
+## 383 36.174000              1          220   0.6775
+## 384 22.863335              1           35  12.9412
+## 385 17.709000              1           29  11.4583
+## 386 14.177000              1           25  14.4000
+## 387 41.092999              1          113   0.5367
+## 388 21.957001              1           27   3.7313
+## 389 16.063999              1           55  29.3185
+## 390 25.737000              1          283   3.6220
+## 391 20.474001              1           15  16.2500
+## 392 35.810001              1          439   6.2709
+## 393 13.567000              0           33  11.4068
+## 394 20.089001              1           44   9.3525
+## 395 18.283001              1           30   5.9322
+## 396 25.239716              1          406   7.8593
+## 397 25.063000              1            0  12.5000
+## 398 30.628500              1          155   1.8987
+## 399 27.475216              1         2232   4.6909
+## 400 30.840000              1           21  20.4819
+## 401 34.159500              1          540   2.7921
+## 402 43.230000              1           84   0.7200
+## 403 27.947750              1          404   9.6774
+## 404 49.938999              1          265   3.9175
+## 405 55.327999              1          272   1.4164
+## 406 35.480999              1          403   2.4359
+## 407 34.300999              1          496   0.1734
+## 408 38.628571              1          300   2.6116
+## 409 35.341999              1          112   0.0000
+## 410 31.052000              1          241   0.3033
+## 411 40.264000              1          466   0.1239
+## 412 35.810001              1          412   0.0000
+## 413 43.230000              1           22   0.0000
+## 414 50.676998              1          209   0.0000
+## 415 40.402000              1          286   0.5980
+## 416 28.716999              1          195   3.5569
+## 417 41.734108              1          721   1.5038
+## 418 23.733000              1           45  37.1938
+## 419  9.952000              0           14  59.4059
+## 420 12.502000              0          313  47.5712
+```
+
+```r
+glimpse(datos_reg)
+```
+
+```
+## Rows: 420
+## Columns: 8
+## $ distrito       &lt;chr&gt; "75119", "61499", "61549", "61457", "61523", "62042", "~
+## $ colegio        &lt;chr&gt; "Sunol Glen Unified", "Manzanita Elementary", "Thermali~
+## $ Resultados     &lt;dbl&gt; 690.80, 661.20, 643.60, 647.70, 640.85, 605.55, 606.75,~
+## $ REP            &lt;dbl&gt; 17.88991, 21.52466, 18.69723, 17.35714, 18.67133, 21.40~
+## $ ingresos       &lt;dbl&gt; 22.690001, 9.824000, 8.978000, 8.978000, 9.080333, 10.4~
+## $ grupo_ingresos &lt;fct&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ computadores   &lt;dbl&gt; 67, 101, 169, 85, 171, 25, 28, 66, 35, 0, 86, 56, 25, 0~
+## $ almuerzo       &lt;dbl&gt; 2.0408, 47.9167, 76.3226, 77.0492, 78.4270, 86.9565, 94~
+```
+]
+
+---
+
+# Relación entre variables
+
+.small[
+
+```r
+datos_reg %&gt;% 
+  ggplot(aes(REP, Resultados)) + 
+  geom_point() +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/graf_relacion-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Graficar la curva de regresión 
+
+.small[
+
+```r
+datos_reg %&gt;% 
+  ggplot(aes(REP, Resultados)) + 
+  geom_point() +
+* geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/graf_relacion2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+La curva graficada corresponde a `\(\widehat{Resultados}_i = \hat{\beta}_0+\hat{\beta}_1REP_i\)`
+
+**¿Cuáles son los coeficientes ( `\(\hat{\beta}_0\)` , `\(\hat{\beta}_1\)`)?**
+
+---
+
+# Estimar coeficientes "a mano"
+
+$$
+`\begin{aligned}
+\hat{\beta}_1 &amp;= \frac{Cov(X,Y)}{Var(X)} \\
+\hat{\beta}_0 &amp;= \bar{Y} - \hat{\beta}_1 \bar{X}
+\end{aligned}`
+$$
+
+--
+
+
+```r
+(coeficientes &lt;- datos_reg %&gt;% 
+  transmute(Y = Resultados,
+            X = REP) %&gt;% 
+  summarise(beta_1 = cov(X,Y)/var(X),
+            beta_0 = mean(Y)-(beta_1*mean(X))))
+```
+
+```
+*##      beta_1   beta_0
+*## 1 -2.279808 698.9329
+```
+
+---
+
+# Por suerte **R** lo hace más simple
+
+.small[
+
+```r
+modelo1 &lt;- lm(Resultados ~ REP, data = datos_reg)
+summary(modelo1)
+```
+
+```
+## 
+## Call:
+## lm(formula = Resultados ~ REP, data = datos_reg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -47.727 -14.251   0.483  12.822  48.540 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+*## (Intercept) 698.9329     9.4675  73.825  &lt; 2e-16 ***
+*## REP          -2.2798     0.4798  -4.751 2.78e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.58 on 418 degrees of freedom
+## Multiple R-squared:  0.05124,	Adjusted R-squared:  0.04897 
+## F-statistic: 22.58 on 1 and 418 DF,  p-value: 2.783e-06
+```
+]
+
+**El aumento en una unidad de `REP` esta asociada con una disminución, en promedio, de -2.28 unidades de `Resultados`.**
+
+---
+
+# ¿Qué tan bien **ajustada** es la curva?
+
+&lt;img src="RegresionI_files/figure-html/graf_solo-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+El término "ajustar" se refiere a que tan cerca de todos los puntos se encuentra la línea. En otras palabras, **¿cuánto explica la línea calculada la relación entre estas variable?**
+
+Una de las métricas más utilizadas para representar esto es el `\(R^2\)`.
+
+---
+
+# `\(R^2\)` - Coeficiente de determinación
+
+### Suma de Cuadrados Totales (SCT)
+
+&lt;img src="RegresionI_files/figure-html/SCT-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$SCT = \sum_{i=1}^{n}(Y_i - \bar{Y})^2$$`
+
+---
+
+# `\(R^2\)` - Coeficiente de determinación
+
+### Suma de Cuadrados Residuales (SCR)
+
+&lt;img src="RegresionI_files/figure-html/SCR-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$SCR=\sum_{i=1}^n u_i^2 = \sum_{i=1}^n (Y_i-\hat{Y}_i)^2$$`
+---
+
+# `\(R^2\)` - Coeficiente de determinación
+
+### Suma de Cuadrados Explicados (SCE)
+
+&lt;img src="RegresionI_files/figure-html/SCE-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+`$$SCE=\sum_{i=1}^n (\hat{Y_i}-\bar{Y})^2$$`
+
+---
+
+# `\(R^2\)` - Coeficiente de determinación
+
+- Suma de Cuadrados Residuales (SCR): 
+`$$\sum_{i=1}^n u_i^2 = \sum_{i=1}^n (Y_i-\hat{Y}_i)^2$$`
+
+- Suma de Cuadrados Explicados (SCE): 
+`$$\sum_{i=1}^n (\hat{Y_i}-\bar{Y})^2$$`
+
+- Suma de Cuadrados Totales (SCT): 
+`$$SCT = SCE + SCR = \sum_{i=1}^{n}(Y_i - \bar{Y})^2$$`
+
+--
+
+Teniendo estos valores, el coeficiente de determinación corresponde a:
+
+`$$R^2 = \frac{SCE}{SCT} = 1 - \frac{SCR}{SCT}$$`
+
+--
+
+Noten que `\(R^2 \in [0,1]\)`, con 0 correspondiente a un nulo ajuste y 1 a un ajuste perfecto (todos los puntos sobre la curva estimada)
+
+---
+
+# ¿Cómo se ve esto?
+
+&lt;img src="RegresionI_files/figure-html/R_0_1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Calcular `\(R^2\)` "a mano"
+
+`$$R^2=\frac{SCE}{SCT}=\frac{\sum_{i=1}^n (\hat{Y_i}-\bar{Y})^2}{\sum(Y_i - \bar{Y})^2}$$`
+
+.small[
+
+```r
+datos_reg %&gt;% 
+  transmute(X = REP,
+            Y = Resultados) %&gt;%
+  summarise(SCE = sum(((coeficientes$beta_0+(coeficientes$beta_1*X))-mean(Y))^2),
+            SCT = sum((Y-mean(Y))^2),
+            R2 = round(SCE/SCT, 5))
+```
+
+```
+##        SCE      SCT      R2
+*## 1 7794.109 152109.6 0.05124
+```
+]
+
+--
+
+Interpretamos este valor como que **nuestra variable independiente, `REP`, explica un 5.1% de la variación de la variable dependiente, `Resultados`**.
+
+---
+
+# Calcular `\(R^2\)` en **R**
+
+
+```r
+summary(modelo1)
+```
+
+```
+## 
+## Call:
+## lm(formula = Resultados ~ REP, data = datos_reg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -47.727 -14.251   0.483  12.822  48.540 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 698.9329     9.4675  73.825  &lt; 2e-16 ***
+## REP          -2.2798     0.4798  -4.751 2.78e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 18.58 on 418 degrees of freedom
+*## Multiple R-squared:  0.05124,	Adjusted R-squared:  0.04897 
+## F-statistic: 22.58 on 1 and 418 DF,  p-value: 2.783e-06
+```
+
+---
+
+# Variable independiente no numérica
+
+Hasta ahora solo vimos un ejemplo donde tanto la variable dependiente, `\(Y\)`, como la variable independiente, `\(X\)` son numéricas.
+
+.center[**¿Cómo sería una regresión con una variable independiente categórica?**]
+
+--
+
+
+```r
+glimpse(datos_reg)
+```
+
+```
+## Rows: 420
+## Columns: 6
+## $ distrito       &lt;chr&gt; "75119", "61499", "61549", "61457", "61523", "62042", "~
+## $ colegio        &lt;chr&gt; "Sunol Glen Unified", "Manzanita Elementary", "Thermali~
+## $ Resultados     &lt;dbl&gt; 690.80, 661.20, 643.60, 647.70, 640.85, 605.55, 606.75,~
+## $ REP            &lt;dbl&gt; 17.88991, 21.52466, 18.69723, 17.35714, 18.67133, 21.40~
+## $ ingresos       &lt;dbl&gt; 22.690001, 9.824000, 8.978000, 8.978000, 9.080333, 10.4~
+*## $ grupo_ingresos &lt;fct&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+```
+
+&lt;br&gt;
+
+$$
+`\begin{align}
+grupo\_ingresos =
+    \begin{cases}
+      0 &amp; si\ ingresos\ en\ el\ 50\%\ inferior \\
+      1 &amp; si\ ingresos\ en\ el\ 50\%\ superior
+    \end{cases}
+\end{align}`
+$$
+
+---
+
+# Variable independiente no numérica
+
+
+```r
+datos_reg %&gt;% 
+  ggplot(aes(x = REP, y = Resultados, col = grupo_ingresos)) +
+  geom_point() +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/graf_var_indep-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.center[**Los colegios de mayores ingresos parecieran tener mejores resultados**.]
+
+---
+
+# Variable independiente no numérica
+
+.small[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-left[
+.small[
+
+```r
+datos_reg %&gt;% 
+  group_by(grupo_ingresos) %&gt;% 
+  summarise(resultados_prom = mean(Resultados))
+```
+]
+]
+
+.pull-right[
+.small[
+
+```
+## # A tibble: 2 x 2
+##   grupo_ingresos resultados_prom
+##   &lt;fct&gt;                    &lt;dbl&gt;
+*## 1 0                         644.
+*## 2 1                         664.
+```
+]
+]
+
+.center[**Los colegios de más ingresos tienden a  tener mejores resultados**.]
+
+---
+
+# Regresión con **grupo_ingresos**
+
+`$$\small \widehat{Resultados}_i=\hat{\beta}_0 + \hat{\beta}_1 1_{g.ing. = 1}$$`
+
+.small[
+
+```r
+(modelo2 &lt;- lm(Resultados~grupo_ingresos, data = datos_reg))
+```
+
+```
+## 
+## Call:
+## lm(formula = Resultados ~ grupo_ingresos, data = datos_reg)
+## 
+## Coefficients:
+*##     (Intercept)  grupo_ingresos1  
+*##          643.96            20.39
+```
+]
+
+--
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Regresión con **grupo_ingresos**
+
+`$$\small \widehat{Resultados}_i=\hat{\beta}_0 + \hat{\beta}_1 1_{g.ing. = 1}$$`
+
+.small[
+
+```r
+(modelo2 &lt;- lm(Resultados~grupo_ingresos, data = datos_reg))
+```
+
+```
+## 
+## Call:
+## lm(formula = Resultados ~ grupo_ingresos, data = datos_reg)
+## 
+## Coefficients:
+*##     (Intercept)  grupo_ingresos1  
+*##          643.96            20.39
+```
+]
+
+$$
+\small
+`\begin{align}
+\widehat{Resultados}_i&amp;=643.96 + (20.39*1_{g.ing. = 1}) \\
+E(Resultados|grupo\_ingresos)&amp;=643.96 + (20.39*1_{g.ing. = 1})
+\end{align}`
+$$
+
+.pull-left[
+
+$$
+`\begin{aligned}
+\scriptsize E(Resultados|GrupoIng=0) &amp; \scriptsize =643.96 + (20.39*0) \\ 
+                                     &amp; \scriptsize =643.96
+\\
+\scriptsize E(Resultados|GrupoIng=1) &amp; \scriptsize =643.96 + (20.39*1) \\
+                                     &amp; \scriptsize =664.35
+\end{aligned}`
+$$
+]
+
+.pull-right[
+.small[
+
+```
+## # A tibble: 2 x 2
+##   grupo_ingresos resultados_prom
+##   &lt;fct&gt;                    &lt;dbl&gt;
+## 1 0                         644.
+## 2 1                         664.
+```
+]
+]
+
+Pertenecer al 50% superior de ingresos está asociado con un aumento, en promedio, de 20.39 unidades en `Resultado`.
+
+---
+
+# ¿Qué es esto?
+
+
+```r
+str(modelo2)
+```
+
+```
+## List of 13
+##  $ coefficients : Named num [1:2] 644 20.4
+##   ..- attr(*, "names")= chr [1:2] "(Intercept)" "grupo_ingresos1"
+##  $ residuals    : Named num [1:420] 26.451 17.236 -0.364 3.736 -3.114 ...
+##   ..- attr(*, "names")= chr [1:420] "1" "2" "3" "4" ...
+##  $ effects      : Named num [1:420] -13406.22 208.89 -2.37 1.73 -5.12 ...
+##   ..- attr(*, "names")= chr [1:420] "(Intercept)" "grupo_ingresos1" "" "" ...
+##  $ rank         : int 2
+##  $ fitted.values: Named num [1:420] 664 644 644 644 644 ...
+##   ..- attr(*, "names")= chr [1:420] "1" "2" "3" "4" ...
+##  $ assign       : int [1:2] 0 1
+##  $ qr           :List of 5
+##   ..$ qr   : num [1:420, 1:2] -20.4939 0.0488 0.0488 0.0488 0.0488 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : chr [1:420] "1" "2" "3" "4" ...
+##   .. .. ..$ : chr [1:2] "(Intercept)" "grupo_ingresos1"
+##   .. ..- attr(*, "assign")= int [1:2] 0 1
+##   .. ..- attr(*, "contrasts")=List of 1
+##   .. .. ..$ grupo_ingresos: chr "contr.treatment"
+##   ..$ qraux: num [1:2] 1.05 1.05
+##   ..$ pivot: int [1:2] 1 2
+##   ..$ tol  : num 1e-07
+##   ..$ rank : int 2
+##   ..- attr(*, "class")= chr "qr"
+##  $ df.residual  : int 418
+##  $ contrasts    :List of 1
+##   ..$ grupo_ingresos: chr "contr.treatment"
+##  $ xlevels      :List of 1
+##   ..$ grupo_ingresos: chr [1:2] "0" "1"
+##  $ call         : language lm(formula = Resultados ~ grupo_ingresos, data = datos_reg)
+##  $ terms        :Classes 'terms', 'formula'  language Resultados ~ grupo_ingresos
+##   .. ..- attr(*, "variables")= language list(Resultados, grupo_ingresos)
+##   .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. ..$ : chr [1:2] "Resultados" "grupo_ingresos"
+##   .. .. .. ..$ : chr "grupo_ingresos"
+##   .. ..- attr(*, "term.labels")= chr "grupo_ingresos"
+##   .. ..- attr(*, "order")= int 1
+##   .. ..- attr(*, "intercept")= int 1
+##   .. ..- attr(*, "response")= int 1
+##   .. ..- attr(*, ".Environment")=&lt;environment: R_GlobalEnv&gt; 
+##   .. ..- attr(*, "predvars")= language list(Resultados, grupo_ingresos)
+##   .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "factor"
+##   .. .. ..- attr(*, "names")= chr [1:2] "Resultados" "grupo_ingresos"
+##  $ model        :'data.frame':	420 obs. of  2 variables:
+##   ..$ Resultados    : num [1:420] 691 661 644 648 641 ...
+##   ..$ grupo_ingresos: Factor w/ 2 levels "0","1": 2 1 1 1 1 1 1 1 1 1 ...
+##   ..- attr(*, "terms")=Classes 'terms', 'formula'  language Resultados ~ grupo_ingresos
+##   .. .. ..- attr(*, "variables")= language list(Resultados, grupo_ingresos)
+##   .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. ..$ : chr [1:2] "Resultados" "grupo_ingresos"
+##   .. .. .. .. ..$ : chr "grupo_ingresos"
+##   .. .. ..- attr(*, "term.labels")= chr "grupo_ingresos"
+##   .. .. ..- attr(*, "order")= int 1
+##   .. .. ..- attr(*, "intercept")= int 1
+##   .. .. ..- attr(*, "response")= int 1
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: R_GlobalEnv&gt; 
+##   .. .. ..- attr(*, "predvars")= language list(Resultados, grupo_ingresos)
+##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "factor"
+##   .. .. .. ..- attr(*, "names")= chr [1:2] "Resultados" "grupo_ingresos"
+##  - attr(*, "class")= chr "lm"
+```
+
+---
+
+# Tipos de objetos
+
+&lt;/br&gt;
+
+&lt;img src="../Imagenes/TipoDatos.png" width="800px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Paquete **broom**
+
+.smaller[
+
+```r
+library(broom)
+tidy(modelo1)
+```
+
+```
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)   699.       9.47      73.8  6.57e-242
+## 2 REP            -2.28     0.480     -4.75 2.78e-  6
+```
+
+
+```r
+glance(modelo1)
+```
+
+```
+## # A tibble: 1 x 12
+##   r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1    0.0512        0.0490  18.6      22.6 2.78e-6     1 -1822. 3650. 3663.
+## # ... with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
+```
+
+
+```r
+augment(modelo1)
+```
+
+```
+## # A tibble: 420 x 8
+##    Resultados   REP .fitted .resid .std.resid    .hat .sigma  .cooksd
+##         &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+##  1       691.  17.9    658.   32.7      1.76  0.00442   18.5 0.00689 
+##  2       661.  21.5    650.   11.3      0.612 0.00475   18.6 0.000893
+##  3       644.  18.7    656.  -12.7     -0.685 0.00297   18.6 0.000700
+##  4       648.  17.4    659.  -11.7     -0.629 0.00586   18.6 0.00117 
+##  5       641.  18.7    656.  -15.5     -0.836 0.00301   18.6 0.00105 
+##  6       606.  21.4    650.  -44.6     -2.40  0.00446   18.5 0.0130  
+##  7       607.  19.5    654.  -47.7     -2.57  0.00239   18.5 0.00794 
+##  8       609   20.9    651.  -42.3     -2.28  0.00343   18.5 0.00895 
+##  9       612.  19.9    653.  -41.0     -2.21  0.00244   18.5 0.00597 
+## 10       613.  20.8    652.  -38.9     -2.09  0.00329   18.5 0.00723 
+## # ... with 410 more rows
+```
+]
+
+---
+
+# Comparar modelos
+
+#### `\(R^2\)` de `\(\widehat{Resultados}_i=\hat{\beta}_0 + \hat{\beta}_1 REP\)`
+
+
+```r
+glance(modelo1) %&gt;% select(r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.05124009
+```
+
+`REP` **explica un 5.1%** de la variación en `Resultados`.
+
+&lt;br&gt;
+
+#### `\(R^2\)` de `\(\widehat{Resultados}_i=\hat{\beta}_0 + \hat{\beta}_1 1_{g.ing. = 1}\)`
+
+
+```r
+glance(modelo2) %&gt;% select(r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.286863
+```
+`grupo_ingresos` **explica un 28.7%** de la variación en `Resultados`.
+
+---
+
+# Analizar modelos
+
+.pull-left[
+#### `\(\small \widehat{Resultados}_i=\hat{\beta}_0 + \hat{\beta}_1 REP\)`
+
+.smaller[
+
+```r
+tidy(modelo1)
+```
+
+```
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)   699.       9.47      73.8  6.57e-242
+## 2 REP            -2.28     0.480     -4.75 2.78e-  6
+```
+]
+]
+
+.pull-right[
+#### `\(\small \widehat{Resultados}_i=\hat{\beta}_0 + \hat{\beta}_1 1_{g.ing. = 1}\)`
+
+.smaller[
+
+```r
+tidy(modelo2)
+```
+
+```
+## # A tibble: 2 x 5
+##   term            estimate std.error statistic  p.value
+##   &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)        644.       1.11     579.  0       
+## 2 grupo_ingresos1     20.4      1.57      13.0 1.49e-32
+```
+]
+]
+
+--
+
+- Para cada parámetro de están realizando las siguientes pruebas de hipótesis:
+$$
+\small
+`\begin{align}
+H_0: \beta_j=0 \\
+H_A: \beta_j \neq 0
+\end{align}`
+$$
+
+--
+
+- Para probar estas hipótesis tenemos las estimaciones y sus errores estándar. Con estos podemos generar una métrica estandarizada (**estadístico t**), `\(\small \frac{\hat{\beta_j}-\beta_j}{EE_{\beta_j}}\)`.
+
+- Estos estadísticos nos permiten calcular **p-values** para ver que tan extremas son nuestras estimaciones bajo la hipótesis nula, `\(\small \beta_j=0\)`.
+
+- Noten que todos los **p-value** son MUY bajos. Decimos entonces, que **los parámetros estimados son estadísticamente significativos**.
+
+
+---
+class: inverse, center, middle
+name: reg
+
+# Regresión Lineal Múltiple
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Regresión Lineal Múltiple
+
+- ¿Es factible que solo `REP` o solo `grupo_ingresos` influyan en `Resultados`?
+
+--
+
+$$
+\small
+Resultados=\beta_0+\beta_1REP+\beta_2A+\\beta_3B+\epsilon
+$$
+
+- ¿Qué pasa si no se incluyen otras variables relacionadas?
+
+--
+
+#### Paradoja de Simpson
+
+&lt;img src="RegresionI_files/figure-html/paradoja_simpson-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- "Sesgo de variable omitida"
+
+---
+
+# Regresión Lineal Múltiple
+
+### ¿Cómo se estiman los parámetros?
+
+En forma matricial:
+
+`$$Y=X\beta+\epsilon$$`
+
+&lt;img src="../Imagenes/RegMatriz.png" width="550px" style="display: block; margin: auto;" /&gt;
+
+Lo que debemos hacer es estimar el vector de parámetros `\(\hat{\beta}\)` 
+
+`$$\hat{\beta}=(X'X)^{-1}X'Y$$`
+
+Terminando finalmente con `\(\hat{Y}=X\hat{\beta}\)`
+
+---
+
+# Estimar coeficientes "a mano"
+
+`$$\widehat{Resultados}_i=\hat{\beta_0} + \hat{\beta}_1REP_i + \hat{\beta}_2ingresos_i$$`
+
+`$$\hat{\beta}=(X'X)^{-1}X'Y$$`
+
+
+```r
+Y &lt;- datos_reg %&gt;% 
+  select(Resultados) %&gt;% 
+  as.matrix()
+
+X &lt;- datos_reg %&gt;% 
+  mutate(intercepto = rep(1, nrow(.))) %&gt;% 
+  select(intercepto, REP, ingresos) %&gt;% 
+  as.matrix()
+
+solve(t(X) %*% X) %*% (t(X) %*% Y)
+```
+
+```
+##             Resultados
+## intercepto 638.7291572
+*## REP         -0.6487401
+*## ingresos     1.8391120
+```
+
+---
+
+# Por suerte **R** lo hace más simple
+
+`$$\widehat{Resultados}_i=\hat{\beta_0}  + \hat{\beta}_1REP_i + \hat{\beta}_2ingresos_i$$`
+
+.small[
+
+```r
+modelo3 &lt;- lm(Resultados ~ REP + ingresos, data = datos_reg)
+summary(modelo3)
+```
+
+```
+## 
+## Call:
+## lm(formula = Resultados ~ REP + ingresos, data = datos_reg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -39.608  -9.052   0.707   9.259  31.898 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 638.72916    7.44908  85.746   &lt;2e-16 ***
+*## REP          -0.64874    0.35440  -1.831   0.0679 .  
+*## ingresos      1.83911    0.09279  19.821   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 13.35 on 417 degrees of freedom
+## Multiple R-squared:  0.5115,	Adjusted R-squared:  0.5091 
+## F-statistic: 218.3 on 2 and 417 DF,  p-value: &lt; 2.2e-16
+```
+]
+
+---
+
+# Interpretación
+
+
+```r
+tidy(modelo3)
+```
+
+```
+## # A tibble: 3 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)  639.       7.45       85.7  5.70e-267
+## 2 REP           -0.649    0.354      -1.83 6.79e-  2
+## 3 ingresos       1.84     0.0928     19.8  4.38e- 62
+```
+
+- El aumento en una unidad de `REP` esta, en promedio, asociado con una disminución de -0.65 en `Resultados` **manteniendo `ingresos` constante** (o controlando por `ingresos`).
+
+- El aumento en una unidad de `ingresos` esta, en promedio, asociado con un aumento de 1.84 en `Resultados` **manteniendo `REP` constante** (o controlando por `REP`).
+
+--
+
+- Pero **OJO**, el p-value asociado a `REP` es 0.065 por lo que **no es estadísticamente significativo al 0.05** nivel de significancia (si lo sería considerando un nivel de significancia de 0.1).
+
+- Por otro lado, `ingresos` **si es estadísticamente significativo** (p-value &lt;&lt;&lt; 0.05).
+
+
+---
+
+# Comparemos
+
+Comparemos los valores de `\(R^2\)` para `modelo1` (simple) y `modelo2` (simple) y `modelo3` (múltiple)
+
+--
+
+.small[
+
+```r
+glance(modelo1) %&gt;% select(r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.05124009
+```
+
+```r
+glance(modelo2) %&gt;% select(r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.286863
+```
+
+```r
+glance(modelo3) %&gt;% select(r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.511483
+```
+]
+
+--
+
+- `modelo3` explica más del 50% de la variación en `Resultados`.
+
+--
+
+- Pero **OJO** con el `\(R^2\)`: aumentará siempre que sumemos variables (o al menos no bajará).
+
+---
+
+# `\(R^2\)` ajustado
+
+`$$R^2_{adj}=1-\left( \frac{SCE}{SCT}\frac{n-1}{n-k-1}\right)=1-\left( \frac{\sum_{i=1}^n (Y_i-\hat{Y}_i)^2}{\sum(Y_i - \bar{Y})^2}\frac{n-1}{n-k-1}\right)$$`
+
+`\(n\)` es el número de observaciones y `\(k\)` es el número de variables independientes.
+
+--
+
+- Si la nueva variable no "aporta nueva información", `\(R^2_{adj}\)` no aumenta
+- Debido a lo anterior, `\(R^2_{adj}\)` suele ser mejor para la comparación entre modelos
+  
+--
+
+.small[
+
+```r
+glance(modelo1) %&gt;% select(adj.r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.04897033
+```
+
+```r
+glance(modelo2) %&gt;% select(adj.r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.2851569
+```
+
+```r
+glance(modelo3) %&gt;% select(adj.r.squared) %&gt;% pull(1)
+```
+
+```
+## [1] 0.50914
+```
+]
+
+---
+
+# `\(R^2\)` no es la única métrica
+
+`\(R^2\)`, `\(R^2_{adj}\)`, **AIC**, **BIC**, **LogLikehood**, **deviance**.
+
+.small[
+
+```r
+glance(modelo1)
+```
+
+```
+## # A tibble: 1 x 12
+##   r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1    0.0512        0.0490  18.6      22.6 2.78e-6     1 -1822. 3650. 3663.
+## # ... with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
+```
+]
+
+.small[
+
+```r
+glance(modelo2)
+```
+
+```
+## # A tibble: 1 x 12
+##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1     0.287         0.285  16.1      168. 1.49e-32     1 -1762. 3531. 3543.
+## # ... with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
+```
+]
+
+.small[
+
+```r
+glance(modelo3)
+```
+
+```
+## # A tibble: 1 x 12
+##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1     0.511         0.509  13.3      218. 1.35e-65     2 -1683. 3374. 3390.
+## # ... with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
+```
+]
+
+---
+class: inverse, center, middle
+name: reg
+
+# Ejercicio
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Ejercicio
+
+- `EjercicioRegresion.R`
+
+---
+class: inverse, center, middle
+name: reg
+
+# Interacciones y transformaciones
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Modelo simple
+
+`$$Resultados_i=\hat{\beta_0} + \hat{\beta_1}REP_i$$`
+
+
+```
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)   699.       9.47      73.8  6.57e-242
+## 2 REP            -2.28     0.480     -4.75 2.78e-  6
+```
+
+
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-28-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Modelo múltiple
+
+`$$Resultados_i=\hat{\beta_0} + \hat{\beta_1}REP_i + \hat{\beta_2}1_{g.ing=1}$$`
+
+
+```
+## # A tibble: 3 x 5
+##   term            estimate std.error statistic   p.value
+##   &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)       682.       8.11      84.1  1.34e-263
+## 2 REP                -1.92     0.407     -4.73 3.05e-  6
+## 3 grupo_ingresos1    19.9      1.54      12.9  1.88e- 32
+```
+
+--
+
+&lt;br&gt;
+
+$$
+\small
+`\begin{align}
+E(Resultados|grupo\_ingresos=1)&amp;=682-(1.92*REP)+(19.9*1) \\
+E(Resultados|grupo\_ingresos=1)&amp;=701.9-(1.92*REP)
+\end{align}`
+$$
+
+&lt;br&gt;
+
+$$
+\small
+`\begin{align}
+E(Resultados|grupo\_ingresos=0)&amp;=682-(1.92*REP)+(19.9*0) \\
+E(Resultados|grupo\_ingresos=0)&amp;=682-(1.92*REP)
+\end{align}`
+$$
+
+
+---
+
+# Modelo múltiple
+
+`$$Resultados_i=\hat{\beta_0} + \hat{\beta_1}REP_i + \hat{\beta_2}1_{g.ing=1}$$`
+
+
+```
+## # A tibble: 3 x 5
+##   term            estimate std.error statistic   p.value
+##   &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)       682.       8.11      84.1  1.34e-263
+## 2 REP                -1.92     0.407     -4.73 3.05e-  6
+## 3 grupo_ingresos1    19.9      1.54      12.9  1.88e- 32
+```
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-31-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Modelo con interacción
+
+`$$Resultados_i=\hat{\beta_0} + \hat{\beta_1}REP_i + \hat{\beta_2}1_{g.ing=1}+\hat{\beta_3}(REP_i*1_{g.ing=1})$$`
+
+
+```
+## # A tibble: 4 x 5
+##   term                estimate std.error statistic   p.value
+##   &lt;chr&gt;                  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)           664.      10.5       62.9  1.08e-214
+## 2 REP                    -1.01     0.531     -1.90 5.83e-  2
+## 3 grupo_ingresos1        62.5     16.1        3.88 1.21e-  4
+## 4 REP:grupo_ingresos1    -2.17     0.818     -2.66 8.16e-  3
+```
+
+--
+
+&lt;br&gt;
+
+$$
+\small
+`\begin{align}
+E(Resultados|grupo\_ingresos=1)&amp;=664-(1.01*REP)+(62.5*1)-(2.17*REP*1) \\
+E(Resultados|grupo\_ingresos=1)&amp;=726.5-(3.18*REP)
+\end{align}`
+$$
+
+&lt;br&gt;
+
+$$
+\small
+`\begin{align}
+E(Resultados|grupo\_ingresos=0)&amp;=664-(1.01*REP)+(62.5*0)-(2.17*REP*0) \\
+E(Resultados|grupo\_ingresos=0)&amp;=664-(1.01*REP)
+\end{align}`
+$$
+
+---
+
+# Modelo con interacción
+
+`$$Resultados_i=\hat{\beta_0} + \hat{\beta_1}REP_i + \hat{\beta_2}1_{g.ing=1}+\hat{\beta_3}(REP_i*1_{g.ing=1})$$`
+
+
+```
+## # A tibble: 4 x 5
+##   term                estimate std.error statistic   p.value
+##   &lt;chr&gt;                  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)           664.      10.5       62.9  1.08e-214
+## 2 REP                    -1.01     0.531     -1.90 5.83e-  2
+## 3 grupo_ingresos1        62.5     16.1        3.88 1.21e-  4
+## 4 REP:grupo_ingresos1    -2.17     0.818     -2.66 8.16e-  3
+```
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-34-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Otro tipo de interacción
+
+`$$\widehat{Y}_i=\hat{\beta_0}+\hat{\beta_1}X_i$$`
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-35-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.546
+```
+
+---
+
+# Otro tipo de interacción
+
+`$$\widehat{Y}_i=\hat{\beta_0}+\hat{\beta_1}X_i+\hat{\beta_2}X_i^2$$`
+
+&lt;img src="RegresionI_files/figure-html/reg_cuadrado2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.866
+```
+
+---
+
+# Transformaciones de variables
+
+### Transformación "cosméticas"
+
+.tiny[
+
+```r
+modelo3 &lt;- lm(Resultados ~ REP + ingresos, data = datos_reg)
+tidy(modelo3)
+```
+
+```
+## # A tibble: 3 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)  639.       7.45       85.7  5.70e-267
+## 2 REP           -0.649    0.354      -1.83 6.79e-  2
+## 3 ingresos       1.84     0.0928     19.8  4.38e- 62
+```
+]
+
+Si dividimos la variable ingresos (miles de USD) por 10, lo resultante es una variable que representa decenas de miles de USD.
+
+--
+
+.pull-left[
+.tiny[
+
+```r
+datos_reg %&gt;% 
+  mutate(ingresos_nuevo = ingresos/10) %&gt;% 
+  lm(Resultados ~ REP + ingresos_nuevo, data = .) %&gt;% 
+  tidy()
+```
+
+```
+## # A tibble: 3 x 5
+##   term           estimate std.error statistic   p.value
+##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)     639.        7.45      85.7  5.70e-267
+## 2 REP              -0.649     0.354     -1.83 6.79e-  2
+## 3 ingresos_nuevo   18.4       0.928     19.8  4.38e- 62
+```
+]
+]
+
+.pull-right[
+- El coeficiente, `\(\hat{\beta}\)`, cambia en orden de magnitud: la interpretación es que un aumento en 10.000 USD de ingreso se asocia en promedio con un aumento de 18.4 en `Resultados`.
+
+- Pero noten que el estadístico t y su respectivo p-value no cambian.
+]
+
+---
+
+# Transformaciones de variables
+
+### Transformación logarítmica
+
+**¿Qué es un logarítmo?**
+
+| Forma exponencial |Forma logarítmica  |
+| ----------------- |:-------               |
+| `\(10^2=100\)`        | `\(log_{10}(100)=2\)`       |
+| `\(10^3=1000\)`       | `\(log_{10}(1000)=3\)`      |
+| `\(10^4=10000\)`      | `\(log_{10}(10000)=4\)`     |
+| `\(e^1=2.718...\)`    | `\(log_{e}(2.718)=1\)`      |
+| `\(e^2=7.389...\)`    | `\(log_{e}(7.389)=2\)`      |
+| `\(e^3=20.085...\)`   | `\(log_{e}(20.085)=3\)`     |
+
+---
+
+# Transformaciones de variables
+
+### Transformación logarítmica
+
+&lt;br&gt;
+
+|Modelo            |Ecuación                      |Interpretación  |
+| ---------------- |:-------                      |:------- |
+|Lineal-Lineal     | `\(Y=\beta_0+\beta X\)`           |Un cambio de una unidad en `\(X\)` esta asociado con un cambio de `\(\beta\)` unidades en `\(Y\)`    |
+|Log-Lineal        | `\(log(Y)=\beta_0+\beta X\)`      |Un cambio de una unidad en `\(X\)` esta asociado con un cambio de `\((100*\beta)\%\)` en `\(Y\)`    |
+|Lineal-Log        | `\(Y=\beta_0+\beta log(X)\)`      |Un cambio de 1% en `\(X\)` esta asociado con un cambio de `\(\frac{\beta}{100}\)` unidades en `\(Y\)`    |
+|Log-Log           | `\(log(Y)=\beta_0+\beta log(X)\)` |Un cambio de 1% en `\(X\)` esta asociado con un cambio de `\(\beta\%\)` en `\(Y\)`    |
+
+---
+
+# Transformaciones de variables
+
+&lt;img src="RegresionI_files/figure-html/t1-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+--
+
+.small[
+
+```r
+coef(lm(computadores ~ ingresos, data = datos_reg))
+```
+
+```
+## (Intercept)    ingresos 
+##  221.787048    5.704378
+```
+]
+
+Un cambio de una unidad en `ingresos` esta asociado con un cambio de 5.7 unidades en `computadores`.
+
+
+---
+
+# Transformaciones de variables
+
+&lt;img src="RegresionI_files/figure-html/t2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.small[
+
+```r
+coef(lm(log(computadores) ~ ingresos, data = datos_reg))
+```
+
+```
+## (Intercept)    ingresos 
+##  4.38259289  0.03453272
+```
+]
+
+Un cambio de una unidad en `ingresos` esta asociado con un cambio de 3.45% en `computadores`.
+
+---
+
+# Transformaciones de variables
+
+&lt;img src="RegresionI_files/figure-html/t3-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.small[
+
+```r
+coef(lm(computadores ~ log(ingresos), data = datos_reg))
+```
+
+```
+##   (Intercept) log(ingresos) 
+##     -68.21289     142.67547
+```
+]
+
+Un cambio de 1% en `ingresos` esta asociado con un cambio de 1.4 unidades en `computadores`.
+
+---
+
+# Transformaciones de variables
+
+&lt;img src="RegresionI_files/figure-html/t4-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.small[
+
+```r
+coef(lm(log(computadores) ~ log(ingresos), data = datos_reg))
+```
+
+```
+##   (Intercept) log(ingresos) 
+##     2.9946112     0.7247802
+```
+]
+
+Un cambio de 1% en `ingresos` esta asociado con un cambio de 0.7% en `computadores`.
+
+---
+
+# Transformaciones de variables
+
+### ¿Importa la base del logaritmo?
+
+.small[
+
+```r
+coef(lm(log(computadores, base = exp(1)) ~ log(ingresos, base = exp(1)), data = datos_reg))
+```
+
+```
+##                  (Intercept) log(ingresos, base = exp(1)) 
+*##                    2.9946112                    0.7247802
+```
+
+```r
+coef(lm(log(computadores, base = 10) ~ log(ingresos, base = 10), data = datos_reg))
+```
+
+```
+##              (Intercept) log(ingresos, base = 10) 
+*##                1.3005431                0.7247802
+```
+
+```r
+coef(lm(log(computadores, base = 1234) ~ log(ingresos, base = 1234), data = datos_reg))
+```
+
+```
+##                (Intercept) log(ingresos, base = 1234) 
+*##                  0.4207087                  0.7247802
+```
+]
+
+**Noten que el coeficiente, `\(\hat{\beta}\)`, no cambia.**
+
+---
+class: inverse, center, middle
+name: reg
+
+# Juntando todo
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# Censo USA 2000 
+
+
+```r
+(census &lt;- read_csv("../datos/census2000.csv") %&gt;% 
+  filter(hours &gt; 500, income &gt; 5000, age &lt;60 ) %&gt;% 
+  mutate(ingresos_hora = income/hours) %&gt;% 
+  group_by(edad = age, sexo = sex) %&gt;% 
+  summarise(ingresos_hora = mean(ingresos_hora)) %&gt;% 
+   mutate(log_ingresos_hora = log(ingresos_hora)))
+```
+
+```
+## # A tibble: 84 x 4
+## # Groups:   edad [42]
+##     edad sexo  ingresos_hora log_ingresos_hora
+##    &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;             &lt;dbl&gt;
+##  1    18 F             10.4               2.34
+##  2    18 M              8.92              2.19
+##  3    19 F              7.90              2.07
+##  4    19 M              8.51              2.14
+##  5    20 F              8.77              2.17
+##  6    20 M              8.65              2.16
+##  7    21 F              8.90              2.19
+##  8    21 M              9.99              2.30
+##  9    22 F              9.44              2.24
+## 10    22 M              9.82              2.28
+## # ... with 74 more rows
+```
+
+---
+
+# Modelo simple
+
+`$$\widehat{ingresos\_ hora}=\hat{\beta_0}+\hat{\beta_1}edad$$`
+
+.center[
+.smaller[
+
+```r
+lm(ingresos_hora ~ edad, data = census)
+```
+]
+]
+
+.pull-left[
+.small[
+
+```
+## # A tibble: 2 x 4
+##   term        estimate statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    5.49       4.83 6.17e- 6
+## 2 edad           0.289     10.3  2.36e-16
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/graf_final0-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+`$$\widehat{ingresos\_ hora}=5.49+(0.289*edad)$$`
+
+El aumento en una unidad de `edad` esta asociado a un aumento, en promedio, de 0.289 unidades en `ingresos_hora`.
+
+---
+
+# Transformación a **Y**
+
+`$$\widehat{log(ingresos\_ hora)}=\hat{\beta_0}+\hat{\beta_1}edad$$`
+
+.center[
+.smaller[
+
+```r
+lm(log_ingresos_hora ~ edad, data = census)
+```
+]
+]
+
+.pull-left[
+.small[
+
+```
+## # A tibble: 2 x 4
+##   term        estimate statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   2.03        29.1 5.11e-45
+## 2 edad          0.0191      11.0 6.66e-18
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/graf_final1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+`$$\widehat{log(ingresos\_ hora)}=2.03+(0.019*edad)$$`
+
+El aumento en una unidad de `edad` esta asociado a un aumento, en promedio, de 1.9% en `ingresos_hora`.
+
+---
+
+# Curvas por grupo
+
+`$$\widehat{log(ingresos\_hora)}=\hat{\beta_0}+\hat{\beta_1}edad+\hat{\beta_2}1_{M}$$`
+
+.center[
+.smaller[
+
+```r
+lm(log_ingresos_hora ~ edad + sexo, data = census)
+```
+]
+]
+
+.pull-left[
+.smaller[
+
+```
+## # A tibble: 3 x 4
+##   term        estimate statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   1.91       33.5  3.29e-49
+## 2 edad          0.0191     14.1  1.80e-23
+## 3 sexoM         0.237       7.22 2.48e-10
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/graf_final2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+`$$\widehat{log(ingresos\_hora)}=1.91+(0.019*edad)+(0.237*1_{M})$$`
+
+--
+
+&lt;br&gt;
+
+$$
+`\begin{align}
+E(log(ingresos\_hora)|sexo=F)&amp;=1.91+(0.019*edad) \\
+E(log(ingresos\_hora)|sexo=M)&amp;=2.15+(0.019*edad)
+\end{align}`
+$$
+
+---
+
+# Permitir pendientes distintas
+
+`$$\widehat{log(ingresos\_hora)}=\hat{\beta_0}+\hat{\beta_1}edad+\hat{\beta_2}1_{M}+\hat{\beta_3}(edad*1_{M})$$`
+
+.center[
+.smaller[
+
+```r
+lm(log_ingresos_hora ~ edad*sexo, data = census)
+```
+]
+]
+
+.pull-left[
+.smaller[
+
+```
+## # A tibble: 4 x 4
+##   term        estimate statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   2.11       30.1  2.43e-45
+## 2 edad          0.0139      7.95 1.02e-11
+## 3 sexoM        -0.165      -1.66 1.01e- 1
+## 4 edad:sexoM    0.0105      4.24 5.90e- 5
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/graf_final3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+`$$\widehat{log(ingresos\_hora)}=2.11+(0.014*edad)-(0.165*1_{M})+(0.01*edad*1_{M})$$`
+
+--
+
+&lt;br&gt;
+
+$$
+`\begin{align}
+E(log(ingresos\_hora)|sexo=F)&amp;=2.11+(0.014*edad) \\
+E(log(ingresos\_hora)|sexo=M)&amp;=1.95+(0.024*edad)
+\end{align}`
+$$
+
+---
+
+# Ojo, se puede visualizar directamente
+
+.small[
+
+```r
+census %&gt;% 
+  ggplot(aes(x = edad, y = log_ingresos_hora, col = sexo)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+```
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-52-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Capturar la curvatura
+
+`$$\small \widehat{log(ingresos\_hora)}=\hat{\beta_0}+\hat{\beta_1}edad+\hat{\beta_2}1_{M}+\hat{\beta_3}edad^2+\hat{\beta_4}(edad*1_{M})$$`
+
+.center[
+.smaller[
+
+```r
+lm(log_ingresos_hora ~ edad*sexo + I(edad^2), data = census)
+```
+]
+]
+
+.pull-left[
+.smaller[
+
+```
+## # A tibble: 5 x 4
+##   term         estimate statistic  p.value
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)  0.888        12.2  6.46e-20
+## 2 edad         0.0846       21.8  3.23e-35
+## 3 sexoM       -0.165        -3.83 2.55e- 4
+## 4 I(edad^2)   -0.000919    -18.6  1.26e-30
+## 5 edad:sexoM   0.0105        9.79 2.85e-15
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/graf_final4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+`$$\small \widehat{log(ingresos\_hora)}=0.89+(0.084*edad)-(0.165*1_{M})-(0.001*edad^2)+(0.01*edad*1_{M})$$`
+
+--
+
+&lt;br&gt;
+
+$$
+`\begin{align}
+E(log(ingresos\_hora)|sexo=F)&amp;=0.89+(0.084*edad)-(0.001*edad^2) \\
+E(log(ingresos\_hora)|sexo=M)&amp;=0.73+(0.094*edad)-(0.001*edad^2)
+\end{align}`
+$$
+
+---
+
+# Permitir curvaturas distintas
+
+`$$\small \widehat{log(ingresos\_hora)}=\hat{\beta_0}+\hat{\beta_1}edad+\hat{\beta_2}1_{M}+\hat{\beta_3}edad^2+\hat{\beta_4}(edad*1_{M})+\hat{\beta_5}(edad^2*1_{M})$$`
+
+.center[
+.smaller[
+
+```r
+lm(log_ingresos_hora ~ edad*sexo + I(edad^2)*sexo, data = census)
+```
+]
+]
+
+.pull-left[
+.smaller[
+
+```
+## # A tibble: 6 x 4
+##   term             estimate statistic  p.value
+##   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)      0.994        10.2  4.28e-16
+## 2 edad             0.0785       14.6  4.81e-24
+## 3 sexoM           -0.377        -2.75 7.44e- 3
+## 4 I(edad^2)       -0.000839    -12.2  1.11e-19
+## 5 edad:sexoM       0.0227        2.99 3.77e- 3
+## 6 sexoM:I(edad^2) -0.000159     -1.62 1.08e- 1
+```
+]
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/graf_final5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+$$
+\small
+`\begin{align}
+\widehat{log(ingresos\_hora)}=&amp;0.99+(0.078*edad)-(0.377*1_{M})-(0.001*edad^2)+(0.02*edad*1_{M})\\&amp;-(0.0001*edad^2*1_{M})
+\end{align}`
+$$
+
+--
+
+&lt;br&gt;
+
+$$
+\small
+`\begin{align}
+E(log(ingresos\_hora)|sexo=F)&amp;=0.99+(0.078*edad)-(0.001*edad^2) \\
+E(log(ingresos\_hora)|sexo=M)&amp;=0.61+(0.098*edad)-(0.0099*edad^2)
+\end{align}`
+$$
+
+---
+class: inverse, center, middle
+name: reg
+
+# ¿Qué modelo elegir?
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+# `\(R^2_{adj}\)`
+
+.pull-left[
+
+```r
+glance(reg1) %&gt;% select(2)
+```
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.593
+```
+
+```r
+glance(reg2) %&gt;% select(2)
+```
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.750
+```
+
+```r
+glance(reg3) %&gt;% select(2)
+```
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.793
+```
+]
+
+.pull-right[
+
+```r
+glance(reg4) %&gt;% select(2)
+```
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.961
+```
+
+```r
+glance(reg5) %&gt;% select(2)
+```
+
+```
+## # A tibble: 1 x 1
+##   adj.r.squared
+##           &lt;dbl&gt;
+## 1         0.962
+```
+]
+
+---
+
+# Estadístico F
+
+`$$F=\frac{(SCR_R-SCR_{SR})/q}{SCR_{SR}/(n-k-1)}=\frac{(R^2_{SR}-R^2_{R})/q}{(1-R^2_{SR})/(n-k-1)}$$`
+
+El estadístico F es una forma de comparar **pares** de modelos. Se compara un modelo **Restringido (R)** y con un  modelo **Sin Restricción (SR)**.
+
+&lt;br&gt;
+
+- Modelo SR: `\(\hat{Y}=\hat{\beta_0}+\hat{\beta_1}X_1+\hat{\beta_2}X_2\)`
+- Modelo R: `\(\hat{Y}=\hat{\beta_0}+\hat{\beta_1}X_1\)`
+
+&lt;br&gt;
+
+Esta prueba entrega su respectivo **p.value** considerando una hipótesis nula, `\(H_0\)`, del tipo *"El modelo con más variables (SR) no agrega información útil en comparación al modelo R"*.
+
+---
+
+# Estadístico F
+
+.pull-left[
+.tiny[
+
+```r
+anova(reg1, reg2)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Model 1: log_ingresos_hora ~ edad
+## Model 2: log_ingresos_hora ~ edad + sexo
+##   Res.Df    RSS Df Sum of Sq      F    Pr(&gt;F)    
+## 1     82 3.0226                                  
+*## 2     81 1.8382  1    1.1845 52.194 2.477e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+anova(reg2, reg3)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Model 1: log_ingresos_hora ~ edad + sexo
+## Model 2: log_ingresos_hora ~ edad * sexo + sexo
+##   Res.Df    RSS Df Sum of Sq  F    Pr(&gt;F)    
+## 1     81 1.8382                              
+*## 2     80 1.5005  1   0.33762 18 5.896e-05 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+]
+
+.pull-right[
+.tiny[
+
+```r
+anova(reg3, reg4)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Model 1: log_ingresos_hora ~ edad * sexo + sexo
+## Model 2: log_ingresos_hora ~ edad * sexo + sexo + I(edad^2)
+##   Res.Df     RSS Df Sum of Sq      F    Pr(&gt;F)    
+## 1     80 1.50054                                  
+*## 2     79 0.27843  1    1.2221 346.75 &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+anova(reg4, reg5)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Model 1: log_ingresos_hora ~ edad * sexo + sexo + I(edad^2)
+## Model 2: log_ingresos_hora ~ edad * sexo + sexo + I(edad^2) * sexo
+##   Res.Df     RSS Df Sum of Sq      F Pr(&gt;F)
+## 1     79 0.27843                           
+*## 2     78 0.26932  1 0.0091163 2.6403 0.1082
+```
+]
+]
+
+---
+
+# Criterios de información
+
+Los criterios de información son medidas de calidad relativa para nuestros modelos estadísticos. En general, hablamos de dos: *Akaike Information Criterion* (AIC) y *Bayesian Information Criterion* (BIC). **Valor más bajo es mejor**.
+
+.small[
+
+```r
+(BIC &lt;- data.frame(reg1 = glance(reg1) %&gt;% pull(BIC), reg2 = glance(reg2) %&gt;% pull(BIC),
+                   reg3 = glance(reg3) %&gt;% pull(BIC), reg4 = glance(reg4) %&gt;% pull(BIC),
+                   reg5 = glance(reg5) %&gt;% pull(BIC)))
+```
+
+```
+##        reg1      reg2      reg3      reg4      reg5
+## 1 -27.59987 -64.94733 -77.56358 -214.6226 -212.9881
+```
+]
+
+--
+
+Estos indicadores se pueden modelar probabilísticamente.
+
+`$$\small P(M_i) \approx \frac{e^{-\frac{1}{2}[BIC(M_i-BIC_{min})]}}{\sum_{r=1}^{R}e^{-\frac{1}{2}[BIC(M_r-BIC_{min})]}}$$`
+
+.small[
+
+```r
+probs &lt;- exp(-0.5*(BIC-min(BIC)))/sum(exp(-0.5*(BIC-min(BIC))))
+round(probs, 3)
+```
+
+```
+##   reg1 reg2 reg3  reg4  reg5
+## 1    0    0    0 0.694 0.306
+```
+]
+
+**BIC** nos da el mismo resultado que el **estadístico F**.
+
+---
+
+# Análisis de residuales
+
+
+```r
+augment(reg0)
+```
+
+```
+## # A tibble: 84 x 8
+##    ingresos_hora  edad .fitted .resid .std.resid   .hat .sigma  .cooksd
+##            &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+##  1         10.4     18    10.7 -0.320     -0.105 0.0460   3.15 0.000264
+##  2          8.92    18    10.7 -1.77      -0.579 0.0460   3.14 0.00806 
+##  3          7.90    19    11.0 -3.08      -1.01  0.0427   3.13 0.0226  
+##  4          8.51    19    11.0 -2.47      -0.807 0.0427   3.13 0.0145  
+##  5          8.77    20    11.3 -2.49      -0.814 0.0396   3.13 0.0137  
+##  6          8.65    20    11.3 -2.62      -0.854 0.0396   3.13 0.0150  
+##  7          8.90    21    11.6 -2.66      -0.865 0.0367   3.13 0.0143  
+##  8          9.99    21    11.6 -1.56      -0.509 0.0367   3.14 0.00493 
+##  9          9.44    22    11.8 -2.40      -0.782 0.0340   3.14 0.0108  
+## 10          9.82    22    11.8 -2.03      -0.659 0.0340   3.14 0.00765 
+## # ... with 74 more rows
+```
+
+---
+
+# No tan buen ajuste
+
+### Modelo
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-64-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+
+### Análisis residuales
+
+.pull-left[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-65-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-66-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Mejor ajuste
+
+### Modelo
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-67-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+### Análisis residuales
+
+.pull-left[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-68-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-69-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Primer modelo ingresos_hora/edad
+
+### Modelo
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-70-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+### Análisis residuales
+
+.pull-left[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-71-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-72-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Último modelo ingresos_hora/edad
+
+### Modelo
+
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-73-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+### Análisis residuales
+
+.pull-left[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-74-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="RegresionI_files/figure-html/unnamed-chunk-75-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Para concluir
+
+### Una idea general
+
+- Dada una verdad: 
+`$$Y = \beta_0 + \beta_1X + \epsilon$$`
+
+--
+
+- Realizamos una estimación: 
+`$$\hat{Y} = \hat{\beta_0} + \hat{\beta_1}X$$`
+
+--
+
+&lt;/br&gt;
+
+`$$Datos \rightarrow Cálculos \rightarrow Estimación \xrightarrow[]{si\ todo\ sale\ bien} Verdad$$`
+--
+
+&lt;/br&gt;
+
+`$$X,Y \rightarrow (X'X)^{-1}X'Y \rightarrow \hat{\beta} \xrightarrow[]{si\ todo\ sale\ bien} \beta$$`
+
+---
+
+# Próxima clase
+
+- Modelo Logit
+- Casos prácticos
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
